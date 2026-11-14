@@ -1,0 +1,13 @@
+# only the project itself goes into the repository
+/*
+!/site/
+!/scripts/
+!/web-src/
+!/supabase/
+!/.github/
+!/package.json
+!/README.md
+!/.gitignore
+# private: our own saved places live in the account, not in the public repository
+site/data/lists.json
+__pycache__/

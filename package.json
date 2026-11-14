@@ -1,0 +1,14 @@
+{
+  "name": "nash-atlas",
+  "private": true,
+  "description": "Наш атлас: карта путешествий",
+  "scripts": { "build": "python3 scripts/build_web.py" },
+  "dependencies": {
+    "@fontsource/manrope": "^5.2.0",
+    "@fontsource/unbounded": "^5.2.0",
+    "@supabase/supabase-js": "2.119.0",
+    "d3": "7.9.0",
+    "jszip": "3.10.1",
+    "topojson-client": "3.1.0"
+  }
+}
