@@ -22,3 +22,15 @@ python3 scripts/build_standalone.py   # один HTML-файл в out/
 ## Источники данных
 
 Natural Earth, OpenStreetMap / OpenTopoMap, Passport Index (MIT), OurAirports (public domain), Wikimedia Commons (обложки паспортов, свободные лицензии), ACLED, МИДы стран.
+
+## Аккаунты (Supabase)
+
+1. Создать проект на supabase.com (регион Frankfurt).
+2. SQL Editor → вставить `supabase/schema.sql` → Run.
+3. Authentication → URL Configuration: Site URL и Redirect URLs — адрес сайта, например `https://ИМЯ.github.io/nash-atlas/`.
+4. Authentication → Emails → шаблон «Magic Link»: добавить код `{{ .Token }}`, чтобы в письме была и ссылка, и код.
+5. Project Settings → API: адрес проекта и anon (publishable) ключ вписать в `web-src/config.js`. Этот ключ публичный: доступ ограничивают правила в базе.
+
+## Публикация (GitHub Pages)
+
+Settings → Pages → Source: GitHub Actions. Каждый push в `main` пересобирает и публикует сайт (`.github/workflows/pages.yml`).
