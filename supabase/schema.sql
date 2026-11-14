@@ -128,6 +128,11 @@ language sql stable security definer set search_path = public as $$
   where i.token = t and not i.revoked and d.path = p and p like 'assets/%'
 $$;
 
+-- explicit table access (works whether or not the project exposes new tables automatically);
+-- rows are still filtered by the policies above. Visitors without an account only get the two link functions.
+revoke all on public.maps, public.map_members, public.map_invites, public.docs from anon;
+grant select, insert, update, delete on public.maps, public.map_members, public.map_invites, public.docs to authenticated;
+revoke execute on function public.accept_invite(text) from public, anon;
 grant execute on function public.accept_invite(text) to authenticated;
 grant execute on function public.shared_map(text), public.shared_asset(text,text) to anon, authenticated;
 
