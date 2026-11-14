@@ -306,6 +306,7 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .tag.editor{background:rgba(233,196,106,.2);color:#e9c46a}
 .sharebn{background:rgba(233,196,106,.1);border:1px solid rgba(233,196,106,.4);border-radius:14px;padding:12px 14px;gap:6px;display:flex;flex-direction:column}
 .sharebn .hint{margin:0}
+.lgcode summary{cursor:pointer;color:var(--muted);font-size:13px;margin:4px 0 8px}
 .pb-flags{display:flex}.pb-flags .fimg{width:20px;height:20px;margin:0 0 0 -6px;box-shadow:0 0 0 2px rgba(18,31,51,1)}.pb-flags .fimg:first-child{margin-left:0}
 .pp-change .fimg{width:18px;height:18px;margin:0 -6px 0 0;box-shadow:0 0 0 2px #13213a}
 .pp-card{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:16px;padding:12px 8px 10px;transition:background .2s}
@@ -818,18 +819,18 @@ function modal(id,html){let el=document.getElementById(id);if(el)el.remove();el=
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=close);return {el,close}}
 function openLogin(){
   const {el,close}=modal("loginBox",`<h2>Вход в «Наш атлас»</h2>
-    <p class="hint">Пароль не нужен. Пришлём на почту ссылку и код из 6 цифр. С аккаунтом заметки и статусы мест видны на всех твоих устройствах, а картой можно поделиться.</p>
+    <p class="hint">Пароль не нужен: пришлём на почту ссылку для входа. С аккаунтом заметки и статусы мест видны на всех твоих устройствах, а картой можно поделиться.</p>
     <form id="lgForm"><label class="f">Почта<input class="txt" type="email" id="lgEmail" required autocomplete="email" placeholder="you@example.com"></label>
     <div class="arow"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn primary" id="lgGo">Прислать код</button></div></form>
-    <form id="lgCode" hidden><label class="f">Код из письма<input class="txt" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"></label>
-    <p class="hint" id="lgSent"></p><div class="arow"><button type="button" class="btn ghost" id="lgBack">Другая почта</button><button class="btn primary">Войти</button></div></form>`);
+    <form id="lgCode" hidden><p class="hint" id="lgSent"></p><details class="lgcode"><summary>У меня в письме код</summary><label class="f">Код из письма<input class="txt" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"></label><div class="arow"><button class="btn primary">Войти по коду</button></div></details>
+    <div class="arow"><button type="button" class="btn ghost" id="lgBack">Другая почта</button><button type="button" class="btn primary" data-close>Понятно</button></div></form>`);
   const em=el.querySelector("#lgEmail");setTimeout(()=>em.focus(),60);
   el.querySelector("#lgForm").onsubmit=async e=>{e.preventDefault();const b=el.querySelector("#lgGo");b.disabled=true;b.textContent="Отправляю…";
     const redirect=location.origin+location.pathname+(S.acct.share?`?share=${encodeURIComponent(S.acct.share.token)}`:"");
     const {error}=await sb.auth.signInWithOtp({email:em.value.trim(),options:{emailRedirectTo:redirect,shouldCreateUser:true}});
     b.disabled=false;b.textContent="Прислать код";
     if(error){status(/rate/i.test(error.message)?"Слишком много писем подряд, попробуй через минуту":"Не получилось отправить письмо",6000);return}
-    el.querySelector("#lgForm").hidden=true;el.querySelector("#lgCode").hidden=false;el.querySelector("#lgSent").textContent=`Письмо ушло на ${em.value.trim()}. Можно ввести код или просто нажать ссылку в письме.`;setTimeout(()=>el.querySelector("#lgOtp").focus(),60)};
+    el.querySelector("#lgForm").hidden=true;el.querySelector("#lgCode").hidden=false;el.querySelector("#lgSent").innerHTML=`Письмо ушло на <b>${esc(em.value.trim())}</b>. Открой его и нажми ссылку — <b>в этом же браузере</b>, на этом же устройстве. Если письма нет, проверь «Спам»; повторно отправить можно через минуту.`};
   el.querySelector("#lgBack").onclick=()=>{el.querySelector("#lgForm").hidden=false;el.querySelector("#lgCode").hidden=true};
   el.querySelector("#lgCode").onsubmit=async e=>{e.preventDefault();const {error}=await sb.auth.verifyOtp({email:em.value.trim(),token:el.querySelector("#lgOtp").value.trim(),type:"email"});
     if(error){status("Код не подошёл или устарел",5000);return}close()};
