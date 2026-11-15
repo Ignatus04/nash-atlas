@@ -321,6 +321,10 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .aclose:hover{background:var(--panel-2);color:var(--ink)}
 .lg-step{display:flex;flex-direction:column}
 .lg-step[hidden]{display:none}
+.lg-oauth{display:flex;flex-direction:column;gap:8px}
+.lg-prov{padding:11px 14px;font-size:15px;width:100%}
+.lg-or{display:flex;align-items:center;gap:12px;margin:16px 0 12px;color:var(--muted);font-size:12.5px}
+.lg-or::before,.lg-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .lg-step h2{padding-right:40px}
 .lg-lead{margin:8px 0 18px;color:var(--muted)}
 .lg-step form{display:flex;flex-direction:column}
@@ -823,6 +827,13 @@ const CloudAssets={async upload(blob){const url=await shrinkToDataUrl(blob);cons
 
 /* which map is open, and who we are */
 S.acct={user:null,maps:[],map:null,role:null,share:null};
+const OAUTH_LABEL={yandex:["custom:yandex","Войти через Яндекс ID"],google:["google","Войти через Google"]};
+function oauthList(){return (CFG.oauth||[]).filter(k=>OAUTH_LABEL[k]).map(k=>({id:OAUTH_LABEL[k][0],label:OAUTH_LABEL[k][1]}))}
+function oauthErrorFromUrl(){const u=new URL(location.href),h=new URLSearchParams(location.hash.slice(1));
+  const e=u.searchParams.get("error_description")||h.get("error_description")||u.searchParams.get("error")||h.get("error");
+  if(!e) return; ["error","error_code","error_description"].forEach(k=>u.searchParams.delete(k));
+  history.replaceState(null,"",u.pathname+(u.search||""));
+  setTimeout(()=>status(/access_denied|denied/i.test(e)?"Вход отменён.":"Войти не получилось. Попробуйте ещё раз или войдите по почте.",6000),800)}
 function shareTokenFromUrl(){const u=new URL(location.href);return u.searchParams.get("share")}
 function dropShareParam(){const u=new URL(location.href);if(u.searchParams.has("share")){u.searchParams.delete("share");history.replaceState(null,"",u.pathname+(u.search?u.search:"")+u.hash)}}
 async function myMaps(){
@@ -831,6 +842,7 @@ async function myMaps(){
 }
 async function openCloud(){
   sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
+  oauthErrorFromUrl();
   const {data:{session}}=await sb.auth.getSession();
   S.acct.user=session?.user||null;
   sb.auth.onAuthStateChange((ev,s)=>{const was=S.acct.user?.id||null,now=s?.user?.id||null;if(ev==="SIGNED_OUT"||(ev==="SIGNED_IN"&&was!==now))setTimeout(()=>location.reload(),50)});
@@ -911,7 +923,8 @@ function modal(id,html,{labelledby}={}){let el=document.getElementById(id);if(el
 function openLogin(){
   const share=S.acct.share;
   const {el,close}=modal("loginBox",`<div class="lg-step" id="lgS1"><h2 id="lgTitle">Вход</h2>
-      <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите по почте. `:""}Пришлём на почту код, пароль не нужен.</p>
+      <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите. `:""}${oauthList().length?"Пароль не нужен.":"Пришлём на почту код, пароль не нужен."}</p>
+      ${oauthList().length?`<div class="lg-oauth">${oauthList().map(p=>`<button type="button" class="btn lg-prov" data-prov="${p.id}">${p.label}</button>`).join("")}</div><div class="lg-or"><span>или по почте</span></div>`:""}
       <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
         <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
         <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
@@ -925,6 +938,11 @@ function openLogin(){
       <div class="lg-more"><button class="linkbtn" id="lgAgain"></button><button class="linkbtn" id="lgBack">Другая почта</button></div>
       <p class="lg-note">В письме есть и кнопка входа. Она сработает, если открыть письмо в этом же браузере.</p></div>`,{labelledby:"lgTitle"});
   const em=el.querySelector("#lgEmail"), otp=el.querySelector("#lgOtp"), msg1=el.querySelector("#lgEmailMsg"), msg2=el.querySelector("#lgOtpMsg");
+  el.querySelectorAll("[data-prov]").forEach(b=>b.onclick=async()=>{
+    b.disabled=true; const label=b.textContent; b.textContent="Открываем…";
+    const redirectTo=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
+    const {error}=await sb.auth.signInWithOAuth({provider:b.dataset.prov,options:{redirectTo}});
+    if(error){b.disabled=false;b.textContent=label;setMsg(msg1,navigator.onLine?"Вход через этот сервис сейчас не работает. Войдите по почте.":"Нет интернета. Подключитесь и попробуйте снова.")}});
   let left=0, timer=null, busy=false;
   try{em.value=localStorage.getItem("atlas-last-email")||""}catch(e){}
   setTimeout(()=>em.focus(),60);
