@@ -13,7 +13,7 @@
   --ocean:#0c1626; --ocean-2:#101e33; --ink:#eef1f6; --muted:#9aa7bb; --line:#22324b; --panel:#121f33; --panel-2:#18283f;
   --accent:#ff8a5c; --accent-ink:#1a0d06;
   --st-free:#4fbf94; --st-eta:#a8cf5c; --st-arrival:#e6c553; --st-evisa:#e8994d; --st-visa:#7d6b8f; --st-banned:#c84a55; --st-unknown:#3d4a60; --st-home:#e9e3d6;
-  --pin-want:#ff8a5c; --pin-been:#5fd0ff; --pin-love:#ffd166; --pin-home:#ffffff;
+  --pin-want:#ff8a5c; --pin-none:#8fb3d9; --pin-home:#ffffff;
   --display:"Unbounded", "Manrope", system-ui, sans-serif;
   --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme:dark;
@@ -472,6 +472,10 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ad-blk{gap:6px;min-height:0}.ad-l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ad-box{min-height:120px;border-radius:12px;overflow:hidden;background:var(--panel-2)}
 .ad-blk.on .ad-box{background:none}
+.pv-share{margin-bottom:-8px}.pv-acts.pv-share .btn{min-height:40px;padding:8px 12px;font-size:14px}
+.cb-img{display:block;width:100%;max-height:56vh;object-fit:contain;border-radius:16px;background:#0b1526;margin:6px 0 10px}
+.fans-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fans-av{display:flex}.fans-av>span+span{margin-left:-6px}.fans-av .av{box-shadow:0 0 0 2px var(--panel)}
 .lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .rg-list{display:flex;flex-direction:column;gap:6px}
 .rg-list.short>.rg:nth-child(n+7){display:none}
@@ -502,7 +506,6 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ai dd{margin:0}
 .ai ul{margin:4px 0 0;padding-left:18px}
 .hint{font-size:12.5px;color:var(--muted)}
-.vibegrid{display:flex;flex-wrap:wrap;gap:6px}
 .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 input.txt,select.txt{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);font-weight:600}
@@ -656,6 +659,14 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+.ga-sh{display:flex;align-items:center;justify-content:center;gap:22px}
+.ga-story{width:96px;height:170px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);opacity:0;transform:translateY(14px) rotate(-4deg);animation:gaCg .8s var(--spring-soft) .15s forwards}
+.ga-story b{font-size:8px;color:#9aa7bb}.ga-story em{font-style:normal;font-weight:800;font-size:30px;color:#ff8a5c;line-height:1}
+.ga-story i{flex:1;margin:6px 0;border-radius:8px;background:radial-gradient(circle at 40% 45%,#ff8a5c 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#ff8a5c 0 12%,transparent 13%),#22324c}
+.ga-story span{font-size:8px;color:#eef1f6;font-weight:700}
+.ga-fans{display:flex;align-items:center;opacity:0;transform:translateY(14px);animation:gaCg .8s var(--spring-soft) .45s forwards}
+.ga-fans .av{margin-left:-6px;box-shadow:0 0 0 2px var(--panel)}.ga-fans .av:first-child{margin-left:0}
+.ga-fans b{margin-left:10px;font-size:12px;background:var(--accent,#ff8a5c);color:#1a1206;padding:6px 10px;border-radius:10px}
 .ga-rg{display:flex;flex-direction:column;gap:8px;padding:14px 24px}
 .ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-rgr b{font-size:12.5px;color:var(--ink)}.ga-rgr span{height:6px;width:80%;border-radius:3px;background:#3a4f70}.ga-rgr i{font-style:normal;font-size:11px;color:#cfe6ff}
@@ -864,7 +875,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <div class="row2"><button type="button" class="btn small" id="addPick">Указать точку на карте</button><span id="addCoords" class="hint"></span></div>
     <label class="f" for="addName">Название<input class="txt" id="addName" required></label>
     <label class="f" for="addStatus">Статус
-      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="been">Были</option><option value="love">Любимое</option><option value="home">Дом</option></select>
+      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="">Без отметки</option><option value="home">Дом</option></select>
     </label>
     <label class="f" for="addTags">Вайб и метки через запятую<input class="txt" id="addTags" placeholder="кофе, вид, романтика"></label>
     <label class="f" for="addNote">Заметка<textarea class="note" id="addNote"></textarea></label>
@@ -907,8 +918,11 @@ const SAFE_NONE="#5b6579";
 const SRC={us:"Госдеп США",uk:"МИД Великобритании",au:"МИД Австралии",fr:"МИД Франции",ca:"МИД Канады",ru:"режимы, введённые в регионах РФ"};
 const SRC_WHY={us:"США — ближайший партнёр стран Америки и разбирает их по штатам",uk:"у британского МИД самая подробная разбивка по районам для Европы, Ближнего Востока, Южной Азии и Африки",au:"Австралия теснее всех связана с Юго-Восточной Азией и Океанией",fr:"Франция лучше всех знает франкоязычную Африку и Магриб",ru:"для России — официальные режимы по регионам: КТО, ЧС и уровни реагирования"};
 function safeOf(k){return S.safety?.c?.[k]||null}
-const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},been:{label:"Были",c:"var(--pin-been)"},love:{label:"Любимое",c:"var(--pin-love)"},home:{label:"Дом",c:"var(--pin-home)"}};
-const VIBES = ["Уютно и медленно","Тусовки и ночная жизнь","Природа и виды","Искусство и архитектура","Еда и рынки","Романтика","Необычное и скрытое","Пляж и вода","Активный отдых","Винтаж и шопинг","Кофе и поработать","Для двоих на закате"];
+const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},home:{label:"Дом",c:"var(--pin-home)"}};
+// a place without a mark (the old «Были» and «Любимое» marks read as no mark; stored data is left as it was)
+const NOPIN = {label:"Без отметки",c:"var(--pin-none)"};
+const pinOf = st => PIN[st]||NOPIN;
+const stOf = st => PIN[st]?st:"";
 const ADM_T = {Province:"провинция",State:"штат",Region:"регион",County:"уезд",Prefecture:"префектура",Department:"департамент",Municipality:"муниципалитет",District:"район",Governorate:"мухафаза",Canton:"кантон","Autonomous Community":"автономное сообщество",Voivodeship:"воеводство",Oblast:"область","Federal District":"федеральный округ",Republic:"республика"};
 const WIKI = {ru:"https://en.wikipedia.org/wiki/Visa_requirements_for_Russian_citizens",by:"https://en.wikipedia.org/wiki/Visa_requirements_for_Belarusian_citizens"};
 const AREAS=[
@@ -1190,6 +1204,98 @@ function fillAds(){
   boxes.forEach(b=>{b.dataset.b="1";adIO.observe(b)});
 }
 
+/* ---------- sharing: a picture for stories, an invite to the shared map, «тоже хочу» ---------- */
+async function inviteLink(role){
+  const a=S.acct; if(!CLOUD||!a?.user||!a.map) return null;
+  if(a.role!=="owner") return null;
+  const {data:i}=await sb.from("map_invites").select("token").eq("map_id",a.map.id).eq("role",role).eq("revoked",false).order("created_at",{ascending:false}).limit(1);
+  let t=i?.[0]?.token;
+  if(!t){const {data,error}=await sb.from("map_invites").insert({map_id:a.map.id,role}).select().single();if(error)return null;t=data.token}
+  return location.origin+location.pathname+"?share="+t;
+}
+async function shareOut(o){ // the phone's share sheet when there is one, otherwise copy the link
+  try{if(navigator.share&&(!o.files||navigator.canShare?.({files:o.files}))){await navigator.share(o);return "shared"}}catch(e){if(e?.name==="AbortError")return "cancel"}
+  if(o.url){try{await navigator.clipboard.writeText(o.url);return "copied"}catch(e){}}
+  return "none";
+}
+async function invitePeople(){
+  if(!CLOUD){status("Совместная карта работает на сайте nash-atlas.ru");return}
+  if(!S.acct?.user){status("Войдите, чтобы пригласить друзей в свою карту",3500);openLogin();return}
+  if(S.acct.role!=="owner"){status("Пригласить людей может владелец карты",3500);return}
+  const url=await inviteLink("editor"); if(!url){status("Ссылка не создалась. Проверьте интернет и попробуйте снова.",5000);return}
+  const r=await shareOut({title:"Наш атлас",text:`Присоединяйся к карте «${S.acct.map.name}»: будем вместе отмечать, куда хотим поехать`,url});
+  if(r==="copied") status("Ссылка-приглашение скопирована. Отправьте её другу",3500);
+}
+// who wants to go: {userId: 1}; the author of a place that is marked «Хотим» counts too
+function fansOf(p){const f={...(p.fans||{})};if(p.status==="want"&&p.by&&!(p.by in f))f[p.by]=1;return Object.keys(f)}
+let membersP=null;
+function loadMembers(){if(!CLOUD||!S.acct?.map)return Promise.resolve(new Map());
+  if(!membersP) membersP=sb.from("map_members").select("user_id,email").eq("map_id",S.acct.map.id).then(({data})=>new Map((data||[]).map(m=>[m.user_id,m.email]))).catch(()=>new Map());
+  return membersP}
+function fansHTML(p){if(!(CLOUD&&S.acct?.user&&S.db&&S.canWrite))return "";
+  const me=S.acct.user.id, f=fansOf(p), mine=f.includes(me);
+  return `<section class="blk fans"><h2>Хотят поехать <span>${f.length||""}</span></h2><div class="fans-row"><span class="fans-av" id="fansAv"></span>
+    <button class="btn small${mine?"":" primary"}" id="fanBtn" aria-pressed="${mine}">${mine?"Я хочу ✓":"Я тоже хочу"}</button></div></section>`}
+function bindFans(p,save){const b=$("#fanBtn"); if(!b) return;
+  const draw=()=>loadMembers().then(m=>{const box=$("#fansAv");if(!box)return;const cur=S.places.get(p.id)||p;box.innerHTML=fansOf(cur).map(u=>`<span title="${esc(m.get(u)||"участник карты")}">${avatar(m.get(u)||"?")}</span>`).join("")});
+  draw();
+  b.onclick=()=>{const me=S.acct.user.id, cur=S.places.get(p.id)||p, f={...(cur.fans||{})};
+    if(cur.status==="want"&&cur.by&&!(cur.by in f))f[cur.by]=1;
+    const on=!(me in f); if(on)f[me]=1; else delete f[me];
+    const patch={fans:f}; if(on&&cur.status!=="want")patch.status="want";
+    save(patch, on?"отмечено":"снято"); b.setAttribute("aria-pressed",on); b.textContent=on?"Я хочу ✓":"Я тоже хочу"; b.classList.toggle("primary",!on);
+    const h=document.querySelector(".fans h2 span"); if(h)h.textContent=Object.keys(f).length||""; draw()};
+}
+/* the picture: the world with the countries we want to go to, big numbers, flags, the site address */
+async function shareCard(){
+  const want=[...S.places.values()].filter(p=>p.status==="want");
+  if(!want.length){status("Отметьте места «Хотим», и будет чем поделиться",3500);return}
+  const byK=d3.rollup(want,v=>v.length,p=>p.k), ks=[...byK.keys()].filter(Boolean);
+  const W0=1080,H0=1920, c=document.createElement("canvas"); c.width=W0;c.height=H0; const g=c.getContext("2d");
+  try{await document.fonts?.ready}catch(e){}
+  const bg=g.createLinearGradient(0,0,0,H0); bg.addColorStop(0,"#0b1526"); bg.addColorStop(1,"#13243d"); g.fillStyle=bg; g.fillRect(0,0,W0,H0);
+  // glow behind the map
+  const gl=g.createRadialGradient(W0/2,980,40,W0/2,980,620); gl.addColorStop(0,"rgba(255,138,92,.16)"); gl.addColorStop(1,"rgba(255,138,92,0)"); g.fillStyle=gl; g.fillRect(0,300,W0,1300);
+  g.fillStyle="#eef1f6"; g.font="700 46px Unbounded, Manrope, sans-serif"; g.textBaseline="alphabetic"; g.fillText("Наш атлас",80,150);
+  g.fillStyle="#9aa7bb"; g.font="600 40px Manrope, sans-serif"; g.fillText("Хочу побывать",80,300);
+  g.fillStyle="#ff8a5c"; g.font="700 190px Unbounded, Manrope, sans-serif"; const nTxt=String(ks.length); g.fillText(nTxt,72,480);
+  const nw=g.measureText(nTxt).width; g.fillStyle="#eef1f6"; g.font="700 56px Manrope, sans-serif";
+  g.fillText(ruPlural(ks.length,"страна","страны","стран"),92+nw,420); g.fillStyle="#9aa7bb"; g.font="600 40px Manrope, sans-serif";
+  g.fillText(`${want.length} ${ruPlural(want.length,"место","места","мест")}`,92+nw,476);
+  // map
+  // the inhabited world edge to edge (no Antarctica), the countries we want to go to lit up
+  const pj=d3.geoNaturalEarth1().fitExtent([[-30,560],[W0+30,1290]],{type:"MultiPoint",coordinates:[[-168,-56],[179,80]]});
+  const thinP=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))},g);
+  g.save(); g.beginPath(); g.rect(0,540,W0,770); g.clip();
+  for(const f of S.countries){if(f.properties.k==="AQ"||byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#22324c";g.fill();g.strokeStyle="#0b1526";g.lineWidth=1.2;g.stroke()}
+  g.shadowColor="rgba(255,138,92,.85)"; g.shadowBlur=26;
+  for(const f of S.countries){if(!byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#ff8a5c";g.fill()}
+  g.shadowBlur=0;
+  for(const p of want){const xy=pj([p.lng,p.lat]);if(!xy)continue;g.beginPath();g.arc(xy[0],xy[1],7,0,7);g.fillStyle="#ffffff";g.fill();g.lineWidth=3;g.strokeStyle="#ff8a5c";g.stroke()}
+  g.restore();
+  // flags of the countries with the most places
+  const top=ks.sort((a,b)=>byK.get(b)-byK.get(a)).slice(0,8), fl=await Promise.all(top.map(k=>new Promise(res=>{const src=S.flags?.[k];if(!src)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src})));
+  let x=80; const fy=1340;
+  top.forEach((k,i)=>{const im=fl[i]; if(!im) return; g.save(); g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.clip(); g.drawImage(im,x,fy,88,88); g.restore();
+    g.strokeStyle="rgba(255,255,255,.35)"; g.lineWidth=3; g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.stroke(); x+=108});
+  g.fillStyle="#cfd8e6"; g.font="600 38px Manrope, sans-serif";
+  const names=top.slice(0,4).map(k=>S.cByK.get(k)?.properties.ru||k); let line=names.join(", ")+(ks.length>4?` и ещё ${ks.length-4}`:"");
+  while(g.measureText(line).width>W0-160&&names.length>1){names.pop();line=names.join(", ")+` и ещё ${ks.length-names.length}`}
+  g.fillText(line,80,1500);
+  // footer
+  g.fillStyle="rgba(255,255,255,.08)"; g.fillRect(80,1690,W0-160,2);
+  g.fillStyle="#eef1f6"; g.font="700 44px Manrope, sans-serif"; g.fillText("nash-atlas.ru",80,1790);
+  g.fillStyle="#9aa7bb"; g.font="500 34px Manrope, sans-serif"; g.fillText("Карта виз, безопасности и мест, куда хочется",80,1846);
+  const blob=await new Promise(res=>c.toBlob(res,"image/png")); if(!blob){status("Не получилось собрать картинку",4000);return}
+  const url=await inviteLink("viewer").catch(()=>null)||"https://nash-atlas.ru/";
+  const file=new File([blob],"nash-atlas.png",{type:"image/png"}), src=URL.createObjectURL(blob);
+  const {el,close}=modal("cardBox",`<h2 id="cbT">Поделиться картой</h2><img class="cb-img" src="${src}" alt="Картинка: хочу побывать в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}">
+    <p class="hint">${url.includes("share=")?"Вместе с картинкой отправится ссылка: по ней друг увидит вашу карту целиком, но ничего не сможет изменить.":"Войдите в аккаунт, чтобы вместе с картинкой отправлять ссылку на вашу карту."}</p>
+    <div class="ck-acts"><button class="btn primary" id="cbShare">Поделиться</button><a class="btn" id="cbSave" href="${src}" download="nash-atlas.png">Сохранить картинку</a></div>`,{labelledby:"cbT"});
+  el.querySelector("#cbShare").onclick=async()=>{const r=await shareOut({files:[file],title:"Наш атлас",text:`Хочу побывать в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}. Моя карта:`,url});
+    if(r==="copied")status("Ссылка скопирована, картинку можно сохранить кнопкой рядом",4000);else if(r==="none")status("Сохраните картинку кнопкой рядом",3500)};
+}
+
 /* ---------- state ---------- */
 const S = {pass:(()=>{try{const a=JSON.parse(localStorage.getItem("atlas-pass")||"null");if(Array.isArray(a)&&a.length)return a;const m=localStorage.getItem("atlas-mode");if(m==="ru"||m==="by")return [m]}catch(e){}return ["ru","by"]})(), layer:(()=>{try{return localStorage.getItem("atlas-layer")==="safe"?"safe":"entry"}catch(e){return "entry"}})(), sel:{type:"home"}, area:null, areaGeo:new Map(), countries:[], cByK:new Map(), adm:null, cities:[], meta:{}, visa:null,
   places:new Map(), seed:new Map(), dbPlaces:new Map(), lists:[], pickCb:null, db:null, user:null, sample:null, me:null, canWrite:true, admShown:null};
@@ -1210,6 +1316,7 @@ function rebuildPlaces(){
   const m=new Map();
   for(const [id,p] of S.seed){const o=S.dbPlaces.get(id);if(o&&o.deleted)continue;if(S.areaIds?.[id]&&!o)continue;/* a saved city or region itself: its places are what matters */m.set(id,o?{...p,...o,id,seed:true}:p)}
   for(const [id,p] of S.dbPlaces){if(!S.seed.has(id)&&!p.deleted)m.set(id,p)}
+  for(const [id,p] of m) if(p.status&&!PIN[p.status]) m.set(id,{...p,status:""});
   S.places=m;
 }
 // RU and BY: our own checked rules (with notes); any other passport: Passport Index matrix
@@ -1888,7 +1995,7 @@ function drawLegend(){
   const counts={};S.countries.forEach(f=>{const c=legendCode(codeFor(f.properties.k));counts[c]=(counts[c]||0)+1});
   const title="Въезд "+whoText()+(S.pass.length>1?" (по более строгому)":"");
   $("#legend").innerHTML=`<h3>${title}</h3><ul>${LEGEND_ORDER.map(c=>`<li><span class="sw" style="background:${ST[c].c}"></span>${ST[c].label}</li>`).join("")}</ul>
-  <div class="pins">${Object.entries(PIN).map(([k,v])=>`<span style="display:flex;gap:6px;align-items:center"><span class="dotc" style="background:${v.c}"></span>${v.label}</span>`).join("")}</div>`;
+  <div class="pins">${[...Object.entries(PIN),["none",NOPIN]].map(([k,v])=>`<span style="display:flex;gap:6px;align-items:center"><span class="dotc" style="background:${v.c}"></span>${v.label}</span>`).join("")}</div>`;
 }
 function setupZoom(){
   zoom=d3.zoom().scaleExtent([kMin(),TILES?60000:900]);
@@ -2124,7 +2231,7 @@ function renderSummary(){
     sub=entryLine(k); sub2=safeLine(k);
     const n=placesIn(p=>p.k===k).length; if(!sub2&&n) sub2=`<i class="dot" style="background:var(--pin-want)"></i>${n} ${ruPlural(n,"наше место","наших места","наших мест")}`;
     if(s.type!=="country"&&f) sub=`${esc(f.properties.ru)} · `+sub;
-  } else if(s.type==="place"){const p=S.places.get(s.id); x=true; if(p){icon=flagImg(p.k)||"";title=p.name;sub=`<i class="dot" style="background:${PIN[p.status]?.c}"></i>${esc(PIN[p.status]?.label||"")}${placeLoc(p).line?` · ${esc(placeLoc(p).line)}`:""}`}}
+  } else if(s.type==="place"){const p=S.places.get(s.id); x=true; if(p){icon=flagImg(p.k)||"";title=p.name;sub=`<i class="dot" style="background:${pinOf(p.status).c}"></i>${esc(pinOf(p.status).label)}${placeLoc(p).line?` · ${esc(placeLoc(p).line)}`:""}`}}
   else if(s.type==="list"){x=true;icon=`<span class="sm-ic">${ic("pin",22)}</span>`;title=s.name;const n=placesIn(p=>p.list===s.name).length;sub=`${n} ${ruPlural(n,"место","места","мест")}`}
   else {icon=`<span class="sm-ic sm-hi">${ic("globe",22)}</span>`;title="Куда поедем?";
     const free=S.countries.filter(f=>{const c=codeFor(f.properties.k);return c!=="H"&&legendCode(c)==="F"}).length;
@@ -2224,26 +2331,28 @@ function closeSearch(){const tb=$(".topbar");if(!tb?.classList.contains("searchi
 function pvBack(){return MOB()?"":`<div class="backrow"><button class="backbtn" id="pvBack"><span aria-hidden="true">←</span> ${S.sel.type==="home"?"Ко всем странам":"Назад: "+esc(backLabel(S.sel)||"карточка")}</button></div>`}
 function renderPlacesTab(){
   const all=[...S.places.values()], f=S.plf||"", ro=S.db&&!S.canWrite;
-  const add=ro?"":`<div class="pv-acts"><button class="btn primary" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
+  const add=ro?"":`<div class="pv-acts pv-share"><button class="btn small" id="pvCard">${ic("share",17)}<span>Поделиться картой</span></button>${CLOUD?`<button class="btn small" id="pvInv">${ic("user",17)}<span>Пригласить</span></button>`:""}</div><div class="pv-acts"><button class="btn primary" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
   if(!all.length){
     $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
       <p class="pv-lead">Здесь соберутся места, где вы были и куда хотите поехать. Каждое место видно на карте и в карточке своей страны.</p>
       ${add}
       <p class="hint">Место добавляется по ссылке из Google Карт или точкой на карте. Сохранённые списки Google Карт переносятся импортом целиком.</p>`;
   } else {
-    const cnt=d3.rollup(all,v=>v.length,p=>p.status), list=f?all.filter(p=>p.status===f):all;
-    const chip=(k,label,n)=>`<button class="chip pv-f${f===k?" on":""}" data-plf="${k}" aria-pressed="${f===k}">${k?`<span class="dot" style="background:${PIN[k].c}"></span>`:""}${esc(label)} <span class="n">${n}</span></button>`;
+    const cnt=d3.rollup(all,v=>v.length,p=>p.status||"none"), list=f?all.filter(p=>(p.status||"none")===f):all;
+    const chip=(k,label,n)=>`<button class="chip pv-f${f===k?" on":""}" data-plf="${k}" aria-pressed="${f===k}">${k?`<span class="dot" style="background:${pinOf(k==="none"?"":k).c}"></span>`:""}${esc(label)} <span class="n">${n}</span></button>`;
     const groups=[...d3.group(list,p=>p.k)].map(([k,v])=>({k,v,name:S.cByK.get(k)?.properties.ru||k||"Без страны"})).sort((a,b)=>b.v.length-a.v.length||a.name.localeCompare(b.name,"ru"));
     $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
       <p class="pv-lead">${all.length} ${ruPlural(all.length,"место","места","мест")} в ${new Set(all.map(p=>p.k)).size} ${ruPlural(new Set(all.map(p=>p.k)).size,"стране","странах","странах")}</p>
       ${add}
-      <div class="chips pv-fs" role="group" aria-label="Показать места">${chip("","Все",all.length)}${Object.keys(PIN).filter(k=>cnt.get(k)).map(k=>chip(k,PIN[k].label,cnt.get(k))).join("")}</div>
+      <div class="chips pv-fs" role="group" aria-label="Показать места">${chip("","Все",all.length)}${[...Object.keys(PIN),"none"].filter(k=>cnt.get(k)).map(k=>chip(k,pinOf(k==="none"?"":k).label,cnt.get(k))).join("")}</div>
       ${groups.map((g,gi)=>(gi===2?adSlotHTML("places"):"")+`<section class="blk pv-g"><h2><button class="plain pv-c" data-ck="${esc(g.k)}">${flagImg(g.k)}<span>${esc(g.name)}</span></button> <span>${g.v.length}</span></h2><div class="list">${byLoc(g.v).map(placeItem).join("")}</div></section>`).join("")}`;
     document.querySelectorAll("[data-plf]").forEach(b=>b.onclick=()=>{S.plf=b.dataset.plf;renderPlacesTab()});
     document.querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>select({type:"country",k:b.dataset.ck},true));
     bindPlaceLinks();fillAds();
   }
   const a=$("#pvAdd"); if(a) a.onclick=openAdd;
+  const sc=$("#pvCard"); if(sc) sc.onclick=shareCard;
+  const iv=$("#pvInv"); if(iv) iv.onclick=invitePeople;
   const bk=$("#pvBack"); if(bk) bk.onclick=()=>{S.tab="countries";showSel()};
   const im=$("#pvImp"); if(im) im.onclick=()=>$("#importBtn").click();
   updateTabs();
@@ -2257,13 +2366,14 @@ function renderProfile(){
     :`<section class="blk"><h2>Ваши данные</h2><p class="pv-lead">Места, заметки и фото хранятся в этом браузере. Чтобы перенести их на другое устройство, скачайте копию и загрузите её там.</p><div class="pv-acts"><button class="btn" id="pfOut">${ic("down",17)}<span>Скачать копию</span></button><button class="btn" id="pfIn">${ic("up",17)}<span>Загрузить копию</span></button></div></section>`;
   const tiles=TILES?`<button class="ap-item" id="pfBm" role="switch" aria-checked="${basemap==="otm"}">${ic("layers")}<span>Подложка с рельефом<small>Горы, дороги и города. Грузится дольше</small></span><span class="sw-t" aria-hidden="true"></span></button>`:"";
   $("#pbody").innerHTML=`<div class="p-head"><h1>Профиль</h1></div>${acct}
+    <section class="blk"><h2>Поделиться</h2><button class="ap-item" id="pfCard">${ic("share")}<span>Картинка для сторис<small>Сколько стран и мест вы хотите посетить</small></span></button>${CLOUD?`<button class="ap-item" id="pfInv">${ic("user")}<span>Пригласить друзей<small>Отмечать места на одной карте вместе</small></span></button>`:""}</section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
     <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="https://nash-atlas.ru/privacy.html">${ic("doc")}<span>Политика конфиденциальности</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
   on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);
-  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings);
+  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings); on("pfCard",shareCard); on("pfInv",invitePeople);
   on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
   updateTabs();
 }
@@ -2344,7 +2454,7 @@ function gaSafeScene(root){
   btns.forEach((b,j)=>b.classList.toggle("act",j===0)); liquid(seg,pill,btns[0]); gaLater(flip,1400);
 }
 // a still globe turned towards Europe, with flag pins at real cities
-const GA_PINS=[["PT",-9.14,38.72,"love"],["FI",24.94,60.17,"want"],["IT",12.5,41.9,"been"],["JO",35.93,31.95,"been"]];
+const GA_PINS=[["PT",-9.14,38.72,"want"],["FI",24.94,60.17,"want"],["IT",12.5,41.9,"want"],["JO",35.93,31.95,"want"]];
 function gaStillGlobe(size){
   if(!gaWorld()) return `<div class="ga-globe" style="--s:${size}px"><div class="ga-wait"></div></div>`;
   const pj=d3.geoOrthographic().rotate([-14,-44]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
@@ -2359,7 +2469,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=5;
+const GUIDE_VER=6;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2392,13 +2502,16 @@ const GUIDE=[
   {since:5, t:"Регионы и описания городов",
     m:"В карточке страны регионы теперь списком: сначала те, где есть ваши места, у каждого — центр, строка о нём и отметка, если там неспокойно. У столиц и центров регионов появились короткие описания: чем город интересен и что посмотреть рядом.",
     art:()=>`<div class="ga ga-rg">${[["Татарстан","Казань",1],["Карелия","Петрозаводск",0],["Алтай","Горно-Алтайск",0]].map(([a,b,n],i)=>`<div class="ga-rgr" style="--i:${i}"><b>${a}</b><span></span><i>центр: ${b}</i>${n?`<em>3 места</em>`:""}</div>`).join("")}</div>`},
+  {since:6, t:"Поделиться и позвать друзей",
+    m:"В «Моих местах» и в Профиле — «Поделиться картой»: соберётся картинка для сторис с картой, числом стран и флагами, вместе со ссылкой на вашу карту. «Пригласить друзей» отправляет ссылку, по которой друг войдёт и будет отмечать места вместе с вами. В карточке места кнопка «Я тоже хочу» показывает, кто ещё хочет туда поехать. Отметок теперь две: «Хотим» и «Дом».",
+    art:()=>`<div class="ga ga-sh"><div class="ga-story"><b>Хочу побывать</b><em>23</em><i></i><span>nash-atlas.ru</span></div><div class="ga-fans">${["И","М","А"].map((x,i)=>`<span class="av" style="--i:${i}">${x}</span>`).join("")}<b>Я тоже хочу</b></div></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
   {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты. По городу или аэропорту откроется его страна."},
   {since:2, sel:{m:'#tabbar [data-tab="countries"]',d:"#cfq"}, t:"Страны", m:"Список стран с фильтрами: без визы, по прилёте, только безопасные."},
   {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
-  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим», «Были», «Любимое»."},
+  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим» и «Дом»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
   {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
 ];
@@ -2740,8 +2853,8 @@ function drawPins(occ){
      .on("mouseleave",hideTip);
     return g;},u=>u,ex=>ex.transition().duration(REDUCED?0:200).attr("opacity",0).remove());
   gc.attr("transform",d=>`translate(${d.x},${d.y})`);
-  gc.select(".cl-ring").attr("r",d=>clR(d.m.length)+4).attr("fill",d=>PIN[d.st]?.c||PIN.want.c).attr("opacity",.35);
-  gc.select(".cl-body").attr("r",d=>clR(d.m.length)).attr("fill",d=>PIN[d.st]?.c||PIN.want.c);
+  gc.select(".cl-ring").attr("r",d=>clR(d.m.length)+4).attr("fill",d=>pinOf(d.st).c).attr("opacity",.35);
+  gc.select(".cl-body").attr("r",d=>clR(d.m.length)).attr("fill",d=>pinOf(d.st).c);
   gc.select(".cl-n").attr("y",4.5).text(d=>d.m.length);
   gc.select(".cl-flag").attr("transform",d=>{const r=clR(d.m.length);return `translate(${-r*0.72},${-r*0.72})`}).each(function(d){flagNode(d3.select(this),d.k,7)});
   // singles
@@ -2758,7 +2871,7 @@ function drawPins(occ){
      .on("mouseleave",hideTip);
     return g;},u=>u,ex=>ex.transition().duration(REDUCED?0:200).attr("opacity",0).remove());
   gs.attr("transform",d=>`translate(${d.x},${d.y}) scale(${d.p.id===selId?1.25:1})`);
-  gs.select(".pin").attr("fill",d=>PIN[d.p.status]?.c||PIN.want.c);
+  gs.select(".pin").attr("fill",d=>pinOf(d.p.status).c);
   gs.select(".pin-warn").attr("stroke",d=>{const z=placeZone(d.p);return z?SAFE[z.z.l].c:"none"});
   gs.select(".pin-flag").each(function(d){const el=d3.select(this);if(el.attr("data-k")!==d.p.k){el.attr("data-k",d.p.k);flagNode(el,d.p.k,8.5)}});
   // labels where they fit
@@ -2914,7 +3027,7 @@ function bindNotes(){
 }
 
 function placesBlock(list,title="Наши места"){
-  return `<section class="blk"><h2>${esc(title)} <span>${list.length||""}</span></h2>${list.length?`<div class="list">${list.slice(0,400).map(placeItem).join("")}</div>`:`<p class="empty">Пока пусто. Добавь место кнопкой «+ Место» или подбери по вайбу ниже.</p>`}</section>`;
+  return `<section class="blk"><h2>${esc(title)} <span>${list.length||""}</span></h2>${list.length?`<div class="list">${list.slice(0,400).map(placeItem).join("")}</div>`:`<p class="empty">Пока пусто. Добавь место кнопкой «+ Место».</p>`}</section>`;
 }
 // where a place is: its city (or the nearest town), and the region
 function placeRegion(p){
@@ -2943,7 +3056,7 @@ function byLoc(list){
 }
 function placeItem(p){
   const loc=placeLoc(p).line;
-  return `<div class="item"><div class="t"><span class="pl-th" data-th="${esc(p.id)}" aria-hidden="true">${flagImg(p.k)||""}</span><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span><span class="badge" style="--c:${PIN[p.status]?.c}">${esc(PIN[p.status]?.label||"")}</span></div>
+  return `<div class="item"><div class="t"><span class="pl-th" data-th="${esc(p.id)}" aria-hidden="true">${flagImg(p.k)||""}</span><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span>${p.status?`<span class="badge" style="--c:${pinOf(p.status).c}">${esc(pinOf(p.status).label)}${fansOf(p).length>1?` · ${fansOf(p).length}`:""}</span>`:""}</div>
   ${p.tags?.length||p.note?`<div class="meta">${esc([p.tags?.join(", "),p.note?.slice(0,90)].filter(Boolean).join(" · "))}</div>`:""}</div>`;
 }
 function bindPlaceLinks(){document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>select({type:"place",id:b.dataset.place},true));bindThumbs()}
@@ -3115,9 +3228,9 @@ function bindFinder(){
   renderFinder();
 }
 function renderList(L,pts){
-  const by={};pts.forEach(p=>by[p.status]=(by[p.status]||0)+1);
+  const by={};pts.forEach(p=>by[p.status||""]=(by[p.status||""]||0)+1);
   $("#pbody").innerHTML=`${crumbs([{t:"Весь мир",go:{type:"home"}},{t:"Список «"+L.name+"»"}])}
-    <div class="p-head"><div class="flag">${S.meta[L.k]?.flag||""}</div><div class="grow"><h1>${esc(L.name)}</h1><p>${pts.length} ${ruPlural(pts.length,"место","места","мест")} из Google Карт · ${Object.entries(by).map(([k,n])=>(PIN[k]?.label||k).toLowerCase()+": "+n).join(", ")}</p></div></div>
+    <div class="p-head"><div class="flag">${S.meta[L.k]?.flag||""}</div><div class="grow"><h1>${esc(L.name)}</h1><p>${pts.length} ${ruPlural(pts.length,"место","места","мест")} из Google Карт · ${Object.entries(by).map(([k,n])=>pinOf(k).label.toLowerCase()+": "+n).join(", ")}</p></div></div>
     <section class="blk"><div class="row2"><button class="btn small" data-go='${esc(JSON.stringify({type:"country",k:L.k}))}'>Карточка страны</button></div></section>
     <section class="blk"><h2>Места</h2><div class="list">${byLoc(pts).map(placeItem).join("")}</div></section>`;
   bindCrumbs();bindPlaceLinks();
@@ -3142,10 +3255,9 @@ function renderCountry(k){
     ${factsBlock(k)}
     ${notesBlock("country",k,f.properties.ru)}
     ${placesBlock(pl)}
-    ${briefBlock(k,f.properties.ru)}
     ${regs.length?regionNavHTML(k,regs):S.adm?(cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""):`<section class="blk"><h2>Регионы</h2><p class="empty">Загружаю регионы…</p></section>`}
-    ${vibeBlock({kind:"country",key:k,label:f.properties.ru,ctx:f.properties.ru})}`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);bindRegionNav();fillAds();
+`;
+  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();fillCityPhotos(k);bindRegionNav();fillAds();
   if(!S.cdesc) ensureCityDescs().then(()=>{if(S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});
   document.querySelectorAll("[data-reg]").forEach(b=>b.onclick=()=>ensureAdm().then(()=>select({type:"region",id:b.dataset.reg},true)));
   if(!S.adm) ensureAdm().then(()=>{if(S.sel.type==="country"&&S.sel.k===k) renderCountry(k)});
@@ -3165,10 +3277,10 @@ function renderRegion(f){
     ${notesBlock("region",p.id,p.ru)}
     ${placesBlock(pl)}
     ${cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""}
-    ${vibeBlock({kind:"region",key:p.id,label:p.ru,ctx:`${p.ru} (${p.en}), ${cf?.properties.ru||""}`})}
+
     ${zoneMini(p.id)}
     ${entryMini(p.k)}`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindVibe();
+  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();
 }
 function safetyBlock(k){
   const sf=safeOf(k); if(!S.safety) return "";
@@ -3205,9 +3317,9 @@ function renderCity(c){
     ${entryMini(iso)}
     ${notesBlock("city",cityKey(c),ru)}
     ${placesBlock(pl,"Наши места рядом")}
-    ${vibeBlock({kind:"city",key:cityKey(c),label:ru,ctx:`${ru} (${en}), ${cf?.properties.ru||""}`,lat,lng:lon})}
+
     <section class="blk"><div class="row2"><a class="btn small" href="${gmapsSearch(en+", "+(cf?.properties.en||""))}" target="_blank" rel="noopener">Открыть в Google Картах</a></div></section>`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindVibe();fillCityGallery(c);
+  bindCrumbs();bindNotes();bindPlaceLinks();fillCityGallery(c);
   if(!S.cdesc) ensureCityDescs().then(()=>{if(cityDesc(c)&&S.sel.type==="city"&&S.sel.key===ck){const h=document.querySelector("#pbody .p-head");if(h&&!document.querySelector(".lead-d"))h.insertAdjacentHTML("afterend",`<p class="lead-d">${esc(cityDesc(c))}</p>`)}});
 }
 function renderPlace(p){
@@ -3219,7 +3331,8 @@ function renderPlace(p){
     ${(()=>{const z=placeZone(p);return z?`<section class="blk"><div class="warn-box" style="border-color:${SAFE[z.z.l].c}"><span class="wi" style="background:${SAFE[z.z.l].c}">!</span><div><b style="color:${SAFE[z.z.l].c}">${esc(SAFE[z.z.l].label)}${z.z.p?": опасна часть региона":""}</b><p>${esc(z.z.r||"")}${z.z.n?" — "+esc(z.z.n):""}.${z.z.p?" Опасна только часть региона — проверьте по ссылкам в карточке страны, попадает ли туда место.":""}</p></div></div></section>`:""})()}
     <div class="p-head"><div class="flag">${S.meta[p.k]?.flag||""}</div><div class="grow"><h1>${esc(p.name)}</h1><p>${esc([p.city,cf?.properties.ru,p.list?("список «"+p.list+"»"):"",p.approx?"координаты примерные":""].filter(Boolean).join(" · "))}</p></div></div>
     <section class="blk"><h2>О месте <span class="saved" id="dSrc"></span></h2><div id="pDesc"><div class="skel" style="width:96%"></div><div class="skel" style="width:88%"></div><div class="skel" style="width:70%"></div></div></section>
-    <section class="blk"><h2>Статус</h2><div class="chips" id="pStatus">${Object.entries(PIN).map(([k,v])=>`<button class="chip" data-st="${k}" aria-pressed="${p.status===k}" ${ro?"disabled":""}>${v.label}</button>`).join("")}</div></section>
+    ${fansHTML(p)}
+    <section class="blk"><h2>Отметка</h2><div class="chips" id="pStatus">${Object.entries(PIN).map(([k,v])=>`<button class="chip" data-st="${k}" aria-pressed="${p.status===k}" ${ro?"disabled":""}><span class="dot" style="background:${v.c}"></span>${v.label}</button>`).join("")}</div></section>
     <section class="blk"><h2>Вайб и метки</h2><input class="txt" id="pTags" value="${esc((p.tags||[]).join(", "))}" placeholder="через запятую" ${ro?"disabled":""}></section>
     <section class="blk"><h2>Заметка <span class="saved" id="pSaved"></span></h2><textarea class="note" id="pNote" ${ro?"disabled":""}>${esc(p.note||"")}</textarea></section>
     ${p.why?`<section class="blk"><h2>Почему Claude советовал</h2><p style="margin:0">${esc(p.why)}</p></section>`:""}
@@ -3236,7 +3349,8 @@ function renderPlace(p){
   const ref=S.db.doc("places/"+p.id); let chain=Promise.resolve();
   const full=()=>{const {id,seed,...rest}=p;return {...rest,edited:Date.now()}};
   const save=(patch,label)=>{Object.assign(p,patch);chain=chain.then(()=>ref.set(full())).then(()=>{$("#pSaved")&&( $("#pSaved").textContent=label||"сохранено");scheduleOverlay()}).catch(()=>status("Не получилось сохранить"))};
-  document.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-st]").forEach(x=>x.setAttribute("aria-pressed",x===b));save({status:b.dataset.st})});
+  document.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const off=b.getAttribute("aria-pressed")==="true",st=off?"":b.dataset.st;document.querySelectorAll("[data-st]").forEach(x=>x.setAttribute("aria-pressed",!off&&x===b));save({status:st})});
+  bindFans(p,save);
   let tt; $("#pTags").oninput=e=>{clearTimeout(tt);tt=setTimeout(()=>save({tags:splitTags(e.target.value)}),700)};
   let nt; $("#pNote").oninput=e=>{$("#pSaved").textContent="…";clearTimeout(nt);nt=setTimeout(()=>save({note:e.target.value}),700)};
   $("#pMove").onclick=()=>startPick((lat,lng)=>{save({lat,lng,approx:false,k:countryOf(lat,lng)||p.k});select({type:"place",id:p.id},false)});
@@ -3256,7 +3370,7 @@ function galleryHTML(p,dbItems){
   const list=photoList(p,dbItems); lbList=list;
   const canUp=!!S.assets&&S.canWrite;
   const gq=gmapsSearch(p.name+(p.city?", "+p.city:"")+(S.cByK.get(p.k)?", "+S.cByK.get(p.k).properties.en:""));
-  if(!list.length) return `<div class="nophoto" style="--c:${PIN[p.status]?.c||PIN.want.c}"><span class="big">${S.meta[p.k]?.flag||"📍"}</span><div class="acts">${canUp?`<button class="btn small" id="phAdd">Добавить фото</button>`:""}<a class="btn small" href="${gq}" target="_blank" rel="noopener">Фото в Google Картах</a></div></div><input type="file" id="phFile" accept="image/*" multiple hidden>${canUp?`<div class="hint" style="margin-top:6px">Фото из интернета: скопируй картинку и нажми Ctrl+V (⌘V) здесь или перетащи её в карточку.</div>`:""}`;
+  if(!list.length) return `<div class="nophoto" style="--c:${pinOf(p.status).c}"><span class="big">${S.meta[p.k]?.flag||"📍"}</span><div class="acts">${canUp?`<button class="btn small" id="phAdd">Добавить фото</button>`:""}<a class="btn small" href="${gq}" target="_blank" rel="noopener">Фото в Google Картах</a></div></div><input type="file" id="phFile" accept="image/*" multiple hidden>${canUp?`<div class="hint" style="margin-top:6px">Фото из интернета: скопируй картинку и нажми Ctrl+V (⌘V) здесь или перетащи её в карточку.</div>`:""}`;
   return `<div class="gallery">${list.map((x,i)=>`<button class="ph" data-ph="${i}" aria-label="Открыть фото ${i+1}"><img src="${esc(x.url)}" alt="${esc(p.name)}" loading="lazy"></button>`).join("")}${canUp?`<button class="add" id="phAdd"><span style="font-size:22px">+</span>Добавить фото</button>`:""}</div><input type="file" id="phFile" accept="image/*" multiple hidden>
   <div class="row2"><a class="btn small ghost" href="${gq}" target="_blank" rel="noopener">Больше фото в Google Картах</a></div>${canUp?`<div class="hint">Фото из интернета: скопируй картинку и нажми Ctrl+V (⌘V) здесь или перетащи её в карточку.</div>`:""}`;
 }
@@ -3336,106 +3450,13 @@ function addRegen(p){
 }
 function splitTags(s){return String(s||"").split(/[,;]/).map(x=>x.trim()).filter(Boolean).slice(0,12)}
 
-/* ---------- Claude: brief ---------- */
-function briefBlock(k,name){
-  if(STANDALONE) return "";
-  return `<section class="blk"><h2>Справка для поездки <span class="saved" id="brAt"></span></h2><div id="brief">${S.sample?`<button class="btn small" id="brGo">Собрать справку с Claude</button><div class="hint" style="margin-top:6px">Сезон, бюджет, как платить с картами РФ и РБ, связь, транспорт и характер страны. Сохранится здесь для вас обоих.</div>`:`<p class="empty">Справки от Claude работают, когда страница открыта в Claude.</p>`}</div></section>`;
-}
-function renderBrief(d,at){
-  const list=a=>Array.isArray(a)&&a.length?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
-  const rows=[["Характер",d.vibe],["Когда ехать",d.season],["Бюджет на двоих в день",d.budget],["Деньги и карты",d.money],["Связь",d.connection],["Транспорт",d.transport],["Безопасность",d.safety]].filter(r=>r[1]);
-  $("#brief").innerHTML=`<div class="ai"><dl>${rows.map(([a,b])=>`<div><dt>${a}</dt><dd>${esc(b)}</dd></div>`).join("")}${d.tips?.length?`<div><dt>Лайфхаки</dt><dd>${list(d.tips)}</dd></div>`:""}${d.regions?.length?`<div><dt>Куда смотреть</dt><dd>${list(d.regions.map(r=>r.name+(r.vibe?": "+r.vibe:"")))}</dd></div>`:""}</dl></div>
-  <div class="hint">Claude писал по своим знаниям, без поиска в интернете. Платёжные правила и цены меняются, важное проверяйте.</div>
-  ${S.sample&&S.canWrite?`<div class="row2" style="margin-top:6px"><button class="btn small ghost" id="brGo">Обновить справку</button></div>`:""}`;
-  if(at) $("#brAt").textContent=new Date(at).toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"});
-}
-function bindBrief(k,name){
-  const id="brief-"+k.replace(/[^A-Za-z0-9]/g,"");
-  if(S.db) S.db.doc("briefs/"+id).get().then(s=>{if(s.exists&&S.sel.type==="country"&&S.sel.k===k){renderBrief(s.data().data,s.data().at);bindBriefBtn(k,name,id)}}).catch(()=>{});
-  bindBriefBtn(k,name,id);
-}
-function bindBriefBtn(k,name,id){
-  const b=$("#brGo"); if(!b) return;
-  b.onclick=async()=>{
-    b.disabled=true; b.textContent="Claude думает… обычно до минуты";
-    const rules=S.pass.map(p=>{const e=entry(p,k);return `${pName(p)} — ${ST[e.c]?.label||"нет данных"} ${e.s}`}).join("; ");
-    const prompt=`Ты помогаешь путешественникам с паспортами: ${S.pass.map(p=>p==="ru"?"России":p==="by"?"Беларуси":pName(p)).join(", ")}. Составь короткую практичную справку о стране «${name}» для туристической поездки.
-Правила въезда уже известны (не повторяй их): ${rules}.
-Пиши по-русски, живо и конкретно, без воды. Если в чём-то не уверен, так и скажи.
-Ответь только JSON-объектом такого вида:
-{"vibe":"1–2 предложения о характере страны для путешественника","season":"лучшие месяцы и чего избегать","budget":"примерный бюджет на двоих в день: эконом / средний, в местной валюте и долларах","money":"как платить картами банков стран наших паспортов, наличные, обмен, что работает","connection":"связь и мобильный интернет, eSIM","transport":"как передвигаться","safety":"на что обратить внимание","tips":["3–5 коротких лайфхаков"],"regions":[{"name":"регион или город","vibe":"чем хорош, 5–10 слов"}]}
-В regions дай 4–6 пунктов.`;
-    try{
-      const data=await S.sample.json(prompt,{cache:{gcTime:3600000}});
-      if(S.sel.type==="country"&&S.sel.k===k){renderBrief(data,Date.now());bindBriefBtn(k,name,id)}
-      if(S.db&&S.canWrite) S.db.doc("briefs/"+id).set({data,at:Date.now(),by:S.me||null}).catch(()=>{});
-    }catch(e){b.disabled=false;b.textContent="Собрать справку с Claude";status(sampleErr(e),5000)}
-  };
-}
 function sampleErr(e){
   return ({not_granted:"Доступ к Claude для этой страницы не разрешён",rate_limited:"Слишком много запросов, попробуй через пару минут",invalid_json:"Claude ответил в неожиданном виде, попробуй ещё раз",session_expired:"Нужно заново войти в Claude",cancelled:"Остановлено",refused:"Claude не стал отвечать на этот запрос"})[e?.code]||"Не получилось связаться с Claude, попробуй ещё раз";
 }
 
-/* ---------- Claude: vibe places ---------- */
-let vibeCtx=null;
-function vibeBlock(ctx){
-  vibeCtx=ctx;
-  if(STANDALONE){vibeCtx=null;return ""}
-  return `<section class="blk"><h2>Места по вайбу</h2>
-    <div class="vibegrid" id="vibes">${VIBES.map(v=>`<button class="chip" data-vibe="${esc(v)}" aria-pressed="false">${esc(v)}</button>`).join("")}</div>
-    <input class="txt" id="vibeExtra" placeholder="Или опиши своими словами: «тихий бар с винилом»">
-    <div class="row2"><button class="btn primary small" id="vibeGo" ${S.sample?"":"disabled"}>Подобрать места</button><span class="hint" id="vibeHint">${S.sample?"Claude подберёт 8 мест, их можно сразу сохранить на карту":"Работает, когда страница открыта в Claude"}</span></div>
-    <div id="vibeOut" class="list"></div></section>`;
-}
-function bindVibe(){
-  const ctx=vibeCtx; if(!ctx) return;
-  document.querySelectorAll("[data-vibe]").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
-  const go=$("#vibeGo"); if(!go) return;
-  go.onclick=async()=>{
-    const vibes=[...document.querySelectorAll('[data-vibe][aria-pressed="true"]')].map(b=>b.dataset.vibe);
-    const extra=$("#vibeExtra").value.trim();
-    if(!vibes.length&&!extra){$("#vibeHint").textContent="Выбери хотя бы один вайб или опиши свой";return}
-    const cacheKey=slugId("v",ctx.key+"|"+vibes.join(",")+"|"+extra);
-    go.disabled=true; $("#vibeOut").innerHTML=`<p class="empty">Claude подбирает места… обычно 20–60 секунд</p>`;
-    try{
-      let items=null;
-      if(S.db){const s=await S.db.doc("vibes/"+cacheKey).get().catch(()=>null); if(s?.exists) items=s.data().items;}
-      if(!items){
-        const ours=placesIn(p=>ctx.kind==="country"?p.k===ctx.key:(ctx.lat?distKm(ctx.lat,ctx.lng,p.lat,p.lng)<60:true)).slice(0,20).map(p=>p.name);
-        const prompt=`Подбери 8 конкретных реальных мест в локации «${ctx.ctx}» для пары путешественников. Вайб: ${[...vibes,extra].filter(Boolean).join("; ")}.
-${ctx.kind==="country"?"Это вся страна: предложи места в разных городах и регионах.":ctx.kind==="region"?"Это регион: можно места в разных городах региона.":"Это город и его окрестности."}
-${ours.length?"У них уже сохранены: "+ours.join(", ")+". Не повторяй их.":""}
-Выбирай места, которые точно существуют и известны; лучше меньше, чем выдуманные. Пиши по-русски.
-Ответь только JSON-массивом объектов:
-[{"name":"название по-русски","local":"название как в Google Картах, латиницей или на местном языке","kind":"тип: кафе, смотровая, парк, музей, бар…","why":"почему подходит под вайб, 1–2 предложения","area":"район или город","lat":число,"lng":число,"price":"$, $$ или $$$ или пусто"}]
-Координаты давай как можно точнее, они нужны для точки на карте.`;
-        items=await S.sample.json(prompt,{cache:{gcTime:3600000}});
-        if(!Array.isArray(items)) throw {code:"invalid_json"};
-        items=items.filter(x=>x&&x.name).slice(0,10);
-        if(S.db&&S.canWrite) S.db.doc("vibes/"+cacheKey).set({items,key:ctx.key,vibes,extra,at:Date.now()}).catch(()=>{});
-      }
-      renderVibeItems(items,ctx);
-    }catch(e){$("#vibeOut").innerHTML=`<p class="err">${esc(sampleErr(e))}</p>`}
-    go.disabled=false;
-  };
-}
-function renderVibeItems(items,ctx){
-  $("#vibeOut").innerHTML=items.map((x,i)=>`<div class="item"><div class="t"><b>${esc(x.name)}</b><span class="meta">${esc([x.kind,x.price].filter(Boolean).join(" · "))}</span></div>
-    <div class="meta">${esc([x.local&&x.local!==x.name?x.local:"",x.area].filter(Boolean).join(" · "))}</div>
-    <div>${esc(x.why||"")}</div>
-    <div class="row"><a class="btn small" href="${gmapsSearch((x.local||x.name)+", "+(x.area||ctx.label))}" target="_blank" rel="noopener">Проверить в Google Картах</a>
-    ${S.db&&S.canWrite?`<button class="btn small" data-save="${i}">Сохранить на карту</button>`:""}</div></div>`).join("")+`<div class="hint">Места и координаты предложил Claude по своим знаниям. Перед поездкой проверь, что место открыто.</div>`;
-  document.querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{
-    const x=items[+b.dataset.save]; const lat=+x.lat,lng=+x.lng;
-    if(!isFinite(lat)||!isFinite(lng)){status("У этого места нет координат: добавь его вручную через «+ Место»");return}
-    b.disabled=true;
-    try{await addPlace({name:x.name,lat,lng,status:"want",tags:splitTags([x.kind,...(document.querySelectorAll('[data-vibe][aria-pressed="true"]').length?[...document.querySelectorAll('[data-vibe][aria-pressed="true"]')].map(q=>q.dataset.vibe.toLowerCase()):[])].join(",")),note:"",why:x.why||"",city:x.area||ctx.label,approx:true,url:gmapsSearch((x.local||x.name)+", "+(x.area||ctx.label))});b.textContent="Сохранено ✓"}catch(e){b.disabled=false;status("Не получилось сохранить")}
-  });
-}
-
 /* ---------- places: db ---------- */
 async function addPlace(p){
-  const doc={name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status||"want",tags:p.tags||[],note:p.note||"",url:p.url||"",city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()};
+  const doc={name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:p.url||"",city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()};
   if(!S.db){const id="local-"+Date.now()+Math.random().toString(36).slice(2,6);S.dbPlaces.set(id,{id,...doc});rebuildPlaces();scheduleOverlay();return id}
   const ref=S.db.collection("places").doc(); await ref.set(doc); S.dbPlaces.set(ref.id,{id:ref.id,...doc}); rebuildPlaces(); scheduleOverlay(); return ref.id;
 }
@@ -3526,7 +3547,7 @@ function renderImp(){
   const lists=[...new Set(impItems.map(x=>x.list))];
   $("#impInfo").innerHTML=impItems.length?`<p style="margin:0">Нашлось <b>${impItems.length}</b> ${ruPlural(impItems.length,"место","места","мест")} в ${lists.length} ${ruPlural(lists.length,"списке","списках","списках")}: ${esc(lists.join(", "))}.</p>
     <p class="hint" style="margin:6px 0 0">С координатами: ${withLL.length}. Без координат: ${noLL.length}${noLL.length?" (Google не кладёт их в CSV)":""}.</p>
-    ${noLL.length?`<label class="row2" style="margin-top:8px"><input type="checkbox" id="impGeo" ${S.sample?"checked":"disabled"}> Найти точки для мест без координат с помощью Claude (по названию, примерно)</label>`:""}`:`<p class="err">В файле не нашлось сохранённых мест. Проверь, что в Takeout был отмечен раздел «Сохранённые».</p>`;
+    `:`<p class="err">В файле не нашлось сохранённых мест. Проверь, что в Takeout был отмечен раздел «Сохранённые».</p>`;
   $("#impGo").disabled=!impItems.length;
 }
 async function runImport(){
@@ -3547,7 +3568,7 @@ ${chunk.map((x,j)=>`${j}. ${x.name}${x.note?" — "+x.note.slice(0,80).replace(/
   }
   const ready=items.filter(x=>x.lat!=null); const skipped=items.length-ready.length; let n=0;
   for(const x of ready){ $("#impInfo").innerHTML=`<p>Сохраняю: ${n+1} из ${ready.length}…</p>`;
-    try{await addPlace({...x,status:/хочу|want/i.test(x.list)?"want":/избран|favou?rite|любим/i.test(x.list)?"love":"want",tags:x.tags?.length?x.tags:[]});n++}catch(e){if(e?.code==="quota_exceeded"){status("Место в базе закончилось",6000);break}}}
+    try{await addPlace({...x,status:/избран|favou?rite|любим/i.test(x.list)?"":"want",tags:x.tags?.length?x.tags:[]});n++}catch(e){if(e?.code==="quota_exceeded"){status("Место в базе закончилось",6000);break}}}
   $("#impInfo").innerHTML=`<p class="ok">Добавлено ${n} ${ruPlural(n,"место","места","мест")}.${skipped?` ${skipped} без координат пропущено: их можно добавить вручную по ссылке.`:""}</p>`;
   impItems=[]; go.disabled=true;
   select({type:"home"},false);
@@ -3571,7 +3592,7 @@ const ALIAS={US:["сша","америка","штаты"],GB:["британия",
 const AREA_WORDS=[["европ",["europe"]],["африк",["africa"]],["азия",["southasia","eastasia","sea","rusca"]],["азии",["southasia","eastasia","sea","rusca"]],["юго восточн",["sea"]],["восточная азия",["eastasia"]],["южная азия",["southasia"]],["ближний восток",["mideast"]],["кавказ",["mideast"]],["средняя азия",["rusca"]],["центральная азия",["rusca"]],["океани",["oceania"]],["латинск",["camerica","samerica"]],["южная америк",["samerica"]],["северная америк",["namerica"]],["центральная америк",["camerica"]],["кариб",["camerica"]],["америк",["namerica","camerica","samerica"]]];
 const ENTRY_WORDS=[["без виз",["F"]],["безвиз",["F"]],["виза не нужна",["F"]],["по прилет",["A"]],["на границе",["A"]],["электронн",["E","V"]],["e visa",["V"]],["евиз",["V"]],["онлайн",["E","V"]],["нужна виза",["R"]],["визов",["R"]],["закрыт",["X"]],["легкий въезд",["F","E","A"]],["просто въехать",["F","E","A"]]];
 const SAFE_WORDS=[["безопасн",[1]],["спокойн",[1]],["осторожн",[2]],["опасн",[3,4]],["не ехать",[4]],["воюет",[4]],["война",[4]]];
-const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["были",["been"]],["был",["been"]],["любим",["love"]],["дом",["home"]]];
+const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["дом",["home"]]];
 let SIX=null;
 const SYN={пляж:["beach","playa","praia","plage","plaj","strand","spiaggia"],музей:["museum","muzesi","musee","museo"],храм:["temple","wat","church","pagoda"],водопад:["waterfall","falls","selale"],озеро:["lake","lago","golu","gol"],гора:["mount","mountain","dag","peak"],парк:["park","parque"],рынок:["market","bazaar","bazar","mercado","pazar"],кофе:["coffee","cafe","kahve"],кафе:["cafe","coffee"],замок:["castle","kale","castillo","schloss"],собор:["cathedral","catedral"],мечеть:["mosque","camii","masjid"],остров:["island","isla","koh","ada"],пещера:["cave","cueva","magara"],каньон:["canyon","kanyon"],вулкан:["volcano","volcan"],дворец:["palace","palacio","saray"],монастырь:["monastery","monastir"],мост:["bridge","kopru","puente"],ресторан:["restaurant"],бар:["bar","pub"],смотровая:["viewpoint","mirador"],крепость:["fortress","fort","kalesi"],сад:["garden","bahce"],пустыня:["desert"],заповедник:["reserve","national park"]};
 const synOf=t=>{const out=[t];for(const [k,v] of Object.entries(SYN))if(t.startsWith(k.slice(0,Math.max(4,k.length-1)))||k.startsWith(t)&&t.length>=4)out.push(k,...v);return [...new Set(out)]};
@@ -3638,7 +3659,7 @@ function filterPlaces(f,ks){
 function facetLabel(f){const parts=[];
   if(f.entry)parts.push([...new Set(f.entry.map(c=>c==="E"||c==="V"?"электронная виза или разрешение":ST[c]?.label.toLowerCase()))].join(" / "));
   if(f.safe)parts.push(f.safe.map(l=>SAFE[l].label.toLowerCase()).join(" / "));
-  if(f.status)parts.push(f.status.map(x=>PIN[x].label.toLowerCase()).join(" / "));
+  if(f.status)parts.push(f.status.map(x=>pinOf(x).label.toLowerCase()).join(" / "));
   if(f.tags.length)parts.push("«"+f.tags.join(", ")+"»");
   if(f.areas)parts.push(AREAS.filter(a=>f.areas.includes(a.id)).map(a=>a.name).join(", "));
   if(f.cur)parts.push("валюта: "+f.cur+"…");
@@ -3679,7 +3700,7 @@ function searchAll(raw){
 }
 function countryHint(k){const c=legendCode(codeFor(k)), sf=safeOf(k), n=placesIn(p=>p.k===k).length;
   return [ST[c]?.label,sf?.l?SAFE[sf.l].label.toLowerCase():"",n?`${n} ${ruPlural(n,"место","места","мест")}`:""].filter(Boolean).join(" · ")}
-const QUICK=[["без визы","Без визы вдвоём"],["без визы безопасно","Без визы и спокойно"],["хотим","Где хотим побывать"],["были","Где уже были"],["любимое","Любимые места"],["пляж","Пляжи"],["безвиз европа","Безвиз в Европе"],["евро","Страны с евро"],["испанский","Говорят по-испански"],["не ехать","Куда лучше не ехать"]];
+const QUICK=[["без визы","Без визы вдвоём"],["без визы безопасно","Без визы и спокойно"],["хотим","Где хотим побывать"],["пляж","Пляжи"],["безвиз европа","Безвиз в Европе"],["евро","Страны с евро"],["испанский","Говорят по-испански"],["не ехать","Куда лучше не ехать"]];
 function suggestions(){let recent=[];try{recent=JSON.parse(localStorage.getItem("atlas-recent")||"[]")}catch(e){}
   return [...recent.slice(0,4).map(r=>({g:"Недавние",t:r,ic:"recent",s:"",fill:r,sc:0})),...QUICK.map(([q,t])=>({g:"Попробуй",t,ic:"spark",s:q,fill:q,sc:1}))]}
 let resSel=-1,resArr=[];
@@ -3688,7 +3709,7 @@ function hl(t,q){const n=nz(q).split(" ").filter(w=>w.length>1);if(!n.length)ret
   if(best<0||low.length!==t.length)return esc(t);return esc(t.slice(0,best))+"<mark>"+esc(t.slice(best,best+len))+"</mark>"+esc(t.slice(best+len))}
 function resIcon(x){
   if(x.ic==="country"||x.ic==="list"||(x.ic==="city"&&x.k)||(x.ic==="region"&&x.k)){const src=S.flags?.[x.k];return src?`<img class="ri-flag" src="${src}" alt="">`:`<span class="ri">${S.meta[x.k]?.flag||"●"}</span>`}
-  if(x.ic==="place")return `<span class="ri-pin" style="background:${PIN[x.st]?.c||PIN.want.c}"></span>`;
+  if(x.ic==="place")return `<span class="ri-pin" style="background:${pinOf(x.st).c}"></span>`;
   return `<span class="ri">${RES_IC[x.ic]||"·"}</span>`}
 function renderResults(){const r=$("#results");const q=$("#q").value;let g0=null;
   r.innerHTML=resArr.map((x,i)=>{const head=x.g!==g0?`<div class="rg">${esc(x.g)}</div>`:"";g0=x.g;
