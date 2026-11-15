@@ -458,6 +458,8 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .cg:active .cg-ph img{transform:scale(.97)}
 .cg-n{font-weight:700;font-size:14px;line-height:1.2}
 .cg-s{font-size:12px;color:var(--muted);margin-top:-4px}
+.cg-c{font-size:13px;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#cityGal .cg{width:200px}
 @keyframes cgShim{to{background-position:-300% 0}}
 .pl-loc{font-size:12px;color:var(--muted);line-height:1.3}
 .item .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;align-items:center}
@@ -1039,6 +1041,47 @@ function fillCityPhotos(k){const box=document.querySelector(".cgal"); if(!box||!
     if(x){fadeImg(el,x.u);b.title=b.querySelector(".cg-n").textContent+" · фото из Википедии"}else b.remove()});
     if(!box.querySelector(".cg"))box.remove()})}
 
+/* city card: photos from the city's Wikipedia article, with what is in them as the caption */
+const cgMem=new Map();
+const wstrip=h=>String(h||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
+async function cityGallery(c){
+  const ck=cityKey(c); if(cgMem.has(ck)) return cgMem.get(ck);
+  const key="atlas-cg:"+ck;
+  try{const x=JSON.parse(localStorage.getItem(key)||"null");if(x&&Date.now()-x.at<1000*3600*24*60){cgMem.set(ck,x.ph);return x.ph}}catch(e){}
+  const e0=wqErr; let out=[];
+  // photos in the order the article shows them (the infobox collage first), Russian article first
+  for(const [L,col] of [["ru",0],["en",1]]){
+    if(!c[col]) continue;
+    try{let r;try{r=await fetch(`https://${L}.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(c[col].replace(/ /g,"_"))}?redirect=true`)}catch(e){wqErr++;throw e}
+      if(!r.ok) continue; const j=await r.json();
+      const old=/гравюр|картин|кисти|портрет|рисун|карта|схема|спутник|герб|флаг|климат|\b1[0-8]\d\d\b|\b19[0-4]\d\b|век[ае]?\b/i;
+      const items=(j.items||[]).filter(x=>x.type==="image"&&x.showInGallery!==false&&/\.(jpe?g|webp)$/i.test(x.title)
+        &&!/map|karte|flag|coat|wappen|logo|seal|locator|emblem|climate|nasa|satellite|portrait|collage|1[0-8]\d\d|19[0-4]\d/i.test(x.title)
+        &&!old.test(x.caption?.text||"")).slice(0,8);
+      if(items.length<2) continue;
+      // what the photo shows: the article's caption, or the file's Russian description
+      const need=items.filter(x=>!x.caption?.text);
+      const desc=new Map();
+      if(need.length){try{const m=await wq("commons.wikimedia.org",{titles:need.map(x=>"File:"+x.title.replace(/^[^:]+:/,"")).join("|"),prop:"imageinfo",iiprop:"extmetadata",iiextmetadatafilter:"ImageDescription|ObjectName",iiextmetadatalanguage:"ru"});
+        const to=new Map((m.query?.normalized||[]).map(x=>[x.to,x.from]));
+        Object.values(m.query?.pages||{}).forEach(pg=>{const md=pg.imageinfo?.[0]?.extmetadata;const t=[wstrip(md?.ImageDescription?.value),wstrip(md?.ObjectName?.value)].find(x=>/[а-яё]{3}/i.test(x)&&!/[a-z]{4}/i.test(x));if(t)desc.set(pg.title.replace(/^[^:]+:/,""),t)})}catch(e){}}
+      out=items.map(x=>{const f=x.title.replace(/^[^:]+:/,"").replace(/_/g," ");let cap=wstrip(x.caption?.text)||desc.get(f)||"";
+        cap=cap.replace(/\s*\(.*?\)\s*/g," ").replace(/\.$/,"").trim();
+        if(/загружен|конкурс|лицензи|передний план|на заднем плане$/i.test(cap)||nz(cap)===nz(c[0]))cap=""; if(cap.length>70)cap=cap.slice(0,68).replace(/\s\S*$/,"")+"…";
+        const src=(x.srcset?.[0]?.src||"").replace(/^\/\//,"https://");return {u:wthumb(src,500),cap}}).filter(x=>x.u);
+      if(out.length) break;
+    }catch(e){}
+  }
+  if(!out.length&&wqErr>e0) return out;
+  cgMem.set(ck,out); try{localStorage.setItem(key,JSON.stringify({at:Date.now(),ph:out}))}catch(e){}
+  return out;
+}
+function cityGalleryHTML(){return STANDALONE?`<div class="gallery cgal" id="cityGal" aria-label="Фото города">${'<span class="cg"><span class="cg-ph"></span></span>'.repeat(3)}</div>`:""}
+function fillCityGallery(c){const box=$("#cityGal"); if(!box) return;
+  cityGallery(c).then(ph=>{if(!box.isConnected)return; if(!ph.length){box.remove();return}
+    box.innerHTML=ph.map((x,i)=>`<span class="cg" title="Фото из Википедии"><span class="cg-ph" data-i="${i}"></span>${x.cap?`<span class="cg-c">${esc(x.cap)}</span>`:""}</span>`).join("");
+    box.querySelectorAll(".cg-ph").forEach(el=>fadeImg(el,ph[+el.dataset.i].u))})}
+
 /* ---------- state ---------- */
 const S = {pass:(()=>{try{const a=JSON.parse(localStorage.getItem("atlas-pass")||"null");if(Array.isArray(a)&&a.length)return a;const m=localStorage.getItem("atlas-mode");if(m==="ru"||m==="by")return [m]}catch(e){}return ["ru","by"]})(), layer:(()=>{try{return localStorage.getItem("atlas-layer")==="safe"?"safe":"entry"}catch(e){return "entry"}})(), sel:{type:"home"}, area:null, areaGeo:new Map(), countries:[], cByK:new Map(), adm:null, cities:[], meta:{}, visa:null,
   places:new Map(), seed:new Map(), dbPlaces:new Map(), lists:[], pickCb:null, db:null, user:null, sample:null, me:null, canWrite:true, admShown:null};
@@ -1473,6 +1516,16 @@ function hatch(key,draw,size){let pat=hatchCache.get(key);if(!pat){const c=docum
 function zoneHatch(l){return hatch("z"+l+CDPR,(g,s)=>{g.fillStyle=SAFE[l].c;g.globalAlpha=.18;g.fillRect(0,0,s,s);g.globalAlpha=1;g.strokeStyle=SAFE[l].c;g.lineWidth=3.2;g.beginPath();g.moveTo(0,-1);g.lineTo(0,s+1);g.stroke()},8)}
 function dfHatch(){return hatch("df"+CDPR,(g,s)=>{g.strokeStyle="rgba(20,25,45,.32)";g.lineWidth=1.4;g.beginPath();g.moveTo(0,-1);g.lineTo(0,s+1);g.stroke()},7)}
 function patAt(pat,k){if(pat.setTransform)pat.setTransform(new DOMMatrix().scaleSelf(1/(CDPR*k)).rotateSelf(45));return pat}
+// the outline of the open country without the seam where the data cuts it at the date line
+const selOl=new Map();
+function selOutline(f){if(selOl.has(f))return selOl.get(f);
+  const g=f.geometry, polys=g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[], lines=[];
+  const seam=(a,b)=>Math.abs(a[0])>179.99&&Math.abs(b[0])>179.99;
+  for(const poly of polys)for(const ring of poly){let cur=[ring[0]];for(let i=1;i<ring.length;i++){if(seam(ring[i-1],ring[i])){if(cur.length>1)lines.push(cur);cur=[ring[i]]}else cur.push(ring[i])}if(cur.length>1)lines.push(cur)}
+  const d=path({type:"MultiLineString",coordinates:lines}), p=d?new Path2D(d):null; selOl.set(f,p); return p}
+const seamC=new Map();
+function seamCountry(f){let v=seamC.get(f);if(v==null){v=false;const g=f.geometry;const polys=g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[];
+  outer:for(const poly of polys)for(const ring of poly)for(let i=1;i<ring.length;i++)if(Math.abs(ring[i][0])>179.99&&Math.abs(ring[i-1][0])>179.99){v=true;break outer}seamC.set(f,v)}return v}
 let drawQ=false;
 function requestDraw(){if(drawQ)return;drawQ=true;requestAnimationFrame(()=>{drawQ=false;drawCanvas()})}
 function drawCanvas(){
@@ -1494,7 +1547,9 @@ function drawCanvas(){
       if(kk===hoverK){cx.globalAlpha=op*(tiles?.7:.82);cx.fill(pth);cx.globalAlpha=op}else cx.fill(pth)}
     cx.globalAlpha=1;
     {cx.strokeStyle=tiles?"rgba(30,35,55,.45)":rc("var(--ocean)");cx.lineWidth=(tiles?1:.6)*lw;cx.lineJoin="round";
-      for(const pth of lod.values()) cx.stroke(pth)}
+      for(const pth of lod.values()) cx.stroke(pth);
+      // countries the data cuts at the date line are filled once more, so the cut doesn't show as a border
+      cx.globalAlpha=op; for(const [f,pth] of lod) if(seamCountry(f)){cx.fillStyle=cols.get(f.properties.k)||"#22324c";cx.fill(pth)} cx.globalAlpha=1}
     // zones (safety), disputed territories, lines of control
     const zOp=tiles?Math.max(op,.35):1;
     for(const z of cvShapes.zones){cx.globalAlpha=zOp;cx.fillStyle=z.hatch?patAt(zoneHatch(z.l),k):z.c;cx.fill(z.p);
@@ -1504,13 +1559,18 @@ function drawCanvas(){
     if(cvShapes.front){cx.setLineDash([6*lw,3*lw]);cx.strokeStyle="#b3261e";cx.lineWidth=2*lw;cx.stroke(cvShapes.front);cx.setLineDash([])}
     if(cvShapes.ks){cx.setLineDash([7*lw,4*lw]);cx.strokeStyle="#f2a93b";cx.lineWidth=3*lw;cx.stroke(cvShapes.ks);cx.setLineDash([])}
     // the open country gets a light outline
-    if(sel){const f=S.cByK.get(sel),pth=f&&lod.get(f);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
+    if(sel){const f=S.cByK.get(sel),pth=f&&selOutline(f);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
   }
   // everything outside the focused area is dimmed (drawn once, not per copy: the mask covers the whole canvas)
+  // the hole is cut in every copy of the world, so a country across the date line (Chukotka, Fiji) stays lit on both sides
   if(cvShapes.focus&&!document.body.classList.contains("tilesmode")){
     cx.setTransform(CDPR*k,0,0,CDPR*k,CDPR*(OVS+t.x),CDPR*(OVS+t.y));
-    cx.globalAlpha=cvShapes.focus.a; cx.fillStyle=tiles?"rgba(18,26,44,.38)":"rgba(6,12,24,.5)"; cx.fill(cvShapes.focus.p,"evenodd");
-    if(!moving){cx.strokeStyle=tiles?"rgba(18,26,44,.18)":"rgba(6,12,24,.25)";cx.lineWidth=10*lw;cx.lineJoin="round";cx.stroke(cvShapes.focus.p)}
+    const fp=new Path2D(), x0=(-OVS-t.x)/k-1, y0=(-OVS-t.y)/k-1;
+    fp.rect(x0,y0,(W+2*OVS)/k+2,(H+2*OVS)/k+2);
+    for(const n of offs) fp.addPath(cvShapes.focus.h,new DOMMatrix([1,0,0,1,TILES?n*mercW():0,0]));
+    cx.globalAlpha=cvShapes.focus.a; cx.fillStyle=tiles?"rgba(18,26,44,.38)":"rgba(6,12,24,.5)"; cx.fill(fp,"evenodd");
+    if(!moving){cx.strokeStyle=tiles?"rgba(18,26,44,.18)":"rgba(6,12,24,.25)";cx.lineWidth=10*lw;cx.lineJoin="round";
+      for(const n of offs){if(n){cx.save();cx.translate(TILES?n*mercW():0,0);cx.stroke(cvShapes.focus.h);cx.restore()}else cx.stroke(cvShapes.focus.h)}}
     cx.globalAlpha=1}
   perfDraw(performance.now()-t0);
 }
@@ -1588,7 +1648,7 @@ function setupProjection(){
   const mob=MOB(), [vt,vb]=mob?viewArea():[70,H];
   const ext=mob?[[8,vt],[W-8,vb]]:[[10,70],[W-10,H-10]];
   proj=TILES?d3.geoMercator().fitExtent(ext,{type:"MultiPoint",coordinates:[[-179.9,-56],[179.9,78]]}):d3.geoNaturalEarth1().fitExtent(ext,{type:"Sphere"});
-  path=d3.geoPath(proj);
+  path=d3.geoPath(proj); if(typeof selOl!=="undefined")selOl.clear();
 }
 /* ---------- endless map: the world repeats left and right, top and bottom never show ---------- */
 function worldYs(){return [proj([0,85.05])[1],proj([0,-85.05])[1]]}
@@ -1765,8 +1825,8 @@ function worldRect(){const a=proj.invert?null:null;const w=mercOrSphere();return
 function mercOrSphere(){const pad=Math.max(W,H)*3;return [-pad,-pad,W+pad,H+pad]}
 function updateFocus(){
   const g=focusFor(S.sel); focusGeo=g;
-  const d=g?worldRect()+simplePath(g,focusZoomFor(S.sel)):null;
-  const had=cvShapes.focus; cvShapes.focus=d?{p:new Path2D(d),a:had?1:0}:null;
+  const d=g?simplePath(g,focusZoomFor(S.sel)):null;
+  const had=cvShapes.focus; cvShapes.focus=d?{h:new Path2D(d),a:had?1:0}:null;
   if(cvShapes.focus&&!had&&!REDUCED){const f=cvShapes.focus,t0=performance.now();(function st(){if(cvShapes.focus!==f)return;f.a=Math.min(1,(performance.now()-t0)/400);drawCanvas();if(f.a<1)requestAnimationFrame(st)})()}
   else requestDraw();
   if(TILES&&document.body.classList.contains("tilesmode")&&!(zt.node().__transition&&Object.keys(zt.node().__transition).length)) drawPaneFocus();
@@ -2212,7 +2272,7 @@ const GUIDE=[
     art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("plus",22)}</i></div>`,
     run:r=>{if(!MOB())gaPinScene(r)}},
   {since:4, t:"Фото городов и мест",
-    m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
+    m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его: там тоже лента фото. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
     art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-row"><i></i><span><b></b><b></b></span></div></div>`},
 ];
 const TOUR=[
@@ -3021,12 +3081,13 @@ function renderCity(c){
   $("#pbody").innerHTML=`
     ${crumbs(crumb)}
     <div class="p-head"><div class="flag">${S.meta[iso]?.flag||""}</div><div class="grow"><h1>${esc(ru)}</h1><p>${esc([en!==ru?en:"",pop?"население около "+fmtPop(pop):""].filter(Boolean).join(" · "))}</p></div></div>
+    ${cityGalleryHTML()}
     ${entryMini(iso)}
     ${notesBlock("city",cityKey(c),ru)}
     ${placesBlock(pl,"Наши места рядом")}
     ${vibeBlock({kind:"city",key:cityKey(c),label:ru,ctx:`${ru} (${en}), ${cf?.properties.ru||""}`,lat,lng:lon})}
     <section class="blk"><div class="row2"><a class="btn small" href="${gmapsSearch(en+", "+(cf?.properties.en||""))}" target="_blank" rel="noopener">Открыть в Google Картах</a></div></section>`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindVibe();
+  bindCrumbs();bindNotes();bindPlaceLinks();bindVibe();fillCityGallery(c);
 }
 function renderPlace(p){
   const cf=S.cByK.get(p.k);
@@ -3571,7 +3632,7 @@ async function boot(){
   S.countries=topojson.feature(ct,ct.objects[Object.keys(ct.objects)[0]]).features;
   {const o=ct.objects[Object.keys(ct.objects)[0]];S.front=topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==="UA,XU");
    S.ksBorder=topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==="RS,XK");}
-  S.countries.forEach(f=>{const r=meta[f.properties.k]?.ru;if(r)f.properties.ru=r;S.cByK.set(f.properties.k,f)});
+  S.countries.forEach(f=>{const r=meta[f.properties.k]?.ru;if(r)f.properties.ru=r;const o=S.cByK.get(f.properties.k);if(!o||o.properties.small&&!f.properties.small)S.cByK.set(f.properties.k,f)});
   S.meta=meta;
   const geoms=ct.objects[Object.keys(ct.objects)[0]].geometries;
   for(const a of AREAS) S.areaGeo.set(a.id,topojson.merge(ct,geoms.filter(g=>areaOf(g.properties.k)===a.id)));
