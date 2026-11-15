@@ -652,9 +652,9 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;opacity:0;transform:translateY(14px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-cg i{display:block;height:50px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .ga-cg b{font-size:12px;color:var(--ink)}
-.ga-row{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;opacity:0;animation:gaCg .7s var(--spring-soft) .6s forwards;transform:translateY(14px)}
-.ga-row i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
-.ga-row span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-row b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-row b+b{width:60%;background:#2a3b57}
+.ga-prow{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;opacity:0;animation:gaCg .7s var(--spring-soft) .6s forwards;transform:translateY(14px)}
+.ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
+.ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
 .ga-rg{display:flex;flex-direction:column;gap:8px;padding:14px 24px}
 .ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
@@ -2388,7 +2388,7 @@ const GUIDE=[
     run:r=>{if(!MOB())gaPinScene(r)}},
   {since:4, t:"Фото городов и мест",
     m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его: там тоже лента фото. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
-    art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-row"><i></i><span><b></b><b></b></span></div></div>`},
+    art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-prow"><i></i><span><b></b><b></b></span></div></div>`},
   {since:5, t:"Регионы и описания городов",
     m:"В карточке страны регионы теперь списком: сначала те, где есть ваши места, у каждого — центр, строка о нём и отметка, если там неспокойно. У столиц и центров регионов появились короткие описания: чем город интересен и что посмотреть рядом.",
     art:()=>`<div class="ga ga-rg">${[["Татарстан","Казань",1],["Карелия","Петрозаводск",0],["Алтай","Горно-Алтайск",0]].map(([a,b,n],i)=>`<div class="ga-rgr" style="--i:${i}"><b>${a}</b><span></span><i>центр: ${b}</i>${n?`<em>3 места</em>`:""}</div>`).join("")}</div>`},
