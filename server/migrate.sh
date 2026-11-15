@@ -13,7 +13,8 @@ read -r -s -p "Пароль облачной базы: " PGPW </dev/tty; echo
 [ -n "$PGPW" ] || { echo "Пароль пустой."; exit 1; }
 # the pooler address and user of the cloud project; the password goes in an environment variable, not in a URL
 CLOUD="host=aws-1-eu-west-3.pooler.supabase.com port=5432 dbname=postgres user=postgres.hvqdjcpbevwuaymdrpye sslmode=require"
-DUMP="docker run --rm -i --network host -e PGPASSWORD postgres:17 pg_dump"
+# no -i: under «curl | bash» an interactive container would swallow the rest of this script from stdin
+DUMP="docker run --rm --network host -e PGPASSWORD postgres:17 pg_dump"
 export PGPASSWORD="$PGPW"
 echo "Проверяю пароль…"
 docker run --rm --network host -e PGPASSWORD postgres:17 psql "$CLOUD" -tAc "select 1" >/dev/null || { echo "Пароль не подошёл. Сбросьте его в Supabase (Project Settings → Database → Reset database password) и запустите снова."; exit 1; }
