@@ -8,11 +8,10 @@
 //
 // Secrets (Supabase → Edge Functions → Secrets): SMARTCAPTCHA_SERVER_KEY, POSTBOX_API_KEY (the secret part of the
 // Postbox API key, the same one as the SMTP password), SEND_EMAIL_HOOK_SECRET (from the hook settings, "v1,whsec_…").
-// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase itself.
+// SUPABASE_URL and SUPABASE_DB_URL are provided by Supabase itself.
 import { Webhook } from "npm:standardwebhooks@1.0.0";
 
 const URL_ = Deno.env.get("SUPABASE_URL")!;
-const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FROM = "=?UTF-8?B?" + btoa(String.fromCharCode(...new TextEncoder().encode("Наш атлас"))) + "?= <noreply@nash-atlas.ru>";
 const SUBJECT = "Код для входа в «Наш атлас»";
 const CORS = {
@@ -25,9 +24,10 @@ const json = (b: unknown, status = 200, h: Record<string, string> = {}) =>
   new Response(JSON.stringify(b), { status, headers: { ...h, "Content-Type": "application/json" } });
 const norm = (e: string) => String(e || "").trim().toLowerCase();
 
-// the pass table, through the database REST API with the service key (RLS keeps everyone else out)
-const db = (path: string, init: RequestInit = {}) =>
-  fetch(`${URL_}/rest/v1/${path}`, { ...init, headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json", ...(init.headers || {}) } });
+// the pass table, straight through Postgres (SUPABASE_DB_URL is given to every function; no API key needed)
+import postgres from "npm:postgres@3.4.5";
+let sql: ReturnType<typeof postgres> | null = null;
+const db = () => (sql ??= postgres(Deno.env.get("SUPABASE_DB_URL")!, { max: 1, prepare: false, idle_timeout: 5 }));
 
 async function captcha(req: Request) {
   let body: { email?: string; token?: string } = {};
@@ -41,19 +41,24 @@ async function captcha(req: Request) {
     body: new URLSearchParams({ secret: Deno.env.get("SMARTCAPTCHA_SERVER_KEY") ?? "", token, ...(ip ? { ip } : {}) }),
   }).then((x) => x.json()).catch(() => null);
   if (r?.status !== "ok") return json({ ok: false, error: "captcha failed" }, 403, CORS);
-  const until = new Date(Date.now() + 10 * 60_000).toISOString();
-  const w = await db("captcha_pass", { method: "POST", headers: { Prefer: "resolution=merge-duplicates" }, body: JSON.stringify({ email, until }) });
-  if (!w.ok) return json({ ok: false, error: "storage" }, 500, CORS);
+  try {
+    await db()`insert into public.captcha_pass (email, until) values (${email}, now() + interval '10 minutes')
+               on conflict (email) do update set until = excluded.until`;
+  } catch (err) {
+    console.error("captcha_pass insert", String(err));
+    return json({ ok: false, error: "storage" }, 500, CORS);
+  }
   return json({ ok: true }, 200, CORS);
 }
 
 async function takePass(email: string) {
-  const r = await db(`captcha_pass?email=eq.${encodeURIComponent(email)}&until=gt.${encodeURIComponent(new Date().toISOString())}`, {
-    method: "DELETE", headers: { Prefer: "return=representation" },
-  });
-  if (!r.ok) return false;
-  const rows = await r.json();
-  return Array.isArray(rows) && rows.length > 0;
+  try {
+    const rows = await db()`delete from public.captcha_pass where email = ${email} and until > now() returning email`;
+    return rows.length > 0;
+  } catch (err) {
+    console.error("captcha_pass delete", String(err));
+    return false;
+  }
 }
 
 const TEMPLATE = `<!doctype html>
@@ -103,15 +108,18 @@ async function hook(req: Request) {
   let data: any;
   try {
     data = new Webhook(secret).verify(payload, Object.fromEntries(req.headers));
-  } catch {
+  } catch (err) {
+    console.error("hook signature", String(err));
     return json({ error: { http_code: 401, message: "bad signature" } }, 401);
   }
   const email = norm(data?.user?.email ?? data?.user?.new_email ?? "");
   const e = data?.email_data ?? {};
   const type = String(e.email_action_type ?? "");
   // a login code (first or next login) needs a passed captcha; other emails come only from signed-in actions
-  if ((type === "magiclink" || type === "signup") && !(await takePass(email)))
+  if ((type === "magiclink" || type === "signup") && !(await takePass(email))) {
+    console.warn("no captcha pass for this address, email not sent");
     return json({ error: { http_code: 429, message: "Пройдите проверку «я не робот» на сайте и запросите код снова." } }, 429);
+  }
   const link = `${URL_}/auth/v1/verify?token=${encodeURIComponent(e.token_hash ?? "")}&type=${encodeURIComponent(type)}&redirect_to=${encodeURIComponent(e.redirect_to ?? "https://nash-atlas.ru/")}`;
   const esc = (s: string) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
   const html = TEMPLATE.replaceAll("{{ .Token }}", esc(e.token ?? "")).replaceAll("{{ .ConfirmationURL }}", esc(link));
