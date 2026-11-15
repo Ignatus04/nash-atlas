@@ -37,7 +37,7 @@ rm -rf $ROOT/repo && git clone -q --depth 1 $REPO $ROOT/repo
 if [ ! -f $APP/.env ]; then
   say "Supabase: официальная установка (несколько минут)"
   curl -fsSL https://raw.githubusercontent.com/supabase/supabase/master/docker/setup.sh -o /tmp/sb-setup.sh
-  sh /tmp/sb-setup.sh -y --project-dir supabase
+  sh /tmp/sb-setup.sh -y --project-dir supabase || true
 else
   echo "Supabase уже установлен в $APP, обновляю только наши настройки."
 fi
