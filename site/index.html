@@ -499,24 +499,95 @@ aside.drop{outline:2px dashed var(--accent);outline-offset:-8px}
 .dlg h2{margin:0;font:700 18px var(--display)}
 .dlg .foot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 
+/* «Мои места», «Профиль», how-to guide */
+.pv-lead{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+.pv-acts{display:flex;flex-wrap:wrap;gap:8px}
+.pv-acts .btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px}
+.pv-fs .chip{display:inline-flex;align-items:center;gap:6px;min-height:36px}
+.pv-fs .chip.on{background:var(--ink);color:var(--ocean);border-color:var(--ink)}
+.pv-fs .chip .dot{width:8px;height:8px;border-radius:50%}
+.pv-fs .chip .n{opacity:.65;font-variant-numeric:tabular-nums}
+section.pv-g>h2{font:700 15px/1.3 var(--body);color:var(--ink);text-transform:none;letter-spacing:0}
+section.pv-g>h2>span{color:var(--muted);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+.pv-c{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:32px}
+.pv-c:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.pv-c .fimg{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.pf-wide{width:100%;min-height:46px}
+.pf-acct .ap-head{padding:0 0 10px}
+section.blk .ap-item{background:var(--panel-2);margin-bottom:6px;min-height:52px;padding:10px 14px;color:inherit;text-decoration:none}
+section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ap-item small{color:var(--muted);font-size:12.5px;font-weight:500}
+.ap-item .pb-flags{display:flex}
+.ap-item .pb-flags img{width:22px;height:22px;border-radius:50%;margin-left:-6px;box-shadow:0 0 0 2px var(--panel-2)}
+.sw-t{flex:none;width:42px;height:24px;border-radius:12px;background:#33445f;position:relative;transition:background-color .2s ease}
+.sw-t::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#dfe5ee;transition:transform .2s ease}
+[aria-checked="true"] .sw-t{background:var(--accent)}
+[aria-checked="true"] .sw-t::after{transform:translateX(18px)}
+.gd-modal .abox{width:min(440px,100%);padding:22px 22px 18px}
+.gd{display:flex;flex-direction:column;gap:10px}
+.gd-art{display:grid;place-items:center;min-height:120px;border-radius:16px;background:radial-gradient(120% 120% at 30% 0%,#1d3150,#111d31);margin-bottom:4px;padding:14px}
+.gd-ic{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(255,138,92,.14);color:var(--accent)}
+.gd-sw{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;font-size:12.5px;font-weight:600}
+.gd-sw span{display:inline-flex;align-items:center;gap:6px}
+.gd-sw i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.gd-k{margin:0;font:700 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gd h2{margin:0;font:800 20px/1.25 var(--display);text-wrap:balance}
+.gd-m{margin:0;font-size:15px;line-height:1.55;color:#d3dbe8;min-height:5.2em}
+.gd-dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.gd-dots i{width:6px;height:6px;border-radius:3px;background:#33445f;transition:width .2s ease,background-color .2s ease}
+.gd-dots i.on{width:18px;background:var(--accent)}
+.gd-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.gd-foot .btn{min-height:44px;padding:10px 18px}
+.gd-foot .btn.primary{margin-left:auto;min-width:120px}
+@media (max-width:560px){.gd-modal{align-items:end;padding:0}.gd-modal .abox{border-radius:22px 22px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:92dvh}}
+.tabbar,.grab,.srchbtn,.srch-x{display:none}
+.iconbtn.srchbtn{pointer-events:auto;width:40px;height:40px;border-radius:12px;background:rgba(18,31,51,.92);border:1px solid var(--line);color:var(--ink);place-items:center}
+/* phone: the map fills the screen, the card is a sheet you pull up, sections live in a bottom bar */
 @media (max-width:860px){
-  #app{grid-template-columns:1fr;grid-template-rows:1fr}
-  aside{position:absolute;left:0;right:0;bottom:0;height:46%;border-left:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;z-index:8;transition:height .2s}
-  aside.min{height:64px;overflow:hidden}
-  .close{display:block}
+  :root{--tabh:calc(60px + env(safe-area-inset-bottom,0px))}
+  #app{grid-template-columns:1fr;grid-template-rows:1fr;height:100dvh}
+  aside#panel{position:fixed;left:0;right:0;bottom:var(--tabh);height:calc(100dvh - var(--tabh) - var(--toph,104px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;z-index:9;
+    transform:translateY(var(--off,0px));transition:transform .34s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain;box-shadow:0 -12px 32px rgba(0,0,0,.35)}
+  aside#panel.dragging{transition:none}
+  aside#panel .p-inner{padding:2px 18px calc(var(--padb,0px) + 28px)}
+  .grab{display:block;position:sticky;top:0;z-index:3;height:26px;margin-bottom:-4px;background:linear-gradient(var(--panel) 70%,transparent);touch-action:none;cursor:grab}
+  .grab::before{content:"";position:absolute;left:50%;top:9px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#3a4c69}
+  .close{display:none!important}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;height:var(--tabh);padding:0 4px env(safe-area-inset-bottom,0px);background:#0e1828;border-top:1px solid var(--line);z-index:12}
+  .tabbar button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;color:var(--muted);font:600 11px/1.1 var(--body);touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative}
+  .tabbar button span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tabbar button[aria-current="page"]{color:var(--ink)}
+  .tabbar button[aria-current="page"] .tb-i{background:#22324b}
+  .tb-i{display:grid;place-items:center;width:44px;height:28px;border-radius:14px;transition:background-color .2s ease}
+  .tb-add{color:var(--ink)!important}
+  .tb-plus{display:grid;place-items:center;width:46px;height:46px;margin-top:-20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 18px rgba(255,138,92,.35),0 0 0 4px #0e1828}
+  .tabbar button:active .tb-i,.tabbar button:active .tb-plus{transform:scale(.94)}
   .legend{display:none}
   .zoomctl{display:none}
-  .brand{display:none}
-  .topbar{left:10px;right:10px;top:10px;gap:6px}
-  .search{flex:1 1 0;max-width:none}
-  .search input{padding:9px 12px;font-size:14px}
-  .actions{margin-left:0;gap:6px}
-  .actions .btn{padding:8px 11px}
-  #importBtn{display:none}
+  .bmsel{display:none!important}
+  .topbar{left:10px;right:10px;top:calc(8px + env(safe-area-inset-top,0px));gap:8px;flex-wrap:wrap;align-items:center}
+  .brand{display:flex;padding:7px 12px 7px 8px;font-size:14px;gap:8px;min-height:40px}
+  .brand .bflags img{width:20px;height:20px}
+  .srchbtn{display:grid;margin-left:auto}
+  #passBtn,#acctBtn,.actions{display:none!important}
+  .search{display:none;flex:1 1 0;max-width:none}
+  .topbar.searching{z-index:13}
+  .topbar.searching .search{display:flex;gap:8px;align-items:center}
+  .rfoot{display:none!important}
+  .topbar.searching .brand,.topbar.searching .srchbtn{display:none}
+  .srch-x{display:block;order:2;background:none;border:0;color:var(--ink);font-weight:600;padding:8px 4px;white-space:nowrap}
+  .search input{padding:10px 12px;font-size:16px}
+  .results{left:0;width:calc(100vw - 20px);min-width:0;max-height:calc(100dvh - 180px)}
   .seg{order:3;width:100%}
   .seg button{flex:1;padding:6px 4px;font-size:13px}
+  .status{bottom:auto;top:calc(var(--toph,104px) + 6px)}
+  .attrib{bottom:auto;top:calc(var(--toph,104px) + 2px);right:10px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* tablet in portrait: the sheet keeps a readable width instead of stretching edge to edge */
+@media (min-width:600px) and (max-width:860px){
+  aside#panel{left:50%;right:auto;width:560px;margin-left:-280px}
+  .topbar{left:max(10px,calc(50% - 300px));right:max(10px,calc(50% - 300px))}
+}@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -526,7 +597,9 @@ aside.drop{outline:2px dashed var(--accent);outline-offset:-8px}
     <svg id="map" aria-label="Карта мира с правилами въезда и нашими местами"></svg>
     <div class="topbar">
       <button class="brand" id="brand" title="Весь мир"><span class="bflags" aria-hidden="true"></span><span class="btxt">Наш атлас</span></button>
+      <button class="iconbtn srchbtn" id="srchBtn" aria-label="Поиск"></button>
       <div class="search">
+        <button class="srch-x" id="srchX" type="button">Отмена</button>
         <input id="q" type="search" placeholder="Поиск: «безвиз европа», «пляж таиланд», «хотим»…" autocomplete="off" aria-label="Поиск">
         <div class="results" id="results" role="listbox"></div>
       </div>
@@ -542,6 +615,7 @@ aside.drop{outline:2px dashed var(--accent);outline-offset:-8px}
         <button data-layer="safe" aria-pressed="false">Безопасность</button>
       </div>
       <div class="actions">
+        <button class="btn" id="placesBtn">Мои места</button>
         <button class="btn primary" id="addBtn" aria-label="Добавить место">+ Место</button>
         <button class="btn" id="importBtn" title="Импорт из Google Карт">Импорт</button>
       </div>
@@ -559,7 +633,14 @@ aside.drop{outline:2px dashed var(--accent);outline-offset:-8px}
     <div class="pickbar" id="pickbar"><span>Нажми на карту, где находится место</span><button id="pickCancel">Отмена</button></div>
     <div class="status" id="status"></div>
   </div>
-  <aside id="panel" aria-live="polite"><button class="close" id="sheetToggle" aria-label="Свернуть карточку">▾</button><div class="p-inner" id="pbody"><p class="empty">Загружаю карту…</p></div></aside>
+  <aside id="panel" aria-live="polite"><div class="grab" id="grab" aria-hidden="true"></div><button class="close" id="sheetToggle" aria-label="Свернуть карточку">▾</button><div class="p-inner" id="pbody"><p class="empty">Загружаю карту…</p></div></aside>
+  <nav class="tabbar" id="tabbar" aria-label="Разделы">
+    <button type="button" data-tab="map"><span class="tb-i" data-ic="map"></span><span>Карта</span></button>
+    <button type="button" data-tab="countries"><span class="tb-i" data-ic="globe"></span><span>Страны</span></button>
+    <button type="button" data-tab="add" class="tb-add" aria-label="Добавить место"><span class="tb-plus" data-ic="plus"></span><span>Место</span></button>
+    <button type="button" data-tab="places"><span class="tb-i" data-ic="pin"></span><span>Мои места</span></button>
+    <button type="button" data-tab="profile"><span class="tb-i" data-ic="user"></span><span>Профиль</span></button>
+  </nav>
 </div>
 
 <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Фото места"><button class="x" id="lbX" aria-label="Закрыть">✕</button><button class="nav prev" id="lbP" aria-label="Предыдущее фото">‹</button><img id="lbImg" alt=""><button class="nav next" id="lbN" aria-label="Следующее фото">›</button><div class="cap" id="lbCap"></div></div>
@@ -888,7 +969,17 @@ const IC={
   plus:'<path d="M12 5v14M5 12h14"/>',
   check:'<path d="m5 12 4.5 4.5L19 7"/>',
   x:'<path d="M6 6l12 12M18 6 6 18"/>',
-  leave:'<path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M14 8l4 4-4 4M18 12H9"/>'};
+  leave:'<path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M14 8l4 4-4 4M18 12H9"/>',
+  map:'<path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z"/>',
+  pin:'<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/>',
+  user:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.4 4.2-5 7.5-5s6.1 1.6 7.5 5"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.5M12 17h.01"/>',
+  doc:'<path d="M7 3h7l4 4v14H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4M9.5 12h5M9.5 16h5"/>',
+  passport:'<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 16h6"/>',
+  layers:'<path d="m12 4 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4M4 16l8 4 8-4"/>',
+  import:'<path d="M12 4v10m0 0-4-4m4 4 4-4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>'};
 const ic=(n,s=18)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
 const avatar=(email,cls="")=>`<span class="av ${cls}" aria-hidden="true">${esc((email||"?")[0].toUpperCase())}</span>`;
 const roleName=r=>r==="owner"?"владелец":r==="editor"?"может править":"только смотрит";
@@ -1006,12 +1097,10 @@ function syncLine(){if(!navigator.onLine)return `<span class="sync off">Нет �
 function closeAcct(){const p=$("#acctPop");if(!p)return;p.remove();$("#acctBtn")?.setAttribute("aria-expanded","false");document.removeEventListener("pointerdown",acctOutside,true)}
 function acctOutside(e){const p=$("#acctPop");if(p&&!p.contains(e.target)&&!$("#acctBtn").contains(e.target))closeAcct()}
 function toggleAcct(){ if($("#acctPop")) closeAcct(); else openAcct() }
-function openAcct(){
-  closeAcct();
+function acctMenuHTML(){
   const a=S.acct, own=a.role==="owner", ro=S.db instanceof CloudDB&&S.db.ro, others=a.maps.filter(m=>m.id!==a.map?.id);
-  const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
   const item=(id,icn,label,extra="")=>`<button class="ap-item" id="${id}">${ic(icn)}<span>${label}</span>${extra}</button>`;
-  p.innerHTML=`<div class="ap-head">${avatar(a.user.email,"lg")}<div class="ap-who"><b title="${esc(a.user.email)}">${esc(a.user.email)}</b>${syncLine()}</div></div>
+  return `<div class="ap-head">${avatar(a.user.email,"lg")}<div class="ap-who"><b title="${esc(a.user.email)}">${esc(a.user.email)}</b>${syncLine()}</div></div>
     <div class="ap-map"><div class="ap-mname" id="apName"><b>${esc(a.map.name)}</b>${own?`<button class="iconbtn" id="apRename" aria-label="Переименовать карту">${ic("pen",16)}</button>`:`<span class="arole">${a.role==="editor"?"правка":"просмотр"}</span>`}</div>
       <span class="ap-stat">${mapStats()}${own?"":" · карта другого человека"}</span></div>
     ${others.length?`<div class="ap-maps" role="group" aria-label="Другие карты">${others.map(m=>`<button class="ap-item ap-other" data-map="${m.id}"><span class="dot" aria-hidden="true"></span><span>${esc(m.name)}</span><span class="ap-r">${m.role==="owner"?"моя":m.role==="editor"?"правка":"просмотр"}</span></button>`).join("")}</div>`:""}
@@ -1023,6 +1112,31 @@ function openAcct(){
       ${item("apNew","plus","Новая карта")}
     </div>
     <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}</div>`;
+}
+/* the account actions; `close` hides the popover (if any), `rerender` redraws whichever view shows them */
+function bindAcctMenu(p,close,rerender){
+  const a=S.acct, own=a.role==="owner";
+  const on=(id,fn)=>{const x=p.querySelector("#"+id);if(x)x.onclick=fn};
+  on("apShare",()=>{close();openShare()});
+  on("apMigrate",async()=>{close();if(await uploadRows(localRows(),"данные из браузера")){try{localStorage.setItem("atlas-migrate-hide",a.map.id)}catch(e){}if(S.sel.type==="home")renderHome()}});
+  on("apOut",()=>{close();exportBackup()});
+  on("apIn",()=>{close();importBackup()});
+  on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
+  on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
+  on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
+    const f=box.querySelector("form"), i=box.querySelector("input"); i.focus(); i.select();
+    i.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();rerender()}});
+    f.onsubmit=async e=>{e.preventDefault();const n=i.value.trim();if(!n||n===a.map.name){rerender();return}
+      const {error}=await sb.from("maps").update({name:n}).eq("id",a.map.id);if(error){status("Название не сохранилось. Попробуйте ещё раз.",5000);return}
+      a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();rerender()}});
+  if(own) sb.from("map_members").select("user_id",{count:"exact",head:true}).eq("map_id",a.map.id).then(({count})=>{const s=p.querySelector("#apShareN");if(s&&count>1)s.textContent=`${count-1} ${ruPlural(count-1,"человек","человека","человек")}`});
+}
+function openAcct(){
+  closeAcct();
+  const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
+  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>`;
   document.body.appendChild(p);
   const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
   if(innerWidth>560){p.style.top=(r.bottom+8)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
@@ -1030,22 +1144,8 @@ function openAcct(){
   setTimeout(()=>document.addEventListener("pointerdown",acctOutside,true),0);
   p.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();closeAcct();btn.focus()}});
   (p.querySelector(".ap-item")||p).focus?.();
-  const on=(id,fn)=>{const x=p.querySelector("#"+id);if(x)x.onclick=fn};
-  on("apShare",()=>{closeAcct();openShare()});
-  on("apMigrate",async()=>{closeAcct();if(await uploadRows(localRows(),"данные из браузера")){try{localStorage.setItem("atlas-migrate-hide",a.map.id)}catch(e){}if(S.sel.type==="home")renderHome()}});
-  on("apOut",()=>{closeAcct();exportBackup()});
-  on("apIn",()=>{closeAcct();importBackup()});
-  on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
-  on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
-  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
-  p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
-  on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
-    const f=box.querySelector("form"), i=box.querySelector("input"); i.focus(); i.select();
-    i.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();openAcct()}});
-    f.onsubmit=async e=>{e.preventDefault();const n=i.value.trim();if(!n||n===a.map.name){openAcct();return}
-      const {error}=await sb.from("maps").update({name:n}).eq("id",a.map.id);if(error){status("Название не сохранилось. Попробуйте ещё раз.",5000);return}
-      a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();openAcct()}});
-  if(own) sb.from("map_members").select("user_id",{count:"exact",head:true}).eq("map_id",a.map.id).then(({count})=>{const s=p.querySelector("#apShareN");if(s&&count>1)s.textContent=`${count-1} ${ruPlural(count-1,"человек","человека","человек")}`});
+  bindAcctMenu(p,closeAcct,openAcct);
+  p.querySelector("#apGuide").onclick=()=>{closeAcct();openGuide(0)};
 }
 
 /* who sees the map: two links (to look, to edit) and the people who joined */
@@ -1135,8 +1235,8 @@ function size(){const r=$("#mapwrap").getBoundingClientRect();W=r.width;H=r.heig
   svg.attr("viewBox",[-OVS,-OVS,W+2*OVS,H+2*OVS]).style("left",-OVS+"px").style("top",-OVS+"px").style("width",W+2*OVS+"px").style("height",H+2*OVS+"px").style("transform-origin",`${OVS}px ${OVS}px`);
   d3.select("#ov").attr("viewBox",[0,0,W,H])}
 function setupProjection(){
-  const mob=window.innerWidth<=860;
-  const ext=mob?[[8,96],[W-8,H*0.54-8]]:[[10,70],[W-10,H-10]];
+  const mob=MOB(), [vt,vb]=mob?viewArea():[70,H];
+  const ext=mob?[[8,vt],[W-8,vb]]:[[10,70],[W-10,H-10]];
   proj=TILES?d3.geoMercator().fitExtent(ext,{type:"MultiPoint",coordinates:[[-179.9,-56],[179.9,78]]}):d3.geoNaturalEarth1().fitExtent(ext,{type:"Sphere"});
   path=d3.geoPath(proj);
 }
@@ -1381,7 +1481,10 @@ const BASEMAPS={
   otm:{name:"OpenTopoMap",url:(z,x,y)=>`https://${"abc"[(x+y)%3]}.tile.opentopomap.org/${z}/${x}/${y}.png`,max:17,attr:"© участники OpenStreetMap, SRTM · стиль © OpenTopoMap (CC-BY-SA)"},
   none:{name:"Без подложки"}
 };
-let basemap=(()=>{try{const v=localStorage.getItem("atlas-basemap");return v==="none"?"none":"otm"}catch(e){return "otm"}})();
+let renderBM=()=>{};
+function setBasemap(bm){basemap=bm;try{localStorage.setItem("atlas-basemap",basemap)}catch(e){}tilesErr=0;tilesLoaded=0;tilesOk=true;$("#tilePane").innerHTML="";tileEls.clear();renderBM();drawTiles();scheduleOverlay()}
+// the topo base map is off until the person turns it on (it is heavy on phones and slow to load); the choice is remembered
+let basemap=(()=>{try{return localStorage.getItem("atlas-basemap")==="otm"?"otm":"none"}catch(e){return "none"}})();
 let tilesOk=true, tilesErr=0, tilesLoaded=0;
 let tileZFix=null;           // tile zoom frozen while the map moves
 function tileZFor(k){const world=2*Math.PI*proj.scale()*k*(window.devicePixelRatio>1?1.5:1);return Math.max(1,Math.min(BASEMAPS[basemap].max||18,Math.round(Math.log2(world/256))))}
@@ -1460,19 +1563,197 @@ function moveOverlay(){
     gWarn.selectAll("g.warn").attr("transform",d=>`translate(${sx(d.px)},${T.applyY(d.py)})`);
   });
 }
+/* ---------- phone shell: the sheet (peek / half / full), the tab bar, the search toggle ---------- */
+const MOB=()=>window.innerWidth<=860;
+const PEEK=88;
+const sheet={state:"half"};
+function tabH(){return MOB()?($("#tabbar")?.offsetHeight||60):0}
+function sheetVis(st){const p=$("#panel"),full=p?p.offsetHeight:600;
+  return st==="full"?full:st==="peek"?PEEK:Math.min(full,Math.round((innerHeight-tabH())*0.48))}
+function sheetOff(st){return Math.max(0,($("#panel")?.offsetHeight||0)-sheetVis(st))}
+function setSheet(st){
+  const p=$("#panel"); if(!p) return; sheet.state=st;
+  if(!MOB()){p.style.removeProperty("--off");p.style.removeProperty("--padb");updateTabs();return}
+  const off=sheetOff(st); p.style.setProperty("--off",off+"px"); p.style.setProperty("--padb",off+"px"); p.dataset.state=st;
+  updateTabs();
+}
+function topH(){const tb=$(".topbar");if(!tb)return;document.documentElement.style.setProperty("--toph",Math.round(tb.getBoundingClientRect().bottom+8)+"px")}
+function updateTabs(){
+  const cur=MOB()&&sheet.state==="peek"?"map":(S.tab||"countries");
+  document.querySelectorAll("#tabbar [data-tab]").forEach(b=>{if(b.dataset.tab==="add")return;b.dataset.tab===cur?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current")});
+}
+function showSel(){const s=S.sel;
+  if(s.type==="country")renderCountry(s.k);else if(s.type==="region"){const f=admById(s.id);f?renderRegion(f):renderHome()}
+  else if(s.type==="city"){const c=cityByKey(s.key);c?renderCity(c):renderHome()}else if(s.type==="place"){const q=S.places.get(s.id);q?renderPlace(q):renderHome()}
+  else if(s.type==="list"){const L=S.lists.find(l=>l.name===s.name);L?renderList(L,placesIn(p=>p.list===L.name)):renderHome()}else renderHome()}
+function openTab(t){
+  closeSearch();
+  if(t==="add"){openAdd();return}
+  if(t==="map"){if(MOB()){if(sheet.state==="peek")select({type:"home"},true);else setSheet("peek")}return}
+  const again=S.tab===t&&(!MOB()||sheet.state!=="peek");
+  if(t==="countries"){if(again&&S.sel.type!=="home")select({type:"home"},true);else{S.tab="countries";showSel()}}
+  else if(t==="places"){S.tab="places";renderPlacesTab()}
+  else if(t==="profile"){S.tab="profile";renderProfile()}
+  $("#panel").scrollTop=0;
+  if(MOB()&&sheet.state==="peek")setSheet("half");else updateTabs();
+}
+function bindShell(){
+  document.querySelectorAll("[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic,e.classList.contains("tb-plus")?24:22));
+  $("#srchBtn").innerHTML=ic("search",20);
+  document.querySelectorAll("#tabbar [data-tab]").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
+  $("#placesBtn").onclick=()=>openTab("places");
+  $("#srchBtn").onclick=()=>{$(".topbar").classList.add("searching");topH();setTimeout(()=>$("#q").focus(),30)};
+  $("#srchX").onclick=closeSearch;
+  // the sheet follows the finger: from the handle always, from the content when it is scrolled to the top
+  const p=$("#panel"); let y0=0,off0=0,drag=false,decided=false,fromGrab=false,lastY=0,lastT=0,vel=0;
+  const cur=()=>parseFloat(p.style.getPropertyValue("--off"))||0;
+  p.addEventListener("touchstart",e=>{if(!MOB()||e.touches.length>1)return;const t=e.touches[0];y0=lastY=t.clientY;lastT=e.timeStamp;off0=cur();drag=false;decided=false;vel=0;
+    fromGrab=!!e.target.closest(".grab")},{passive:true});
+  p.addEventListener("touchmove",e=>{if(!MOB())return;const t=e.touches[0],dy=t.clientY-y0;
+    if(!decided){if(Math.abs(dy)<7)return;decided=true;
+      const inScroller=e.target.closest(".results,#cfdrop,input,textarea,select,.gallery");
+      drag=fromGrab||(!inScroller&&((dy>0&&p.scrollTop<=0)||(dy<0&&sheet.state!=="full")));
+      if(drag)p.classList.add("dragging")}
+    if(!drag)return; e.preventDefault();
+    const max=sheetOff("peek"); let off=off0+dy; if(off<0)off=off/3; if(off>max)off=max+(off-max)/3;
+    p.style.setProperty("--off",off+"px");
+    const dt=Math.max(1,e.timeStamp-lastT); vel=0.7*vel+0.3*((t.clientY-lastY)/dt); lastY=t.clientY; lastT=e.timeStamp},{passive:false});
+  const end=()=>{if(!drag)return;drag=false;p.classList.remove("dragging");
+    const off=cur(), order=["full","half","peek"], offs=order.map(sheetOff);
+    let i=offs.reduce((bi,o,j)=>Math.abs(o-off)<Math.abs(offs[bi]-off)?j:bi,0);
+    if(Math.abs(vel)>0.45){const from=order.indexOf(sheet.state);i=vel>0?Math.min(2,Math.max(from+1,i)):Math.max(0,Math.min(from-1,i))}
+    setSheet(order[i])};
+  p.addEventListener("touchend",end);p.addEventListener("touchcancel",end);
+  // a tap on the handle opens a peeking sheet, or tucks it away; a mouse can drag it too
+  $("#grab").addEventListener("click",()=>setSheet(sheet.state==="peek"?"half":"peek"));
+  addEventListener("resize",()=>{topH();setSheet(sheet.state)});
+  topH(); setSheet(MOB()?"half":sheet.state);
+}
+function closeSearch(){const tb=$(".topbar");if(!tb?.classList.contains("searching"))return;tb.classList.remove("searching");$("#q").value="";$("#q").dispatchEvent(new Event("input"));topH()}
+/* ---------- «Мои места»: every place, grouped by country ---------- */
+// on a computer there is no tab bar, so the section leads back to the map card it replaced
+function pvBack(){return MOB()?"":`<div class="backrow"><button class="backbtn" id="pvBack"><span aria-hidden="true">←</span> ${S.sel.type==="home"?"Ко всем странам":"Назад: "+esc(backLabel(S.sel)||"карточка")}</button></div>`}
+function renderPlacesTab(){
+  const all=[...S.places.values()], f=S.plf||"", ro=S.db&&!S.canWrite;
+  const add=ro?"":`<div class="pv-acts"><button class="btn primary" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
+  if(!all.length){
+    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
+      <p class="pv-lead">Здесь соберутся места, где вы были и куда хотите поехать. Каждое место видно на карте и в карточке своей страны.</p>
+      ${add}
+      <p class="hint">Место добавляется по ссылке из Google Карт или точкой на карте. Сохранённые списки Google Карт переносятся импортом целиком.</p>`;
+  } else {
+    const cnt=d3.rollup(all,v=>v.length,p=>p.status), list=f?all.filter(p=>p.status===f):all;
+    const chip=(k,label,n)=>`<button class="chip pv-f${f===k?" on":""}" data-plf="${k}" aria-pressed="${f===k}">${k?`<span class="dot" style="background:${PIN[k].c}"></span>`:""}${esc(label)} <span class="n">${n}</span></button>`;
+    const groups=[...d3.group(list,p=>p.k)].map(([k,v])=>({k,v,name:S.cByK.get(k)?.properties.ru||k||"Без страны"})).sort((a,b)=>b.v.length-a.v.length||a.name.localeCompare(b.name,"ru"));
+    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
+      <p class="pv-lead">${all.length} ${ruPlural(all.length,"место","места","мест")} в ${new Set(all.map(p=>p.k)).size} ${ruPlural(new Set(all.map(p=>p.k)).size,"стране","странах","странах")}</p>
+      ${add}
+      <div class="chips pv-fs" role="group" aria-label="Показать места">${chip("","Все",all.length)}${Object.keys(PIN).filter(k=>cnt.get(k)).map(k=>chip(k,PIN[k].label,cnt.get(k))).join("")}</div>
+      ${groups.map(g=>`<section class="blk pv-g"><h2><button class="plain pv-c" data-ck="${esc(g.k)}">${flagImg(g.k)}<span>${esc(g.name)}</span></button> <span>${g.v.length}</span></h2><div class="list">${byLoc(g.v).map(placeItem).join("")}</div></section>`).join("")}`;
+    document.querySelectorAll("[data-plf]").forEach(b=>b.onclick=()=>{S.plf=b.dataset.plf;renderPlacesTab()});
+    document.querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>select({type:"country",k:b.dataset.ck},true));
+    bindPlaceLinks();
+  }
+  const a=$("#pvAdd"); if(a) a.onclick=openAdd;
+  const bk=$("#pvBack"); if(bk) bk.onclick=()=>{S.tab="countries";showSel()};
+  const im=$("#pvImp"); if(im) im.onclick=()=>$("#importBtn").click();
+  updateTabs();
+}
+
+/* ---------- «Профиль»: account, passports, map look, help ---------- */
+function renderProfile(){
+  const u=CLOUD&&S.acct?.user;
+  const acct=CLOUD?(u?`<section class="blk"><h2>Аккаунт</h2><div class="pf-acct" id="pfAcct"></div></section>`
+      :`<section class="blk"><h2>Аккаунт</h2><p class="pv-lead">Войдите, чтобы карта сохранялась в аккаунте, открывалась на всех ваших устройствах и ею можно было поделиться.</p><button class="btn primary pf-wide" id="pfLogin">Войти</button></section>`)
+    :`<section class="blk"><h2>Ваши данные</h2><p class="pv-lead">Места, заметки и фото хранятся в этом браузере. Чтобы перенести их на другое устройство, скачайте копию и загрузите её там.</p><div class="pv-acts"><button class="btn" id="pfOut">${ic("down",17)}<span>Скачать копию</span></button><button class="btn" id="pfIn">${ic("up",17)}<span>Загрузить копию</span></button></div></section>`;
+  const tiles=TILES?`<button class="ap-item" id="pfBm" role="switch" aria-checked="${basemap==="otm"}">${ic("layers")}<span>Подложка с рельефом<small>Горы, дороги и города. Грузится дольше</small></span><span class="sw-t" aria-hidden="true"></span></button>`:"";
+  $("#pbody").innerHTML=`<div class="p-head"><h1>Профиль</h1></div>${acct}
+    <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
+    ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
+    <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="https://nash-atlas.ru/privacy.html">${ic("doc")}<span>Политика конфиденциальности</span></a></section>`;
+  if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
+  const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
+  on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);
+  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0));
+  on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
+  updateTabs();
+}
+/* ---------- how to use: shown on the first visit, again from Профиль, and as «что нового» ----------
+   KEEP THIS IN STEP WITH THE SITE: when a feature is added or changed, add or edit a step here and give it
+   since: GUIDE_VER+1, then raise GUIDE_VER. People who already saw the guide get only the new steps. */
+const GUIDE_VER=1;
+const GUIDE=[
+  {since:1, t:"Цвет страны — правила въезда",
+    m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт.",
+    art:()=>`<div class="gd-sw">${[["--st-free","Без визы"],["--st-arrival","По прилёте"],["--st-evisa","Электронная"],["--st-visa","Виза"],["--st-banned","Закрыто"]].map(([c,l])=>`<span><i style="background:var(${c})"></i>${l}</span>`).join("")}</div>`},
+  {since:1, t:"Паспорта — ваши или всех, кто едет",
+    m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
+    mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
+    art:()=>`<div class="gd-ic">${ic("passport",40)}</div>`},
+  {since:1, t:"Страна открывается касанием",
+    m:"Нажмите на страну на карте или найдите её в списке справа. В карточке — условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
+    mob:"Нажмите на страну на карте или найдите её в разделе «Страны». В карточке — условия въезда, срок пребывания, опасные районы и ваши места. Карточку можно потянуть вверх.",
+    art:()=>`<div class="gd-ic">${ic("globe",40)}</div>`},
+  {since:1, t:"Въезд или безопасность",
+    m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
+    art:()=>`<div class="gd-sw">${[1,2,3,4].map(l=>`<span><i style="background:${SAFE[l].c}"></i>${esc(SAFE[l].label)}</span>`).join("")}</div>`},
+  {since:1, t:"Ваши места и общая карта",
+    m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
+    mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Все места собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах, ей можно поделиться.",
+    art:()=>`<div class="gd-ic">${ic("pin",40)}</div>`},
+];
+function guideSeen(){try{return +localStorage.getItem("atlas-guide")||0}catch(e){return 0}}
+function openGuide(start=0,steps=GUIDE,done){
+  let i=start;
+  const {el,close}=modal("guideBox",`<div class="gd" id="gdBody"></div>`,{labelledby:"gdTitle"});
+  el.classList.add("gd-modal");
+  const finish=()=>{try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}catch(e){}close();done?.()};
+  el.querySelectorAll("[data-close]").forEach(x=>x.onclick=finish);
+  el.addEventListener("click",e=>{if(e.target===el){e.stopImmediatePropagation();finish()}},true);
+  el.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopImmediatePropagation();finish()}else if(e.key==="ArrowRight")go(i+1);else if(e.key==="ArrowLeft")go(i-1)},true);
+  const draw=()=>{const st=steps[i], last=i===steps.length-1, news=steps!==GUIDE;
+    el.querySelector("#gdBody").innerHTML=`<div class="gd-art">${st.art()}</div>
+      <p class="gd-k">${news?"Что нового":`Как пользоваться · ${i+1} из ${steps.length}`}</p>
+      <h2 id="gdTitle">${esc(st.t)}</h2><p class="gd-m">${esc(MOB()&&st.mob?st.mob:st.m)}</p>
+      <div class="gd-dots" aria-hidden="true">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>
+      <div class="gd-foot">${i?`<button class="btn" id="gdPrev">Назад</button>`:`<button class="linkbtn" id="gdSkip">Пропустить</button>`}<button class="btn primary" id="gdNext">${last?"Начать":"Дальше"}</button></div>`;
+    const pv=el.querySelector("#gdPrev"); if(pv) pv.onclick=()=>go(i-1);
+    const sk=el.querySelector("#gdSkip"); if(sk) sk.onclick=finish;
+    el.querySelector("#gdNext").onclick=()=>last?finish():go(i+1);
+    el.querySelector("#gdNext").focus();
+  };
+  const go=j=>{if(j<0||j>=steps.length)return;i=j;draw()};
+  // a swipe left or right turns the page on a phone
+  let sx0=null; el.addEventListener("touchstart",e=>{sx0=e.touches[0].clientX},{passive:true});
+  el.addEventListener("touchend",e=>{if(sx0==null)return;const dx=e.changedTouches[0].clientX-sx0;sx0=null;if(Math.abs(dx)>50)go(i+(dx<0?1:-1))});
+  draw();
+}
+/* first visit: the guide, then the passport picker; a returning visitor sees only steps added since */
+function startIntro(){
+  const seen=guideSeen(), fresh=GUIDE.filter(g=>g.since>seen);
+  if(!fresh.length){openPassports(false);return}
+  if(seen) openGuide(0,fresh,()=>openPassports(false));
+  else openGuide(0,GUIDE,()=>openPassports(false));
+}
+/* the part of the map not covered by the top bar, the sheet and the tab bar: [top,bottom] in map px.
+   A selection opens the sheet halfway on phones, so that is the space it is framed into. */
+function viewArea(){
+  if(!MOB()) return [40,H];
+  const top=Math.round(($(".topbar")?.getBoundingClientRect().bottom||100)-$("#mapwrap").getBoundingClientRect().top+8);
+  return [top,Math.max(top+120,H-tabH()-sheetVis("half")-8)];
+}
 function zoomToFeature(f,pad=0.85,max=60){
   let [[x0,y0],[x1,y1]]=path.bounds(f);
   // a country across the 180th meridian (Russia, the US, Fiji): measure it the short way round
   if(TILES){const [[l0],[l1]]=d3.geoBounds(f);if(l1<l0){x0=proj([l0,0])[0];x1=x0+(l1+360-l0)/360*mercW()}}
-  const panelW=window.innerWidth<=860?0:0;
-  const vh=window.innerWidth<=860?H*0.54:H;
+  const [vt,vb]=viewArea(), vh=vb-vt;
   const k=Math.min(max,pad/Math.max((x1-x0)/W,(y1-y0)/vh));
-  const t=d3.zoomIdentity.translate(W/2,vh/2+ (window.innerWidth<=860?10:20)).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2);
+  const t=d3.zoomIdentity.translate(W/2,vt+vh/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2);
   fly(t);
 }
 function zoomToPoint(lat,lng,k=60){
-  const [x,y]=proj([lng,lat]);const vh=window.innerWidth<=860?H*0.54:H;
-  fly(d3.zoomIdentity.translate(W/2,vh/2).scale(k).translate(-x,-y));
+  const [x,y]=proj([lng,lat]);const [vt,vb]=viewArea();
+  fly(d3.zoomIdentity.translate(W/2,(vt+vb)/2).scale(k).translate(-x,-y));
 }
 let ovPending=false;
 function scheduleOverlay(){if(ovPending)return;ovPending=true;requestAnimationFrame(()=>{ovPending=false;drawOverlay()})}
@@ -1732,11 +2013,11 @@ function clR(n){return 13+Math.min(9,Math.log2(n)*2.4)}
 function zoomCluster(m){
   const xs=m.map(o=>o.px), ys=m.map(o=>o.py);
   const x0=d3.min(xs),x1=d3.max(xs),y0=d3.min(ys),y1=d3.max(ys);
-  const vh=window.innerWidth<=860?H*0.54:H;
+  const [vt,vb]=viewArea(), vh=vb-vt;
   const KMAX=TILES?20000:900;
   let k=Math.min(KMAX,0.7/Math.max((x1-x0)/W,(y1-y0)/vh,1e-6));
   k=Math.max(k,T.k*2.2); k=Math.min(k,KMAX);
-  fly(d3.zoomIdentity.translate(W/2,vh/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2));
+  fly(d3.zoomIdentity.translate(W/2,vt+vh/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2));
 }
 function showAdmin(k){
   if(!S.adm){gAdm.selectAll("*").remove();return}
@@ -1784,6 +2065,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape"||e.defaultPrevented)
 function select(sel,zoomIt){
   rememberView(S.sel,sel);
   S.sel=sel; const body=$("#pbody"); $("#panel").classList.remove("min"); hotArea(null);
+  S.tab="countries"; if(MOB()&&zoomIt&&sel.type!=="home"&&sheet.state!=="half") setSheet("half"); else updateTabs();
   S.area="world";
   if(sel.type==="area"){ sel=S.sel={type:"home"} }
   if(sel.type==="area"){
@@ -1802,7 +2084,7 @@ function select(sel,zoomIt){
   } else if(sel.type==="city"){
     const c=cityByKey(sel.key); if(!c) return; S.sel.k=c[4]; ensureAdm().then(()=>{showAdmin(c[4]);markAdm()});
     if(zoomIt){const ck=cityKey(c);const ms=[...S.places.values()].filter(p=>placeCity(p)===ck);
-      if(TILES&&ms.length>=2){const xs=ms.map(p=>proj([p.lng,p.lat]));const x0=d3.min(xs,q=>q[0]),x1=d3.max(xs,q=>q[0]),y0=d3.min(xs,q=>q[1]),y1=d3.max(xs,q=>q[1]);const vh=window.innerWidth<=860?H*0.54:H;let k=Math.min(16000,0.75/Math.max((x1-x0)/W,(y1-y0)/vh,1e-6));fly(d3.zoomIdentity.translate(W/2,vh/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2))}
+      if(TILES&&ms.length>=2){const xs=ms.map(p=>proj([p.lng,p.lat]));const x0=d3.min(xs,q=>q[0]),x1=d3.max(xs,q=>q[0]),y0=d3.min(xs,q=>q[1]),y1=d3.max(xs,q=>q[1]);const [vt,vb]=viewArea(),vh=vb-vt;let k=Math.min(16000,0.75/Math.max((x1-x0)/W,(y1-y0)/vh,1e-6));fly(d3.zoomIdentity.translate(W/2,vt+vh/2).scale(k).translate(-(x0+x1)/2,-(y0+y1)/2))}
       else zoomToPoint(c[2],c[3],TILES?(c[6]>2e6?600:1200):(c[6]>2e6?90:160));}
     renderCity(c);
   } else if(sel.type==="place"){
@@ -1912,12 +2194,13 @@ function renderHome(){
     ${areaHTML("world")}
     ${manual.length?placesBlock(manual,"Добавленные вручную"):""}
     ${STANDALONE&&!(S.db instanceof CloudDB)?`<section class="blk"><h2>Ваши данные</h2><p class="hint" style="margin:0">${S.db instanceof CloudDB?`Всё сохраняется в аккаунте и видно на всех устройствах. Копия пригодится, чтобы перенести места из файла-версии атласа или сохранить архив.`:CLOUD?`Без входа заметки, статусы и фото хранятся только в этом браузере. Войди, чтобы они были на всех устройствах, или перенеси копию вручную.`:`Заметки, статусы и фото хранятся в этом браузере. Чтобы перенести их на другой компьютер или отдать девушке, скачай копию и загрузи её там.`}</p><div class="row2"><button class="btn small" id="bkOut">Скачать копию</button><button class="btn small ghost" id="bkIn">Загрузить копию</button><input type="file" id="bkFile" accept=".json" hidden></div></section>`:""}
-    <div class="src">Правила въезда сверены на ${fmtDate(S.visa.updated)}.</div>`;
+    <div class="src">Правила въезда сверены на ${fmtDate(S.visa.updated)}. <button class="linkbtn" id="howBtn">Как пользоваться</button></div>`;
   if(STANDALONE&&$("#bkOut")){
     $("#bkOut").onclick=exportBackup;
     $("#bkIn").onclick=importBackup;
   }
   bindArea(); bindPlaceLinks(); if(typeof bindBanners==="function") bindBanners();
+  const hb=$("#howBtn"); if(hb) hb.onclick=()=>openGuide(0);
 }
     async function exportBackup(){const o={};
       if(S.db instanceof CloudDB){for(const [p,d] of S.db.cache)if(!p.startsWith("assets/"))o["atlas:"+p]=JSON.stringify(d);
@@ -2705,9 +2988,9 @@ async function boot(){
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){
     $("#mapwrap").classList.add("tilesavail");
-    const renderBM=()=>{$("#bmsel").innerHTML=`<button data-bm="${basemap==="otm"?"none":"otm"}" aria-pressed="${basemap==="otm"}" title="Топографическая подложка OpenTopoMap">${basemap==="otm"?"Подложка: вкл":"Подложка: выкл"}</button>`;
+    renderBM=()=>{$("#bmsel").innerHTML=`<button data-bm="${basemap==="otm"?"none":"otm"}" aria-pressed="${basemap==="otm"}" title="Топографическая подложка OpenTopoMap">${basemap==="otm"?"Подложка: вкл":"Подложка: выкл"}</button>`;
       $("#mapwrap").classList.toggle("tiled",!!BASEMAPS[basemap].url);
-      document.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{basemap=b.dataset.bm;try{localStorage.setItem("atlas-basemap",basemap)}catch(e){}tilesErr=0;tilesLoaded=0;tilesOk=true;$("#tilePane").innerHTML="";tileEls.clear();renderBM();drawTiles();scheduleOverlay()})};
+      document.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>setBasemap(b.dataset.bm))};
     renderBM(); drawTiles();
   }
   // region borders are big: fetch them once the map is up and the browser is idle
@@ -2789,7 +3072,8 @@ async function openPassports(force){
   el.addEventListener("click",e=>{if(e.target===el&&pick.size)close()});
   draw(); sum(); setTimeout(()=>el.querySelector(".pp-q").focus(),60);
 }
-Promise.resolve().then(()=>{if(document.readyState!=="loading")openPassports(false);else addEventListener("DOMContentLoaded",()=>openPassports(false))});
+bindShell();
+Promise.resolve().then(()=>{if(document.readyState!=="loading")startIntro();else addEventListener("DOMContentLoaded",startIntro)});
 $("#q").addEventListener("input",e=>{resArr=searchAll(e.target.value);resSel=resArr.length?0:-1;renderResults()});
 $("#q").addEventListener("focus",e=>{ensureAdm();resArr=searchAll(e.target.value);resSel=-1;renderResults()});
 document.addEventListener("keydown",e=>{if((e.key==="/"&&!/input|textarea/i.test(document.activeElement?.tagName))||((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k")){e.preventDefault();$("#q").focus()}});
@@ -2803,7 +3087,7 @@ $("#brand").onclick=()=>select({type:"home"},false);
 function brandFlags(){
   const el=document.querySelector(".bflags"); if(!el||!S.flags) return;
   const cnt=d3.rollup([...S.places.values()],v=>v.length,p=>p.k);
-  let pool=[...cnt.keys()].filter(k=>S.flags[k]).sort((a,b)=>cnt.get(b)-cnt.get(a)); if(pool.length<6) pool=Object.keys(S.flags).filter(k=>k.length===2);
+  let pool=[...cnt.keys()].filter(k=>S.flags[k]&&k!=="XX").sort((a,b)=>cnt.get(b)-cnt.get(a)); if(pool.length<6) pool=Object.keys(S.flags).filter(k=>k.length===2&&k!=="XX");
   pool=pool.sort(()=>Math.random()-.5);
   el.innerHTML=pool.slice(0,5).map(k=>`<img src="${S.flags[k]}" alt="" data-k="${k}">`).join("");
   if(REDUCED||pool.length<6) return;
