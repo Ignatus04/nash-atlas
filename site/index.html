@@ -490,6 +490,12 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .fans-av{display:flex}.fans-av>span+span{margin-left:-6px}.fans-av .av{box-shadow:0 0 0 2px var(--panel)}
 .del-list{margin:6px 0 10px;padding-left:20px}.del-list li{margin-bottom:4px}
 .btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}.btn.danger:disabled{opacity:.45}
+.mapsw{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line)}
+.mapsw:hover{border-color:#3a4f70}.mapsw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mapsw-l{font-size:12.5px;color:var(--muted)}.mapsw b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapsw-r{margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap}.mapsw-c{color:var(--muted)}
+.mapsw-note{margin:-6px 0 0;font-size:13px;line-height:1.4;color:#ffd166}
+.mp-opt.on{border-color:var(--accent)}#mpNew{display:inline-flex;align-items:center;gap:8px}
 .lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .rg-list{display:flex;flex-direction:column;gap:6px}
 .rg-list.short>.rg:nth-child(n+7){display:none}
@@ -896,9 +902,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <div id="addParse" class="hint">Подойдёт ссылка из адресной строки браузера: в ней есть координаты. В короткой ссылке maps.app.goo.gl координат нет, её сначала открой в браузере и скопируй адрес оттуда.</div>
     <div class="row2"><button type="button" class="btn small" id="addPick">Указать точку на карте</button><span id="addCoords" class="hint"></span></div>
     <label class="f" for="addName">Название<input class="txt" id="addName" required></label>
-    <label class="f" for="addStatus">Статус
+    <label class="f" for="addStatus">Отметка
       <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="been">Были</option><option value="">Без отметки</option></select>
     </label>
+    <label class="f" for="addMap" id="addMapL" hidden>В какую карту<select class="txt" id="addMap"></select></label>
     <label class="f" for="addTags">Вайб и метки через запятую<input class="txt" id="addTags" placeholder="кофе, вид, романтика"></label>
     <label class="f" for="addNote">Заметка<textarea class="note" id="addNote"></textarea></label>
     <div id="addErr" class="err"></div>
@@ -1616,6 +1623,18 @@ function openLogin(){
   el.querySelector("#lgBack").onclick=()=>{clearInterval(timer);el.querySelector("#lgS1").hidden=false;el.querySelector("#lgS2").hidden=true;setTimeout(()=>em.focus(),30)};
 }
 
+/* several maps: which one is open, switching, and which ones a place can be added to */
+function writableMaps(){return CLOUD&&S.acct?.user?(S.acct.maps||[]).filter(m=>m.role==="owner"||m.role==="editor"):[]}
+const ROLE_RU={owner:"ваша",editor:"общая · правка",viewer:"общая · просмотр"};
+function mapSwitcherHTML(){const a=S.acct; if(!(CLOUD&&a?.user&&a.map)) return "";
+  return `<button class="mapsw" id="pvMap" aria-haspopup="dialog"><span class="mapsw-l">Карта</span><b>${esc(a.map.name)}</b><span class="mapsw-r">${esc(ROLE_RU[a.role]||"")}</span><span class="mapsw-c" aria-hidden="true">▾</span></button>
+    ${a.role!=="owner"?`<p class="mapsw-note">Открыта общая карта: ${a.role==="viewer"?"смотреть можно, менять нельзя":"новые места добавляются в неё"}. Своя карта — в переключателе выше.</p>`:""}`}
+function openMapSwitch(){const a=S.acct; if(!a?.user) return;
+  const {el,close}=modal("mapsBox",`<h2 id="mpT">Мои карты</h2><div class="mp-list">${(a.maps||[]).map(m=>`<button class="sm-opt mp-opt${m.id===a.map?.id?" on":""}" data-map="${esc(m.id)}"><span class="sm-ic">${ic(m.role==="owner"?"map":"user",20)}</span><span><b>${esc(m.name)}</b><small>${esc(ROLE_RU[m.role]||"")}${m.id===a.map?.id?" · открыта сейчас":""}</small></span></button>`).join("")}</div>
+    <button class="btn" id="mpNew" style="margin-top:12px">${ic("plus",17)}<span>Новая карта</span></button>`,{labelledby:"mpT"});
+  el.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>{if(b.dataset.map===a.map?.id){close();return}switchMap(b.dataset.map)});
+  el.querySelector("#mpNew").onclick=async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)};
+}
 /* deleting the account by the person themselves: everything they own goes, irreversibly (supabase/schema.sql: delete_my_account) */
 function openDeleteAccount(){
   const a=S.acct; if(!a?.user) return;
@@ -2396,7 +2415,7 @@ function renderPlacesTab(){
   const bkS=new Set(beenN.map(p=>p.k).filter(Boolean)), wk=new Set(wantN.map(p=>p.k).filter(k=>k&&!bkS.has(k))).size;
   const add=ro?"":`${wantN.length||beenN.length?`<div class="pv-hero"><div class="pv-hero-t">${bkS.size?`<span class="pv-n"><b class="b">${bkS.size}</b><span>${ruPlural(bkS.size,"страна","страны","стран")}, где были</span></span>`:""}<span class="pv-n"><b>${wk}</b><span>${bkS.size?"куда ещё хотите":ruPlural(wk,"страна, куда хотите","страны, куда хотите","стран, куда хотите")}</span></span></div><div class="pv-hero-a"><button class="btn primary" id="pvCard">${ic("share",17)}<span>Поделиться</span></button>${CLOUD?`<button class="btn" id="pvInv">${ic("user",17)}<span>Позвать друзей</span></button>`:""}</div></div>`:""}<div class="pv-acts"><button class="btn${wantN.length?"":" primary"}" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
   if(!all.length){
-    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
+    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>${mapSwitcherHTML()}
       <p class="pv-lead">Здесь соберутся места, где вы были и куда хотите поехать. Каждое место видно на карте и в карточке своей страны.</p>
       ${add}
       <p class="hint">Место добавляется по ссылке из Google Карт или точкой на карте. Сохранённые списки Google Карт переносятся импортом целиком.</p>`;
@@ -2404,7 +2423,7 @@ function renderPlacesTab(){
     const cnt=d3.rollup(all,v=>v.length,p=>p.status||"none"), list=f?all.filter(p=>(p.status||"none")===f):all;
     const chip=(k,label,n)=>`<button class="chip pv-f${f===k?" on":""}" data-plf="${k}" aria-pressed="${f===k}">${k?`<span class="dot" style="background:${pinOf(k==="none"?"":k).c}"></span>`:""}${esc(label)} <span class="n">${n}</span></button>`;
     const groups=[...d3.group(list,p=>p.k)].map(([k,v])=>({k,v,name:S.cByK.get(k)?.properties.ru||k||"Без страны"})).sort((a,b)=>b.v.length-a.v.length||a.name.localeCompare(b.name,"ru"));
-    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
+    $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>${mapSwitcherHTML()}
       <p class="pv-lead">${all.length} ${ruPlural(all.length,"место","места","мест")} в ${new Set(all.map(p=>p.k)).size} ${ruPlural(new Set(all.map(p=>p.k)).size,"стране","странах","странах")}</p>
       ${add}
       <div class="chips pv-fs" role="group" aria-label="Показать места">${chip("","Все",all.length)}${[...Object.keys(PIN),"none"].filter(k=>cnt.get(k)).map(k=>chip(k,pinOf(k==="none"?"":k).label,cnt.get(k))).join("")}</div>
@@ -2415,6 +2434,7 @@ function renderPlacesTab(){
   }
   const a=$("#pvAdd"); if(a) a.onclick=openAdd;
   const sc=$("#pvCard"); if(sc) sc.onclick=shareCard;
+  const mw=$("#pvMap"); if(mw) mw.onclick=openMapSwitch;
   const iv=$("#pvInv"); if(iv) iv.onclick=invitePeople;
   const bk=$("#pvBack"); if(bk) bk.onclick=()=>{S.tab="countries";showSel()};
   const im=$("#pvImp"); if(im) im.onclick=()=>$("#importBtn").click();
@@ -2532,7 +2552,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=8;
+const GUIDE_VER=9;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2571,6 +2591,9 @@ const GUIDE=[
   {since:8, t:"Где вы уже были",
     m:"У мест две отметки: «Хотим» и «Были». Побывали — нажмите на «Хотим» у места в списке, и оно станет «✓ Были». На картинке для сторис появится «Был в N странах, хочу ещё в M».",
     art:()=>`<div class="ga ga-bn"><span class="ga-b1">Хотим</span><span class="ga-ar">→</span><span class="ga-b2">✓ Были</span></div>`},
+  {since:9, t:"Своя карта и общие",
+    m:"Присоединившись к общей карте, вы не теряете свою. Наверху «Моих мест» видно, какая карта открыта; нажмите на неё, чтобы переключиться или завести новую. При добавлении места можно выбрать, в какую карту оно попадёт.",
+    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Мой атлас</span><span class="ga-ar">⇄</span><span class="ga-b2" style="background:#ffd166">Отпуск вдвоём</span></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -3529,8 +3552,9 @@ function sampleErr(e){
 }
 
 /* ---------- places: db ---------- */
+function placeDoc(p){return {name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:p.url||"",city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()}}
 async function addPlace(p){
-  const doc={name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:p.url||"",city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()};
+  const doc=placeDoc(p);
   if(!S.db){const id="local-"+Date.now()+Math.random().toString(36).slice(2,6);S.dbPlaces.set(id,{id,...doc});rebuildPlaces();scheduleOverlay();return id}
   const ref=S.db.collection("places").doc(); await ref.set(doc); S.dbPlaces.set(ref.id,{id:ref.id,...doc}); rebuildPlaces(); scheduleOverlay(); return ref.id;
 }
@@ -3568,8 +3592,13 @@ function parseGoogle(s){
 }
 let addLL=null;
 function openAdd(){
-  if(S.db&&!S.canWrite){status("У тебя доступ только на просмотр");return}
+  const wm=writableMaps();
+  if(S.db&&!S.canWrite&&!wm.length){status("У тебя доступ только на просмотр");return}
   addLL=null; $("#addForm").reset(); $("#addCoords").textContent=""; $("#addErr").textContent="";
+  // more than one map to write to: choose where the place goes (the open map first, when it can be written to)
+  const sel=$("#addMap"), cur=S.acct?.map?.id;
+  if(wm.length>1||(wm.length&&!S.canWrite)){sel.innerHTML=wm.map(m=>`<option value="${esc(m.id)}" ${m.id===cur?"selected":""}>${esc(m.name)}${m.role==="owner"?"":" (общая)"}</option>`).join("");if(!S.canWrite)sel.value=(wm.find(m=>m.role==="owner")||wm[0]).id;$("#addMapL").hidden=false}
+  else $("#addMapL").hidden=true;
   $("#addParse").className="hint";
   $("#addModal").classList.add("on"); $("#addUrl").focus();
 }
@@ -3980,7 +4009,12 @@ $("#addForm").addEventListener("submit",async e=>{e.preventDefault();
   if(!addLL){$("#addErr").textContent="Нужна точка: вставь полную ссылку с координатами или укажи место на карте";return}
   const name=$("#addName").value.trim(); if(!name){$("#addErr").textContent="Добавь название";return}
   $("#addSave").disabled=true;
-  try{const id=await addPlace({name,lat:addLL.lat,lng:addLL.lng,status:$("#addStatus").value,tags:splitTags($("#addTags").value),note:$("#addNote").value,url:$("#addUrl").value.trim()});closeAdd();select({type:"place",id},true)}
+  const p0={name,lat:addLL.lat,lng:addLL.lng,status:$("#addStatus").value,tags:splitTags($("#addTags").value),note:$("#addNote").value,url:$("#addUrl").value.trim()};
+  const target=!$("#addMapL").hidden?$("#addMap").value:null;
+  try{
+    if(target&&target!==S.acct?.map?.id){const {error}=await sb.from("docs").upsert({map_id:target,path:"places/"+newId("c"),data:placeDoc(p0),updated_at:new Date().toISOString()});if(error)throw error;
+      closeAdd();const m=S.acct.maps.find(x=>x.id===target);status(`«${name}» добавлено в карту «${m?.name||""}»`,4000)}
+    else{const id=await addPlace(p0);closeAdd();select({type:"place",id},true)}}
   catch(err){$("#addErr").textContent=err?.code==="quota_exceeded"?"В базе закончилось место":"Не получилось сохранить, попробуй ещё раз"}
   $("#addSave").disabled=false;});
 $("#shareBtn").onclick=openShareMenu; $("#shareTop").onclick=openShareMenu;
