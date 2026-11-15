@@ -284,9 +284,68 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .acctbtn .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#e9c46a;color:#13213a;font-weight:800;flex:none}
 .acctbtn .an{overflow:hidden;text-overflow:ellipsis}
 .acctbtn:not(:has(.av)){padding:8px 14px}
+.acctbtn .arole,.ap-mname .arole{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(233,196,106,.16);color:#e9c46a;white-space:nowrap}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#e9c46a;color:#13213a;font:800 13px/1 var(--body);flex:none}
+.av.lg{width:40px;height:40px;font-size:17px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.iconbtn{all:unset;box-sizing:border-box;display:grid;place-items:center;width:32px;height:32px;border-radius:8px;cursor:pointer;color:var(--muted);flex:none;transition:background-color .15s,color .15s}
+.iconbtn:hover{background:var(--panel-2);color:var(--ink)}
+.iconbtn:focus-visible,.ap-item:focus-visible,.linkbtn:focus-visible,.aclose:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.linkbtn{all:unset;cursor:pointer;color:#9cd3ff;font-size:13.5px;font-weight:600}
+.linkbtn:hover{text-decoration:underline}
+.linkbtn[disabled]{color:var(--muted);cursor:default;text-decoration:none}
+#acctPop{position:fixed;z-index:55;width:320px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.45);padding:8px;display:flex;flex-direction:column;animation:apIn .14s ease-out}
+@keyframes apIn{from{opacity:0;transform:translateY(-4px)}}
+.ap-head{display:flex;gap:12px;align-items:center;padding:8px 8px 12px}
+.ap-who{min-width:0;display:flex;flex-direction:column;gap:2px}
+.ap-who b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.sync{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--st-free);flex:none}
+.sync.off{color:#e6c553}.sync.off::before{background:#e6c553}
+.ap-map{margin:0 0 4px;padding:10px 12px;border-radius:12px;background:var(--panel-2);display:flex;flex-direction:column;gap:2px}
+.ap-mname{display:flex;align-items:center;gap:6px;min-height:32px;justify-content:space-between}
+.ap-mname b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-stat{font-size:12.5px;color:var(--muted)}
+.ap-ren{display:flex;gap:6px;align-items:center;flex:1}
+.ap-ren .txt{flex:1;padding:5px 8px}
+.ap-maps{display:flex;flex-direction:column;padding:2px 0 4px}
+.ap-list{display:flex;flex-direction:column;padding:2px 0}
+.ap-foot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+.ap-item{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px;min-height:40px}
+.ap-item:hover{background:var(--panel-2)}
+.ap-item .ic{color:var(--muted);flex:none}
+.ap-r{margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.ap-other .dot{width:18px;display:grid;place-items:center;flex:none}
+.ap-other .dot::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--muted)}
+.aclose{all:unset;box-sizing:border-box;position:absolute;top:14px;right:14px;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;cursor:pointer;color:var(--muted)}
+.aclose:hover{background:var(--panel-2);color:var(--ink)}
+.lg-step{display:flex;flex-direction:column}
+.lg-step[hidden]{display:none}
+.lg-step h2{padding-right:40px}
+.lg-lead{margin:8px 0 18px;color:var(--muted)}
+.lg-step form{display:flex;flex-direction:column}
+.lg-step label.f{display:block;color:var(--ink);font-size:13.5px;margin:0 0 6px}
+.lg-otp{font-size:24px;letter-spacing:.32em;text-align:center;font-variant-numeric:tabular-nums;max-width:240px;padding:10px 12px}
+.lg-msg{min-height:18px;margin:6px 0 12px;font-size:13px;color:var(--muted)}
+.lg-msg.err{color:#ff9b9b}
+input.txt[aria-invalid="true"]{border-color:#ff9b9b}
+.lg-go{width:100%;padding:11px 14px;font-size:15px}
+.lg-more{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
+.lg-note{font-size:12.5px;color:var(--muted);margin:16px 0 0}
+.sh-link{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:var(--panel-2)}
+.sh-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sh-txt span{font-size:12.5px;color:var(--muted)}
+.sh-act{display:flex;gap:12px;align-items:center;flex:none}
+.sh-people{display:flex;flex-direction:column;gap:2px}
+.sh-person{display:flex;align-items:center;gap:10px;min-height:44px}
+.sh-person .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.sh-person select{background:var(--panel-2);color:inherit;border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:13px}
+.sh-empty{margin:0}
+@media (max-width:560px){#acctPop{left:8px;right:8px;bottom:8px;top:auto!important;width:auto;border-radius:18px}.sh-link{flex-wrap:wrap}.sh-act{width:100%}}
+@media (prefers-reduced-motion:reduce){#acctPop{animation:none}}
 .amodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(8,14,26,.55);backdrop-filter:blur(8px);opacity:0;transition:opacity .2s}
 .amodal.on{opacity:1}
-.abox{background:linear-gradient(180deg,#14223a,#0f1a2e);border:1px solid var(--line);border-radius:20px;padding:24px;width:min(560px,100%);max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px}
+.abox{position:relative;background:linear-gradient(180deg,#14223a,#0f1a2e);border:1px solid var(--line);border-radius:20px;padding:24px;width:min(480px,100%);max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px}
 .abox h2{margin:0;font:800 21px/1.2 var(--display)}
 .abox h3{margin:6px 0 6px;font:700 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .abox section{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
@@ -735,6 +794,7 @@ class CloudDB{
     this._emit(path);
     const q=data===null?sb.from("docs").delete().eq("map_id",this.map).eq("path",path):sb.from("docs").upsert({map_id:this.map,path,data,updated_at:new Date().toISOString()});
     const {error}=await q;
+    S.syncErr=!!error;
     if(error){ if(had) this.cache.set(path,old); else this.cache.delete(path); this._emit(path); status("Не получилось сохранить: "+(navigator.onLine?"нет доступа или ошибка сервера":"нет интернета"),5000); throw error }
   }
   async putMany(rows){ // [{path,data}]
@@ -804,66 +864,182 @@ async function uploadRows(rows,what){
   catch(e){status("Не получилось перенести, попробуй ещё раз",6000);return false}
 }
 
-/* ---------- account button, sign-in and sharing dialogs ---------- */
+/* ---------- account: sign-in by code, account popover, sharing dialog ---------- */
+const IC={
+  share:'<path d="M15 8a3 3 0 1 0-2.9-3.8L8.9 6.1a3 3 0 1 0 0 3.8l3.2 1.9A3 3 0 1 0 13 10l-3.2-1.9a3 3 0 0 0 0-.2 3 3 0 0 0 0-.2L13 5.8A3 3 0 0 0 15 8Z" transform="translate(2 4)"/>',
+  move:'<path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>',
+  down:'<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>',
+  up:'<path d="M12 20V8m0 0-4 4m4-4 4 4M5 4h14"/>',
+  out:'<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/>',
+  pen:'<path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4Z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  check:'<path d="m5 12 4.5 4.5L19 7"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  leave:'<path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M14 8l4 4-4 4M18 12H9"/>'};
+const ic=(n,s=18)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+const avatar=(email,cls="")=>`<span class="av ${cls}" aria-hidden="true">${esc((email||"?")[0].toUpperCase())}</span>`;
+const roleName=r=>r==="owner"?"владелец":r==="editor"?"может править":"только смотрит";
+
 function renderAcctBtn(){
   const b=$("#acctBtn"); if(!b) return; b.hidden=!CLOUD;
   if(!CLOUD) return;
   const u=S.acct.user;
-  b.innerHTML=u?`<span class="av" aria-hidden="true">${esc((u.email||"?")[0].toUpperCase())}</span><span class="an">${esc(S.acct.map?.name||"Аккаунт")}${S.acct.role&&S.acct.role!=="owner"?` · ${S.acct.role==="editor"?"правка":"просмотр"}`:""}</span>`
-    :S.acct.share?`<span class="an">Чужая карта · ${S.acct.share.role==="editor"?"войти, чтобы править":"войти"}</span>`:`<span class="an">Войти</span>`;
-  b.onclick=()=>u?openAcct():openLogin();
+  b.innerHTML=u?`${avatar(u.email)}<span class="an">${esc(S.acct.map?.name||"Аккаунт")}</span>${S.acct.role&&S.acct.role!=="owner"?`<span class="arole">${S.acct.role==="editor"?"правка":"просмотр"}</span>`:""}`
+    :`<span class="an">Войти</span>`;
+  b.setAttribute("aria-haspopup",u?"dialog":"dialog"); b.setAttribute("aria-expanded","false");
+  b.onclick=()=>u?toggleAcct():openLogin();
 }
-function modal(id,html){let el=document.getElementById(id);if(el)el.remove();el=document.createElement("div");el.id=id;el.className="amodal";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
-  el.innerHTML=`<div class="abox">${html}</div>`;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("on"));
-  const close=()=>{el.classList.remove("on");setTimeout(()=>el.remove(),200)};el.addEventListener("click",e=>{if(e.target===el)close()});el.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();close()}});
+function modal(id,html,{labelledby}={}){let el=document.getElementById(id);if(el)el.remove();
+  const opener=document.activeElement;
+  el=document.createElement("div");el.id=id;el.className="amodal";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");if(labelledby)el.setAttribute("aria-labelledby",labelledby);
+  el.innerHTML=`<div class="abox"><button class="aclose" data-close aria-label="Закрыть">${ic("x")}</button>${html}</div>`;document.body.appendChild(el);
+  const app=$("#app"); if(app) app.inert=true;
+  requestAnimationFrame(()=>el.classList.add("on"));
+  const onKey=e=>{if(!el.isConnected){document.removeEventListener("keydown",onKey,true);return}
+    if(e.key==="Escape"){e.preventDefault();e.stopPropagation();close();return}
+    if(e.key==="Tab"&&!el.contains(document.activeElement)){e.preventDefault();el.querySelector(".abox button,.abox input")?.focus()}};
+  document.addEventListener("keydown",onKey,true);
+  const close=()=>{document.removeEventListener("keydown",onKey,true);el.classList.remove("on");if(app)app.inert=false;setTimeout(()=>el.remove(),REDUCED?0:180);try{opener?.focus()}catch(e){}};
+  setTimeout(()=>{if(!el.contains(document.activeElement))el.querySelector(".abox h2")?.setAttribute("tabindex","-1"),el.querySelector(".abox h2")?.focus()},40);
+  el.addEventListener("click",e=>{if(e.target===el)close()});
+  el.addEventListener("keydown",e=>{
+    if(e.key==="Tab"){const f=[...el.querySelectorAll('button,input,select,a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;
+      if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus()}}});
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=close);return {el,close}}
+
+/* sign in: e-mail, then the code from the letter (works on any device); the button in the letter also works in the same browser */
 function openLogin(){
-  const {el,close}=modal("loginBox",`<h2>Вход в «Наш атлас»</h2>
-    <p class="hint">Пароль не нужен: пришлём на почту ссылку для входа. С аккаунтом заметки и статусы мест видны на всех твоих устройствах, а картой можно поделиться.</p>
-    <form id="lgForm"><label class="f">Почта<input class="txt" type="email" id="lgEmail" required autocomplete="email" placeholder="you@example.com"></label>
-    <div class="arow"><button type="button" class="btn ghost" data-close>Отмена</button><button class="btn primary" id="lgGo">Прислать код</button></div></form>
-    <form id="lgCode" hidden><p class="hint" id="lgSent"></p><details class="lgcode"><summary>У меня в письме код</summary><label class="f">Код из письма<input class="txt" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"></label><div class="arow"><button class="btn primary">Войти по коду</button></div></details>
-    <div class="arow"><button type="button" class="btn ghost" id="lgBack">Другая почта</button><button type="button" class="btn primary" data-close>Понятно</button></div></form>`);
-  const em=el.querySelector("#lgEmail");setTimeout(()=>em.focus(),60);
-  el.querySelector("#lgForm").onsubmit=async e=>{e.preventDefault();const b=el.querySelector("#lgGo");b.disabled=true;b.textContent="Отправляю…";
-    const redirect=location.origin+location.pathname+(S.acct.share?`?share=${encodeURIComponent(S.acct.share.token)}`:"");
-    const {error}=await sb.auth.signInWithOtp({email:em.value.trim(),options:{emailRedirectTo:redirect,shouldCreateUser:true}});
-    b.disabled=false;b.textContent="Прислать код";
-    if(error){status(/rate/i.test(error.message)?"Слишком много писем подряд, попробуй через минуту":"Не получилось отправить письмо",6000);return}
-    el.querySelector("#lgForm").hidden=true;el.querySelector("#lgCode").hidden=false;el.querySelector("#lgSent").innerHTML=`Письмо ушло на <b>${esc(em.value.trim())}</b>. Открой его и нажми ссылку — <b>в этом же браузере</b>, на этом же устройстве. Если письма нет, проверь «Спам»; повторно отправить можно через минуту.`};
-  el.querySelector("#lgBack").onclick=()=>{el.querySelector("#lgForm").hidden=false;el.querySelector("#lgCode").hidden=true};
-  el.querySelector("#lgCode").onsubmit=async e=>{e.preventDefault();const {error}=await sb.auth.verifyOtp({email:em.value.trim(),token:el.querySelector("#lgOtp").value.trim(),type:"email"});
-    if(error){status("Код не подошёл или устарел",5000);return}close()};
-}
-async function openAcct(){
-  const a=S.acct, own=a.role==="owner";
-  const {el,close}=modal("acctBox",`<h2>${esc(a.user.email)}</h2>
-    <section><h3>Мои карты</h3><div class="amaps">${a.maps.map(m=>`<button class="amap" data-map="${m.id}" aria-current="${m.id===a.map?.id}"><b>${esc(m.name)}</b><span>${m.role==="owner"?"моя":m.role==="editor"?"могу править":"только смотрю"}</span></button>`).join("")}</div>
-      ${own?`<div class="arow left"><input class="txt" id="mapName" value="${esc(a.map.name)}" maxlength="80" aria-label="Название карты"><button class="btn small" id="mapRename">Переименовать</button></div>`:""}</section>
-    ${own?`<section><h3>Поделиться картой</h3><p class="hint">Ссылка на просмотр открывается без аккаунта. По ссылке на правку человек входит по почте и может менять места и заметки на этой карте.</p>
-      <div class="arow left"><button class="btn small" data-mk="viewer">Ссылка на просмотр</button><button class="btn small" data-mk="editor">Ссылка на правку</button></div>
-      <div id="shLinks" class="alist"><p class="hint">Загружаю…</p></div><h3>Кто имеет доступ</h3><div id="shMembers" class="alist"></div></section>`:
-      `<section><p class="hint">Это карта другого человека, у тебя ${a.role==="editor"?"право правки":"доступ только на просмотр"}.</p><button class="btn small ghost" id="leaveMap">Убрать из моих карт</button></section>`}
-    ${localHasData()&&!S.db.ro?`<section><h3>Данные с этого устройства</h3><p class="hint">В этом браузере есть заметки и статусы, сделанные без входа. Их можно перенести в карту «${esc(a.map.name)}».</p><button class="btn small" id="migrate">Перенести в аккаунт</button></section>`:""}
-    <div class="arow"><button class="btn ghost" id="signOut">Выйти</button><button class="btn primary" data-close>Готово</button></div>`);
-  el.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>{if(b.dataset.map!==a.map.id)switchMap(b.dataset.map)});
-  el.querySelector("#signOut").onclick=async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()};
-  const mg=el.querySelector("#migrate");if(mg)mg.onclick=async()=>{mg.disabled=true;if(await uploadRows(localRows(),"данные с устройства"))close();mg.disabled=false};
-  const lv=el.querySelector("#leaveMap");if(lv)lv.onclick=async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось");return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()};
-  if(!own) return;
-  el.querySelector("#mapRename").onclick=async()=>{const n=el.querySelector("#mapName").value.trim();if(!n)return;const {error}=await sb.from("maps").update({name:n}).eq("id",a.map.id);if(error){status("Не получилось переименовать");return}a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();status("Готово")};
-  const linkUrl=t=>location.origin+location.pathname+"?share="+t;
-  const loadShare=async()=>{
-    const [{data:inv},{data:mem}]=await Promise.all([sb.from("map_invites").select("token,role,created_at").eq("map_id",a.map.id).eq("revoked",false).order("created_at"),sb.from("map_members").select("user_id,role,email").eq("map_id",a.map.id)]);
-    el.querySelector("#shLinks").innerHTML=(inv||[]).length?inv.map(i=>`<div class="aitem"><span class="tag ${i.role}">${i.role==="editor"?"правка":"просмотр"}</span><input class="txt link" readonly value="${esc(linkUrl(i.token))}" aria-label="Ссылка"><button class="btn small" data-copy="${esc(linkUrl(i.token))}">Копировать</button><button class="btn small ghost" data-revoke="${i.token}" title="Ссылка перестанет работать">Отозвать</button></div>`).join(""):`<p class="hint">Активных ссылок нет.</p>`;
-    el.querySelector("#shMembers").innerHTML=(mem||[]).map(m=>`<div class="aitem"><span class="who">${esc(m.email||"без почты")}${m.user_id===a.user.id?" (ты)":""}</span>${m.role==="owner"?`<span class="tag">владелец</span>`:`<select data-role="${m.user_id}" aria-label="Права"><option value="viewer" ${m.role==="viewer"?"selected":""}>просмотр</option><option value="editor" ${m.role==="editor"?"selected":""}>правка</option></select><button class="btn small ghost" data-kick="${m.user_id}">Убрать</button>`}</div>`).join("");
-    el.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent="Скопировано"}catch(e){b.previousElementSibling.select()}});
-    el.querySelectorAll("[data-revoke]").forEach(b=>b.onclick=async()=>{await sb.from("map_invites").update({revoked:true}).eq("token",b.dataset.revoke);loadShare()});
-    el.querySelectorAll("[data-kick]").forEach(b=>b.onclick=async()=>{await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",b.dataset.kick);loadShare()});
-    el.querySelectorAll("[data-role]").forEach(s=>s.onchange=async()=>{const {error}=await sb.from("map_members").update({role:s.value}).eq("map_id",a.map.id).eq("user_id",s.dataset.role);if(error)status("Не получилось поменять права")});
+  const share=S.acct.share;
+  const {el,close}=modal("loginBox",`<div class="lg-step" id="lgS1"><h2 id="lgTitle">Вход</h2>
+      <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите по почте. `:""}Пришлём на почту код, пароль не нужен.</p>
+      <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
+        <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
+        <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
+        <button class="btn primary lg-go" id="lgGo">Получить код</button></form></div>
+    <div class="lg-step" id="lgS2" hidden><h2>Введите код</h2>
+      <p class="lg-lead" id="lgSent"></p>
+      <form id="lgCode" novalidate><label class="f" for="lgOtp">Код из письма</label>
+        <input class="txt lg-otp" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" spellcheck="false" aria-describedby="lgOtpMsg">
+        <p class="lg-msg" id="lgOtpMsg" aria-live="polite"></p>
+        <button class="btn primary lg-go" id="lgIn">Войти</button></form>
+      <div class="lg-more"><button class="linkbtn" id="lgAgain"></button><button class="linkbtn" id="lgBack">Другая почта</button></div>
+      <p class="lg-note">В письме есть и кнопка входа. Она сработает, если открыть письмо в этом же браузере.</p></div>`,{labelledby:"lgTitle"});
+  const em=el.querySelector("#lgEmail"), otp=el.querySelector("#lgOtp"), msg1=el.querySelector("#lgEmailMsg"), msg2=el.querySelector("#lgOtpMsg");
+  let left=0, timer=null, busy=false;
+  try{em.value=localStorage.getItem("atlas-last-email")||""}catch(e){}
+  setTimeout(()=>em.focus(),60);
+  const setMsg=(m,t)=>{m.textContent=t||"";m.classList.toggle("err",!!t);m.previousElementSibling.setAttribute("aria-invalid",t?"true":"false")};
+  const tick=()=>{const b=el.querySelector("#lgAgain");if(!b)return;b.disabled=left>0;b.textContent=left>0?`Отправить ещё раз через 0:${String(left).padStart(2,"0")}`:"Отправить код ещё раз";if(left>0)left--;else clearInterval(timer)};
+  const send=async()=>{
+    const v=em.value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){setMsg(msg1,"Проверьте почту: в адресе нужны @ и домен, например you@example.com.");em.focus();return false}
+    setMsg(msg1,""); busy=true; const b=el.querySelector("#lgGo"); b.disabled=true; b.textContent="Отправляем…";
+    const redirect=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
+    const {error}=await sb.auth.signInWithOtp({email:v,options:{emailRedirectTo:redirect,shouldCreateUser:true}});
+    b.disabled=false; b.textContent="Получить код"; busy=false;
+    if(error){setMsg(msg1,/rate|seconds|limit/i.test(error.message)?"Письмо уже отправляли только что. Подождите минуту и попробуйте снова.":navigator.onLine?"Письмо не отправилось: сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова.");return false}
+    try{localStorage.setItem("atlas-last-email",v)}catch(e){}
+    el.querySelector("#lgSent").innerHTML=`Отправили на <b>${esc(v)}</b>. Если письма нет, загляните в «Спам».`;
+    el.querySelector("#lgS1").hidden=true; el.querySelector("#lgS2").hidden=false; otp.value=""; setMsg(msg2,"");
+    left=59; clearInterval(timer); timer=setInterval(tick,1000); tick(); setTimeout(()=>otp.focus(),60); return true;
   };
-  el.querySelectorAll("[data-mk]").forEach(b=>b.onclick=async()=>{const {error}=await sb.from("map_invites").insert({map_id:a.map.id,role:b.dataset.mk});if(error){status("Не получилось создать ссылку");return}loadShare()});
-  loadShare();
+  const verify=async()=>{
+    const code=otp.value.replace(/\D/g,"");
+    if(code.length<6){setMsg(msg2,"Введите все цифры кода из письма.");otp.focus();return}
+    if(busy) return; busy=true; const b=el.querySelector("#lgIn"); b.disabled=true; b.textContent="Проверяем…";
+    const {error}=await sb.auth.verifyOtp({email:em.value.trim(),token:code,type:"email"});
+    busy=false; b.disabled=false; b.textContent="Войти";
+    if(error){setMsg(msg2,/expired/i.test(error.message)?"Код устарел. Отправьте новый.":"Код не подошёл. Проверьте цифры или отправьте новый.");otp.select();return}
+    clearInterval(timer); close();
+  };
+  el.querySelector("#lgForm").onsubmit=e=>{e.preventDefault();if(!busy)send()};
+  el.querySelector("#lgCode").onsubmit=e=>{e.preventDefault();verify()};
+  em.oninput=()=>{if(msg1.textContent)setMsg(msg1,"")};
+  otp.oninput=()=>{const d=otp.value.replace(/\D/g,"");if(otp.value!==d)otp.value=d;if(msg2.textContent)setMsg(msg2,"");if(d.length===6)verify()};
+  el.querySelector("#lgAgain").onclick=()=>{if(left<=0)send()};
+  el.querySelector("#lgBack").onclick=()=>{clearInterval(timer);el.querySelector("#lgS1").hidden=false;el.querySelector("#lgS2").hidden=true;setTimeout(()=>em.focus(),30)};
+}
+
+/* the account popover: who, which map, and a short list of actions */
+function mapStats(){const n=S.places?.size||0;const ks=new Set();S.places?.forEach(p=>p.k&&ks.add(p.k));
+  return n?`${n} ${ruPlural(n,"место","места","мест")} в ${ks.size} ${ruPlural(ks.size,"стране","странах","странах")}`:"Пока без мест"}
+function syncLine(){if(!navigator.onLine)return `<span class="sync off">Нет интернета: изменения не сохранятся</span>`;
+  if(S.syncErr)return `<span class="sync off">Последнее изменение не сохранилось</span>`;
+  return `<span class="sync">Всё сохранено</span>`}
+function closeAcct(){const p=$("#acctPop");if(!p)return;p.remove();$("#acctBtn")?.setAttribute("aria-expanded","false");document.removeEventListener("pointerdown",acctOutside,true)}
+function acctOutside(e){const p=$("#acctPop");if(p&&!p.contains(e.target)&&!$("#acctBtn").contains(e.target))closeAcct()}
+function toggleAcct(){ if($("#acctPop")) closeAcct(); else openAcct() }
+function openAcct(){
+  closeAcct();
+  const a=S.acct, own=a.role==="owner", ro=S.db instanceof CloudDB&&S.db.ro, others=a.maps.filter(m=>m.id!==a.map?.id);
+  const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
+  const item=(id,icn,label,extra="")=>`<button class="ap-item" id="${id}">${ic(icn)}<span>${label}</span>${extra}</button>`;
+  p.innerHTML=`<div class="ap-head">${avatar(a.user.email,"lg")}<div class="ap-who"><b title="${esc(a.user.email)}">${esc(a.user.email)}</b>${syncLine()}</div></div>
+    <div class="ap-map"><div class="ap-mname" id="apName"><b>${esc(a.map.name)}</b>${own?`<button class="iconbtn" id="apRename" aria-label="Переименовать карту">${ic("pen",16)}</button>`:`<span class="arole">${a.role==="editor"?"правка":"просмотр"}</span>`}</div>
+      <span class="ap-stat">${mapStats()}${own?"":" · карта другого человека"}</span></div>
+    ${others.length?`<div class="ap-maps" role="group" aria-label="Другие карты">${others.map(m=>`<button class="ap-item ap-other" data-map="${m.id}"><span class="dot" aria-hidden="true"></span><span>${esc(m.name)}</span><span class="ap-r">${m.role==="owner"?"моя":m.role==="editor"?"правка":"просмотр"}</span></button>`).join("")}</div>`:""}
+    <div class="ap-list">
+      ${own?item("apShare","share","Поделиться картой",`<span class="ap-r" id="apShareN"></span>`):""}
+      ${!ro&&localHasData()?item("apMigrate","move","Перенести данные из этого браузера"):""}
+      ${item("apOut","down","Скачать копию карты")}
+      ${!ro?item("apIn","up","Загрузить копию"):""}
+      ${item("apNew","plus","Новая карта")}
+    </div>
+    <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}</div>`;
+  document.body.appendChild(p);
+  const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
+  if(innerWidth>560){p.style.top=(r.bottom+8)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
+  btn.setAttribute("aria-expanded","true");
+  setTimeout(()=>document.addEventListener("pointerdown",acctOutside,true),0);
+  p.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();closeAcct();btn.focus()}});
+  (p.querySelector(".ap-item")||p).focus?.();
+  const on=(id,fn)=>{const x=p.querySelector("#"+id);if(x)x.onclick=fn};
+  on("apShare",()=>{closeAcct();openShare()});
+  on("apMigrate",async()=>{closeAcct();if(await uploadRows(localRows(),"данные из браузера")){try{localStorage.setItem("atlas-migrate-hide",a.map.id)}catch(e){}if(S.sel.type==="home")renderHome()}});
+  on("apOut",()=>{closeAcct();exportBackup()});
+  on("apIn",()=>{closeAcct();importBackup()});
+  on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
+  on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
+  on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
+    const f=box.querySelector("form"), i=box.querySelector("input"); i.focus(); i.select();
+    i.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();openAcct()}});
+    f.onsubmit=async e=>{e.preventDefault();const n=i.value.trim();if(!n||n===a.map.name){openAcct();return}
+      const {error}=await sb.from("maps").update({name:n}).eq("id",a.map.id);if(error){status("Название не сохранилось. Попробуйте ещё раз.",5000);return}
+      a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();openAcct()}});
+  if(own) sb.from("map_members").select("user_id",{count:"exact",head:true}).eq("map_id",a.map.id).then(({count})=>{const s=p.querySelector("#apShareN");if(s&&count>1)s.textContent=`${count-1} ${ruPlural(count-1,"человек","человека","человек")}`});
+}
+
+/* who sees the map: two links (to look, to edit) and the people who joined */
+async function openShare(){
+  const a=S.acct, linkUrl=t=>location.origin+location.pathname+"?share="+t;
+  const {el,close}=modal("shareBox",`<h2 id="shTitle">Доступ к карте «${esc(a.map.name)}»</h2>
+    <section class="sh-sec"><h3>По ссылке</h3>
+      <div class="sh-link" data-role="viewer"><div class="sh-txt"><b>Смотреть</b><span>Открывается без входа, менять ничего нельзя</span></div><div class="sh-act"></div></div>
+      <div class="sh-link" data-role="editor"><div class="sh-txt"><b>Править</b><span>Человек входит по почте и меняет места и заметки</span></div><div class="sh-act"></div></div></section>
+    <section class="sh-sec"><h3>Люди</h3><div id="shPeople" class="sh-people"><p class="hint">Загружаем…</p></div></section>`,{labelledby:"shTitle"});
+  let inv=[];
+  const draw=async()=>{
+    const [{data:i},{data:mem}]=await Promise.all([sb.from("map_invites").select("token,role,created_at").eq("map_id",a.map.id).eq("revoked",false).order("created_at"),sb.from("map_members").select("user_id,role,email").eq("map_id",a.map.id)]);
+    inv=i||[];
+    el.querySelectorAll(".sh-link").forEach(row=>{const role=row.dataset.role, t=inv.filter(x=>x.role===role).pop(), act=row.querySelector(".sh-act");
+      act.innerHTML=t?`<button class="btn small" data-copy="${esc(linkUrl(t.token))}">Скопировать ссылку</button><button class="linkbtn" data-off="${role}">Отключить</button>`
+        :`<button class="btn small" data-make="${role}">Создать ссылку</button>`});
+    const people=(mem||[]).sort((x,y)=>(x.role==="owner"?-1:0)-(y.role==="owner"?-1:0));
+    el.querySelector("#shPeople").innerHTML=people.length>1?people.map(m=>`<div class="sh-person">${avatar(m.email)}<span class="who">${esc(m.email||"без почты")}${m.user_id===a.user.id?" (вы)":""}</span>
+        ${m.role==="owner"?`<span class="ap-r">владелец</span>`:`<label class="sr" for="r${m.user_id}">Права ${esc(m.email||"")}</label><select id="r${m.user_id}" data-role="${m.user_id}"><option value="viewer" ${m.role==="viewer"?"selected":""}>смотрит</option><option value="editor" ${m.role==="editor"?"selected":""}>правит</option></select>
+        <button class="iconbtn" data-kick="${m.user_id}" aria-label="Закрыть доступ ${esc(m.email||"")}">${ic("x",16)}</button>`}</div>`).join("")
+      :`<p class="hint sh-empty">Пока только вы. Человек появится здесь, когда откроет ссылку на правку и войдёт по почте.</p>`;
+    el.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent="Скопировано";setTimeout(()=>{if(b.isConnected)b.textContent="Скопировать ссылку"},1800)}catch(e){prompt("Ссылка",b.dataset.copy)}});
+    el.querySelectorAll("[data-make]").forEach(b=>b.onclick=async()=>{b.disabled=true;const {data,error}=await sb.from("map_invites").insert({map_id:a.map.id,role:b.dataset.make}).select().single();
+      if(error){b.disabled=false;status("Ссылка не создалась. Проверьте интернет и попробуйте снова.",5000);return}
+      try{await navigator.clipboard.writeText(linkUrl(data.token));status("Ссылка создана и скопирована",3000)}catch(e){}draw()});
+    el.querySelectorAll("[data-off]").forEach(b=>b.onclick=async()=>{const role=b.dataset.off;await Promise.all(inv.filter(x=>x.role===role).map(x=>sb.from("map_invites").update({revoked:true}).eq("token",x.token)));status(role==="editor"?"Ссылка на правку отключена: по ней больше не войти":"Ссылка на просмотр отключена",4000);draw()});
+    el.querySelectorAll("[data-kick]").forEach(b=>b.onclick=async()=>{await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",b.dataset.kick);draw()});
+    el.querySelectorAll("select[data-role]").forEach(s=>s.onchange=async()=>{const {error}=await sb.from("map_members").update({role:s.value}).eq("map_id",a.map.id).eq("user_id",s.dataset.role);if(error)status("Права не поменялись. Попробуйте ещё раз.",5000)});
+  };
+  draw();
 }
 function shareBanner(){
   if(!CLOUD||!S.acct.share||S.acct.user) return "";
@@ -1665,22 +1841,24 @@ function renderHome(){
     ${shareBanner()}${migrateBanner()}
     ${areaHTML("world")}
     ${manual.length?placesBlock(manual,"Добавленные вручную"):""}
-    ${STANDALONE&&!(S.db instanceof CloudDB&&S.db.ro)?`<section class="blk"><h2>Ваши данные</h2><p class="hint" style="margin:0">${S.db instanceof CloudDB?`Всё сохраняется в аккаунте и видно на всех устройствах. Копия пригодится, чтобы перенести места из файла-версии атласа или сохранить архив.`:CLOUD?`Без входа заметки, статусы и фото хранятся только в этом браузере. Войди, чтобы они были на всех устройствах, или перенеси копию вручную.`:`Заметки, статусы и фото хранятся в этом браузере. Чтобы перенести их на другой компьютер или отдать девушке, скачай копию и загрузи её там.`}</p><div class="row2"><button class="btn small" id="bkOut">Скачать копию</button><button class="btn small ghost" id="bkIn">Загрузить копию</button><input type="file" id="bkFile" accept=".json" hidden></div></section>`:""}
+    ${STANDALONE&&!(S.db instanceof CloudDB)?`<section class="blk"><h2>Ваши данные</h2><p class="hint" style="margin:0">${S.db instanceof CloudDB?`Всё сохраняется в аккаунте и видно на всех устройствах. Копия пригодится, чтобы перенести места из файла-версии атласа или сохранить архив.`:CLOUD?`Без входа заметки, статусы и фото хранятся только в этом браузере. Войди, чтобы они были на всех устройствах, или перенеси копию вручную.`:`Заметки, статусы и фото хранятся в этом браузере. Чтобы перенести их на другой компьютер или отдать девушке, скачай копию и загрузи её там.`}</p><div class="row2"><button class="btn small" id="bkOut">Скачать копию</button><button class="btn small ghost" id="bkIn">Загрузить копию</button><input type="file" id="bkFile" accept=".json" hidden></div></section>`:""}
     <div class="src">Правила въезда сверены на ${fmtDate(S.visa.updated)}.</div>`;
   if(STANDALONE&&$("#bkOut")){
-    $("#bkOut").onclick=async()=>{const o={};
+    $("#bkOut").onclick=exportBackup;
+    $("#bkIn").onclick=importBackup;
+  }
+  bindArea(); bindPlaceLinks(); if(typeof bindBanners==="function") bindBanners();
+}
+    async function exportBackup(){const o={};
       if(S.db instanceof CloudDB){for(const [p,d] of S.db.cache)if(!p.startsWith("assets/"))o["atlas:"+p]=JSON.stringify(d);
         try{for(let from=0;;from+=200){const {data}=await sb.from("docs").select("path,data").eq("map_id",S.db.map).like("path","assets/%").range(from,from+199);(data||[]).forEach(r=>o["atlas-asset:"+r.path.slice(7)]=r.data.url);if(!data||data.length<200)break}}catch(e){}}
       else for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.startsWith("atlas:")||k.startsWith("atlas-asset:")))o[k]=localStorage.getItem(k)}
       if(!o["atlas:meta/seed"]&&S.lists?.length) o["atlas:meta/seed"]=JSON.stringify({lists:S.lists});
-      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({atlas:1,at:new Date().toISOString(),data:o})],{type:"application/json"}));a.download="nash-atlas-kopiya-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove()};
-    $("#bkIn").onclick=()=>$("#bkFile").click();
-    $("#bkFile").onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(!j.data)throw 0;
+      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({atlas:1,at:new Date().toISOString(),data:o})],{type:"application/json"}));a.download="nash-atlas-kopiya-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove()}
+    async function readBackupFile(e){try{const j=JSON.parse(await e.target.files[0].text());if(!j.data)throw 0;
       if(S.db instanceof CloudDB){const rows=[];for(const [k,v] of Object.entries(j.data)){if(k.startsWith("atlas:"))rows.push({path:k.slice(6),data:JSON.parse(v)});else if(k.startsWith("atlas-asset:"))rows.push({path:"assets/"+k.slice(12),data:{url:v}})}await uploadRows(rows,"копию");return}
-      for(const [k,v] of Object.entries(j.data))if(k.startsWith("atlas:")||k.startsWith("atlas-asset:"))localStorage.setItem(k,v);status("Копия загружена");setTimeout(()=>location.reload(),600)}catch(x){status("Это не копия атласа или в браузере не хватает места",5000)}};
-  }
-  bindArea(); bindPlaceLinks(); if(typeof bindBanners==="function") bindBanners();
-}
+      for(const [k,v] of Object.entries(j.data))if(k.startsWith("atlas:")||k.startsWith("atlas-asset:"))localStorage.setItem(k,v);status("Копия загружена");setTimeout(()=>location.reload(),600)}catch(x){status("Это не копия атласа или в браузере не хватает места",5000)}}
+function importBackup(){const f=document.createElement("input");f.type="file";f.accept=".json,application/json";f.onchange=readBackupFile;f.click()}
 function renderArea(id){$("#pbody").innerHTML=areaHTML(id);bindArea()}
 function areaHTML(id){
   const world=id==="world";
