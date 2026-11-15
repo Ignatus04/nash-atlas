@@ -7,7 +7,7 @@ self.addEventListener("fetch",e=>{
   const r=e.request; if(r.method!=="GET") return;
   const u=new URL(r.url);
   // page: network first, so a new version shows up at once; offline falls back to the cached page
-  if(r.mode==="navigate"){e.respondWith(fetch(r).then(res=>{const cp=res.clone();caches.open(APP).then(c=>c.put("index.html",cp));return res}).catch(()=>caches.match("index.html")));return}
+  if(r.mode==="navigate"){const app=u.origin===location.origin&&/^\/(index\.html)?$/.test(u.pathname);e.respondWith(fetch(r).then(res=>{if(app&&res.ok){const cp=res.clone();caches.open(APP).then(c=>c.put("index.html",cp))}return res}).catch(()=>app?caches.match("index.html"):Response.error()));return}
   // map tiles: cache first, keep the most recent few thousand
   if(/tile\.opentopomap\.org$/.test(u.hostname)){
     e.respondWith(caches.open(TILES).then(async c=>{const hit=await c.match(r);if(hit)return hit;const res=await fetch(r);if(res.ok){c.put(r,res.clone());if(Math.random()<.02)trimTiles()}return res}));return}
