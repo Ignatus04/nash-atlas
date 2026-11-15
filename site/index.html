@@ -567,7 +567,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-map path.hl{stroke:#fff;stroke-width:.6;filter:brightness(1.25)}
 @keyframes gaFade{from{opacity:0}}
 .ga-finger{position:absolute;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);
-  transform:translate(50cqw,120cqh);transition:transform .6s var(--spring-soft);will-change:transform}
+  transform:translate(50%,200%);transition:transform .72s cubic-bezier(.45,0,.2,1);will-change:transform}
 .ga-finger.press{animation:gaPress .45s var(--spring-soft)}
 .ga-finger::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #fff;opacity:0}
 .ga-finger.press::after{animation:gaRing .7s ease-out}
@@ -594,12 +594,15 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-seg2 span:not(.lq){flex:1;text-align:center;position:relative;z-index:1;color:var(--muted);transition:color .3s ease}
 .ga-seg2 span.act{color:var(--ocean)}
 .ga-pass{display:grid;place-items:center}
-.ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFan 4.2s var(--spring) infinite}
+.ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFanL 4.2s var(--spring) infinite}
+.ga-pp:nth-child(2){animation-name:gaFanC;z-index:1}.ga-pp:nth-child(3){animation-name:gaFanR}
 .ga-pp:nth-child(2){background:linear-gradient(160deg,#20456e,#14263f);--x:0px;--r:0deg}.ga-pp:nth-child(3){background:linear-gradient(160deg,#1d6b5c,#123d35);--x:62px;--r:11deg}
 .ga-pp:nth-child(1){--x:-62px;--r:-11deg}
 .ga-pp .fimg{width:26px;height:26px;border-radius:50%}
 .ga-pp b{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}.ga-pp b+b{width:28px}
-@keyframes gaFan{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(var(--x)) rotate(var(--r)) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
+@keyframes gaFanL{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(-62px) rotate(-11deg) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
+@keyframes gaFanC{0%,8%{transform:translateY(0) scale(.92)}28%,70%{transform:translateY(-4px) scale(1)}90%,100%{transform:translateY(0) scale(.92)}}
+@keyframes gaFanR{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(62px) rotate(11deg) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
 .ga-res{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);white-space:nowrap;background:var(--st-visa);color:#fff;font:700 12px var(--body);padding:5px 11px;border-radius:999px;animation:gaRes 4.2s var(--spring-soft) infinite}
 @keyframes gaRes{0%,30%{transform:translateX(-50%) scale(.5);opacity:0}42%,72%{transform:translateX(-50%) scale(1);opacity:1}84%,100%{transform:translateX(-50%) scale(.5);opacity:0}}
 /* globe: a world strip slides behind a round window; shading makes it read as a sphere */
@@ -609,15 +612,15 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-strip path{stroke:#1b3a5f;stroke-width:.4}
 @keyframes gaRoll{to{transform:translateX(-50%)}}
 .ga-shade{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.28),rgba(255,255,255,0) 38%),radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 52%,rgba(4,10,22,.75) 100%)}
-.ga-hi{display:grid;place-items:center;perspective:700px}
-.ga-stage{position:relative;display:grid;place-items:center;transform-style:preserve-3d;animation:gaPop .7s var(--spring-soft) both}
-.ga-stage>.ga-globe{transform:translateZ(0)}
-.ga-orbit{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;animation:gaOrb 9s linear infinite}
-.ga-orbit span{position:absolute;left:0;top:0;transform-style:preserve-3d;transform:rotateZ(var(--a)) translateX(92px) rotateZ(calc(-1*var(--a)))}
-.ga-orbit b{display:block;width:28px;height:28px;margin:-14px;border-radius:50%;overflow:hidden;background:#2a3d5c;box-shadow:0 0 0 2px #101c30,0 6px 14px rgba(0,0,0,.35);animation:gaBill 9s linear infinite}
-.ga-orbit b .fimg{width:100%;height:100%;object-fit:cover;display:block}
-@keyframes gaOrb{from{transform:rotateX(68deg) rotateZ(0)}to{transform:rotateX(68deg) rotateZ(360deg)}}
-@keyframes gaBill{from{transform:rotateZ(0) rotateX(-68deg)}to{transform:rotateZ(-360deg) rotateX(-68deg)}}
+.ga-hi{display:grid;place-items:center}
+.ga-hi>.ga-globe{animation:gaPop .7s var(--spring-soft) both,gaBob 4s ease-in-out .7s infinite}
+@keyframes gaBob{50%{transform:translateY(-4px)}}
+.ga-orbit{position:absolute;left:50%;top:50%;width:0;height:0;animation:gaSpin 16s linear infinite}
+.ga-orbit span{position:absolute;left:0;top:0;transform:rotate(var(--a)) translateX(var(--r,62px))}
+.ga-orbit b{display:block;width:24px;height:24px;margin:-12px;border-radius:50%;overflow:hidden;background:#2a3d5c;box-shadow:0 0 0 2px #101c30,0 6px 14px rgba(0,0,0,.35);transform:rotate(calc(-1*var(--a)));animation:gaPop .6s var(--spring-soft) both}
+.ga-orbit span:nth-child(odd){--r:58px}
+.ga-orbit b .fimg{width:100%;height:100%;object-fit:cover;display:block;animation:gaSpin 16s linear infinite reverse}
+@keyframes gaSpin{to{transform:rotate(360deg)}}
 /* pins dropping on the globe */
 .ga-pl{display:grid;place-items:center}
 .ga-pl .ga-strip{animation-duration:60s}
@@ -625,6 +628,8 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-pin2 svg{position:absolute;inset:0;width:100%;height:100%;fill:var(--c);stroke:#0c1626;stroke-width:1.2}
 .ga-pin2 .fimg{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:50%;object-fit:cover}
 .ga-pin2.on{animation:gaDrop2 .75s var(--spring-soft) forwards}
+.ga-still svg{position:absolute;inset:0;width:100%;height:100%}
+.ga-still path{stroke:#1b3a5f;stroke-width:.5}
 @keyframes gaDrop2{0%{opacity:0;transform:translateY(-70px) scale(.7)}35%{opacity:1}100%{opacity:1;transform:none}}
 .ga-plus{position:absolute;right:16px;bottom:14px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(255,138,92,.4);animation:gaPulse 2.3s var(--spring-soft) infinite}
 @keyframes gaPulse{0%,60%,100%{transform:scale(1)}70%{transform:scale(.86)}}
@@ -1908,29 +1913,41 @@ function gaGlobe(size){
 // timers for the little scripted scenes; cleared whenever the page turns or the guide closes
 let gaT=[]; function gaClear(){gaT.forEach(t=>{clearTimeout(t);clearInterval(t)});gaT=[]}
 const gaLater=(f,ms)=>gaT.push(setTimeout(f,ms));
+// where a lon/lat lands inside the picture, in px (the map is cropped to fill the box, so ask the SVG itself)
+function gaXY(svg,root,lon,lat){const [X,Y]=gaWorld().pj([lon,lat]);const m=svg.getScreenCTM(),r=root.getBoundingClientRect();if(!m)return null;
+  return [m.a*X+m.c*Y+m.e-r.left,m.b*X+m.d*Y+m.f-r.top]}
+// the middle of a country's biggest piece (France's centroid with its overseas parts would land in the ocean)
+function gaCenter(f){const g=f.geometry;if(g.type!=="MultiPolygon")return d3.geoCentroid(f);
+  let best=null,ba=-1;for(const c of g.coordinates){const p={type:"Polygon",coordinates:c},a=d3.geoArea(p);if(a>ba){ba=a;best=p}}return d3.geoCentroid(best)}
 // scene: a finger taps a country, it lights up, its entry rule pops up next to it
 function gaTapScene(root,vb,list,withCard){
   const svg=root.querySelector(".ga-map"); if(!svg) return;
   const tap=root.querySelector(".ga-finger"), tip=root.querySelector(".ga-tip"), card=root.querySelector(".ga-sheet");
+  const W=root.clientWidth,H=root.clientHeight, low=withCard?H*.55:H*.9;
+  // keep only countries whose middle is well inside the visible part of the map
+  const pts=list.map(k=>{const f=S.cByK.get(k);if(!f)return null;const [lon,lat]=gaCenter(f),q=gaXY(svg,root,lon,lat);
+    return q&&q[0]>W*.1&&q[0]<W*.9&&q[1]>H*.14&&q[1]<low?{k,f,x:q[0],y:q[1]}:null}).filter(Boolean);
+  if(!pts.length) return;
+  tap.style.transition="none"; tap.style.transform=`translate(${W/2}px,${H+30}px)`; void tap.offsetWidth; tap.style.transition="";
   let i=0;
   const step=()=>{
-    const k=list[i%list.length]; i++;
-    const f=S.cByK.get(k); if(!f){gaLater(step,50);return}
-    const [lon,lat]=d3.geoCentroid(f), [x,y]=gaPt(lon,lat,vb);
+    const {k,f,x,y}=pts[i%pts.length]; i++;
     svg.querySelectorAll(".hl").forEach(p=>p.classList.remove("hl"));
     tip?.classList.remove("on"); card?.classList.remove("on");
-    tap.style.transform=`translate(${x}cqw,${y}cqh)`;
+    tap.style.transform=`translate(${x}px,${y}px)`;
     gaLater(()=>{tap.classList.remove("press");void tap.offsetWidth;tap.classList.add("press");svg.querySelector(`[data-k="${k}"]`)?.classList.add("hl");
       const c=codeFor(k), lc=legendCode(c), p=S.pass.find(p=>legendCode(entry(p,k).c)===lc), st=p?entry(p,k).s:"";
       const row=`<i style="background:${gaEntryC(k)}"></i>${esc(ST[c]?.label||"")}${st?` · ${esc(st)}`:""}`;
-      if(tip){tip.innerHTML=`${flagImg(k)}<b>${esc(f.properties.ru)}</b><span>${row}</span>`;const bw=root.clientWidth||1, tw=tip.offsetWidth/bw*100, th=tip.offsetHeight/(root.clientHeight||1)*100;tip.style.transform=`translate(${Math.max(2,Math.min(x-tw/2,98-tw))}cqw,${y-th-14<2?y+12:y-th-14}cqh)`;tip.classList.add("on")}
+      if(tip){tip.innerHTML=`${flagImg(k)}<b>${esc(f.properties.ru)}</b><span>${row}</span>`;
+        const tw=tip.offsetWidth,th=tip.offsetHeight, tx=Math.max(6,Math.min(x-tw/2,W-tw-6)), ty=y-th-22<6?y+20:y-th-22;
+        tip.style.transform=`translate(${tx}px,${ty}px)`;tip.classList.add("on")}
       if(card){const l=safeOf(k)?.l, n=placesIn(q=>q.k===k).length;
         card.innerHTML=`<b class="ga-h">${flagImg(k)}${esc(f.properties.ru)}</b><span class="ga-row" style="--i:0">${row}</span>${l?`<span class="ga-row" style="--i:1"><i style="background:${SAFE[l].c}"></i>${esc(SAFE[l].label)}</span>`:""}<span class="ga-row" style="--i:2"><i style="background:var(--pin-want)"></i>${n?`${n} ${ruPlural(n,"ваше место","ваших места","ваших мест")}`:"Ваши места появятся здесь"}</span>`;
-        gaLater(()=>card.classList.add("on"),180)}
-    },650);
-    gaLater(step,withCard?3600:2600);
+        gaLater(()=>card.classList.add("on"),200)}
+    },760);
+    gaLater(step,withCard?3800:2800);
   };
-  step();
+  gaLater(step,250);
 }
 // scene: the layer switch flips and the same map repaints by safety
 function gaSafeScene(root){
@@ -1939,21 +1956,31 @@ function gaSafeScene(root){
   const flip=()=>{on=!on;top.classList.toggle("on",on);btns.forEach((b,j)=>b.classList.toggle("act",(j===1)===on));liquid(seg,pill,btns[on?1:0]);gaLater(flip,2400)};
   btns.forEach((b,j)=>b.classList.toggle("act",j===0)); liquid(seg,pill,btns[0]); gaLater(flip,1400);
 }
-// scene: pins with flags drop onto the globe
+// a still globe turned towards Europe, with flag pins at real cities
+const GA_PINS=[["PT",-9.14,38.72,"love"],["FI",24.94,60.17,"want"],["IT",12.5,41.9,"been"],["JO",35.93,31.95,"been"]];
+function gaStillGlobe(size){
+  if(!gaWorld()) return `<div class="ga-globe" style="--s:${size}px"><div class="ga-wait"></div></div>`;
+  const pj=d3.geoOrthographic().rotate([-14,-44]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
+  const land=S.countries.filter(f=>f.properties.k!=="AQ").map(f=>{const d=pth(f);return d?`<path d="${d}" style="fill:${gaEntryC(f.properties.k)}"/>`:""}).join("");
+  const pins=GA_PINS.map(([k,lon,lat,st],i)=>{const [x,y]=pj([lon,lat]);return `<i class="ga-pin2" style="--x:${(x-size/2).toFixed(1)}px;--y:${(y-size/2).toFixed(1)}px;--c:${PIN[st].c}"><svg viewBox="-13 -36 26 37"><path d="${PIN_PATH}"/></svg>${flagImg(k)}</i>`}).join("");
+  return `<div class="ga-globe ga-still" style="--s:${size}px"><svg viewBox="0 0 ${size} ${size}" aria-hidden="true">${land}</svg><i class="ga-shade"></i></div>${pins}`;
+}
+// scene: pins with flags drop one by one, rest, and start over
 function gaPinScene(root){
   const pins=[...root.querySelectorAll(".ga-pin2")]; let i=0;
-  const drop=()=>{const p=pins[i%pins.length];p.classList.remove("on");void p.offsetWidth;p.classList.add("on");i++;
-    if(i%pins.length===0)gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,700)},2200);else gaLater(drop,520)};
+  const drop=()=>{const p=pins[i];p.classList.remove("on");void p.offsetWidth;p.classList.add("on");i++;
+    if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
 const GUIDE_VER=3;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
-const GUIDE_VB={col:[-12,62,62,22],card:[24,46,52,30],safe:[-12,64,72,22]};
+// examples use only countries whose borders nobody disputes
+const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}<i class="ga-finger"></i><div class="ga-tip"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.col,["TR","EG","GE","IT","AE","EE","IL","IR"],false)},
+    run:r=>gaTapScene(r,GUIDE_VB.col,["IT","TN","FR","PT","AT","HU","PL","JO","NL"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
     mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
@@ -1962,7 +1989,7 @@ const GUIDE=[
     m:"Нажмите на страну на карте или найдите её в списке справа. Выедет карточка: условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
     mob:"Нажмите на страну на карте или найдите её в разделе «Страны». Внизу появится карточка: условия въезда, срок, опасные районы и ваши места. Потяните её вверх, чтобы прочитать всё.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}<i class="ga-finger"></i><div class="ga-sheet"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.card,["TR","GE","AM","AZ","CY","IQ"],true)},
+    run:r=>gaTapScene(r,GUIDE_VB.card,["IT","FR","AT","CZ","PL","HU"],true)},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.safe,gaEntryC)}${gaMap(GUIDE_VB.safe,gaSafeC,"ga-top")}<div class="ga-seg2"><span class="lq"></span><span>Въезд</span><span>Безопасность</span></div></div>`,
@@ -1970,7 +1997,7 @@ const GUIDE=[
   {since:1, t:"Ваши места и общая карта",
     m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
     mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны, все они собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах.",
-    art:()=>`<div class="ga ga-pl">${gaGlobe(150)}${[["TR",-18,-30,"want"],["IT",-44,-6,"been"],["GE",14,-20,"love"],["AE",10,8,"want"],["EG",-22,14,"been"],["TH",44,18,"want"]].map(([k,x,y,st],i)=>`<i class="ga-pin2" style="--x:${x}px;--y:${y}px;--c:${PIN[st].c}"><svg viewBox="-13 -36 26 37"><path d="${PIN_PATH}"/></svg>${flagImg(k)}</i>`).join("")}<i class="ga-plus">${ic("plus",22)}</i></div>`,
+    art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("plus",22)}</i></div>`,
     run:r=>gaPinScene(r)},
 ];
 const TOUR=[
@@ -2035,8 +2062,8 @@ function openGuide(start=0,steps=GUIDE,done,opts={}){
   draw();
 }
 function welcomeArt(){
-  const ks=["TR","GE","TH","AE","IT","JP","EG","ID"];
-  return `<div class="ga ga-hi"><div class="ga-stage">${gaGlobe(104)}<div class="ga-orbit">${ks.map((k,j)=>`<span style="--a:${j*45}deg"><b>${flagImg(k)||""}</b></span>`).join("")}</div></div></div>`;
+  const ks=["IT","FR","PT","TH","BR","AU","CA","MX"];
+  return `<div class="ga ga-hi">${gaGlobe(86)}<div class="ga-orbit">${ks.map((k,j)=>`<span style="--a:${j*45}deg"><b>${flagImg(k)||""}</b></span>`).join("")}</div></div>`;
 }
 /* the tour: dims the page and lights up one real control at a time */
 function runTour(all,done){
