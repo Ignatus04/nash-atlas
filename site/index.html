@@ -523,23 +523,102 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .sw-t::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#dfe5ee;transition:transform .2s ease}
 [aria-checked="true"] .sw-t{background:var(--accent)}
 [aria-checked="true"] .sw-t::after{transform:translateX(18px)}
-.gd-modal .abox{width:min(440px,100%);padding:22px 22px 18px}
-.gd{display:flex;flex-direction:column;gap:10px}
-.gd-art{display:grid;place-items:center;min-height:120px;border-radius:16px;background:radial-gradient(120% 120% at 30% 0%,#1d3150,#111d31);margin-bottom:4px;padding:14px}
-.gd-ic{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:rgba(255,138,92,.14);color:var(--accent)}
-.gd-sw{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;font-size:12.5px;font-weight:600}
-.gd-sw span{display:inline-flex;align-items:center;gap:6px}
-.gd-sw i{width:14px;height:14px;border-radius:4px;display:inline-block}
+/* guide: springy, transform/opacity-only motion so it stays smooth on phones */
+:root{--spring:cubic-bezier(.22,1.28,.36,1);--spring-soft:cubic-bezier(.25,1.12,.4,1)}
+@supports (transition-timing-function:linear(0,1)){:root{
+  --spring:linear(0,.006,.025 2.8%,.101 6.1%,.539 18.9%,.721 25.3%,.849 31.5%,.937 38.1%,.968 41.8%,.991 45.7%,1.006 50.1%,1.015 55%,1.017 63.9%,1.001 85.9%,1);
+  --spring-soft:linear(0,.009,.037 1.7%,.153 3.6%,.776 10.3%,1.001,1.142 16%,1.185,1.209 19%,1.205 20.4%,1.178 22%,1.042 27.4%,.982 30.9%,.958 33.9%,.957 36.1%,.973 40.6%,1.008 49.4%,1.012 54.6%,1.002 69.6%,1)}}
+.gd-modal .abox{width:min(440px,100%);padding:22px 22px 18px;overflow:hidden;animation:gdBoxIn .5s var(--spring) both}
+@keyframes gdBoxIn{from{transform:translateY(28px) scale(.97);opacity:0}}
+.gd{position:relative}
+.gd-pane{display:flex;flex-direction:column;gap:10px}
+.gd-pane>*{animation:gdRise .55s var(--spring) both}
+.gd-pane>:nth-child(2){animation-delay:.04s}.gd-pane>:nth-child(3){animation-delay:.08s}.gd-pane>:nth-child(4){animation-delay:.12s}.gd-pane>:nth-child(5){animation-delay:.16s}.gd-pane>:nth-child(6){animation-delay:.2s}
+@keyframes gdRise{from{transform:translateY(12px);opacity:0}}
+.gd-in-r{animation:gdInR .5s var(--spring) both}.gd-in-l{animation:gdInL .5s var(--spring) both}
+.gd-out-l,.gd-out-r{position:absolute;inset:0;pointer-events:none}
+.gd-out-l{animation:gdOutL .26s cubic-bezier(.4,0,1,1) both}.gd-out-r{animation:gdOutR .26s cubic-bezier(.4,0,1,1) both}
+@keyframes gdInR{from{transform:translateX(44px);opacity:0}}@keyframes gdInL{from{transform:translateX(-44px);opacity:0}}
+@keyframes gdOutL{to{transform:translateX(-44px);opacity:0}}@keyframes gdOutR{to{transform:translateX(44px);opacity:0}}
+.gd-art{position:relative;height:156px;border-radius:18px;background:radial-gradient(120% 130% at 30% 0%,#1f3556,#101c30 70%);overflow:hidden;margin-bottom:2px;contain:paint}
 .gd-k{margin:0;font:700 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gd h2{margin:0;font:800 20px/1.25 var(--display);text-wrap:balance}
+.gd h2.gd-hello{font-size:23px}
 .gd-m{margin:0;font-size:15px;line-height:1.55;color:#d3dbe8;min-height:5.2em}
-.gd-dots{display:flex;gap:6px;justify-content:center;margin-top:4px}
-.gd-dots i{width:6px;height:6px;border-radius:3px;background:#33445f;transition:width .2s ease,background-color .2s ease}
-.gd-dots i.on{width:18px;background:var(--accent)}
+.gd-dots{display:flex;gap:6px;justify-content:center;margin-top:2px}
+.gd-dots i{width:6px;height:6px;border-radius:3px;background:#33445f;transition:width .35s var(--spring),background-color .2s ease}
+.gd-dots i.on{width:20px;background:var(--accent)}
 .gd-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
-.gd-foot .btn{min-height:44px;padding:10px 18px}
-.gd-foot .btn.primary{margin-left:auto;min-width:120px}
-@media (max-width:560px){.gd-modal{align-items:end;padding:0}.gd-modal .abox{border-radius:22px 22px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:92dvh}}
+.gd-foot .btn{min-height:46px;padding:10px 18px;transition:transform .25s var(--spring-soft)}
+.gd-foot .btn:active{transform:scale(.95)}
+.gd-foot .btn.primary{margin-left:auto}
+@media (max-width:560px){.gd-modal{align-items:end;padding:0}.gd-modal .abox{border-radius:24px 24px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:94dvh;animation-name:gdSheetIn}}
+@keyframes gdSheetIn{from{transform:translateY(100%)}}
+/* pictures */
+.ga{position:absolute;inset:0}
+.ga-grid{position:absolute;left:50%;top:22px;width:248px;margin-left:-124px;display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.ga-c{display:block;height:34px;border-radius:9px 12px 8px 11px;background:var(--st-visa);animation:gaPop .6s var(--spring-soft) both,gaCol 7s steps(1) infinite;animation-delay:calc(var(--i)*45ms),calc(var(--i)*-0.55s)}
+.ga-c:nth-child(3n){border-radius:14px 7px 12px 6px}.ga-c:nth-child(4n+1){border-radius:6px 13px 9px 14px}
+@keyframes gaPop{from{transform:scale(.4);opacity:0}}
+@keyframes gaCol{0%{background:var(--st-free)}20%{background:var(--st-arrival)}40%{background:var(--st-evisa)}60%{background:var(--st-visa)}80%{background:var(--st-banned)}}
+.ga-leg{position:absolute;left:10px;right:10px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 10px;font:600 11.5px var(--body)}
+.ga-leg span{display:inline-flex;align-items:center;gap:5px;animation:gaPop .6s var(--spring-soft) both;animation-delay:calc(.35s + var(--i)*70ms)}
+.ga-leg i{width:11px;height:11px;border-radius:3px}
+.ga-pass{display:grid;place-items:center}
+.ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFan 4.2s var(--spring) infinite}
+.ga-pp:nth-child(2){background:linear-gradient(160deg,#20456e,#14263f);--x:0px;--r:0deg}.ga-pp:nth-child(3){background:linear-gradient(160deg,#1d6b5c,#123d35);--x:62px;--r:11deg}
+.ga-pp:nth-child(1){--x:-62px;--r:-11deg}
+.ga-pp .fimg{width:26px;height:26px;border-radius:50%}
+.ga-pp b{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}.ga-pp b+b{width:28px}
+@keyframes gaFan{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(var(--x)) rotate(var(--r)) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
+.ga-res{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);white-space:nowrap;background:var(--st-visa);color:#fff;font:700 12px var(--body);padding:5px 11px;border-radius:999px;animation:gaRes 4.2s var(--spring-soft) infinite}
+@keyframes gaRes{0%,30%{transform:translateX(-50%) scale(.5);opacity:0}42%,72%{transform:translateX(-50%) scale(1);opacity:1}84%,100%{transform:translateX(-50%) scale(.5);opacity:0}}
+.ga-card::before{content:"";position:absolute;left:18%;top:16%;width:36%;height:44%;border-radius:40% 55% 45% 60%;background:var(--st-free);opacity:.85}
+.ga-tap{position:absolute;left:33%;top:33%;width:30px;height:30px;margin:-15px;border-radius:50%;border:2px solid #fff;animation:gaTap 4.4s ease-out infinite}
+@keyframes gaTap{0%{transform:scale(.3);opacity:0}6%{opacity:1}22%,100%{transform:scale(1.6);opacity:0}}
+.ga-sheet{position:absolute;left:12%;right:12%;bottom:-6px;padding:12px 14px 16px;border-radius:14px 14px 0 0;background:#1a2a44;box-shadow:0 -8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:6px;animation:gaSheet 4.4s var(--spring) infinite}
+.ga-h{display:flex;align-items:center;gap:7px;font:800 14px var(--display)}.ga-h .fimg{width:18px;height:18px;border-radius:50%}
+.ga-row{display:flex;align-items:center;gap:7px;font:600 11.5px var(--body);color:#d3dbe8;animation:gaRow 4.4s var(--spring-soft) infinite;animation-delay:calc(var(--i)*90ms)}
+.ga-row i{width:9px;height:9px;border-radius:50%;flex:none}
+@keyframes gaSheet{0%,14%{transform:translateY(105%)}30%,84%{transform:translateY(0)}100%{transform:translateY(105%)}}
+@keyframes gaRow{0%,30%{transform:translateX(-14px);opacity:0}42%,84%{transform:none;opacity:1}100%{opacity:0}}
+.ga-seg{position:absolute;left:50%;top:16px;width:210px;margin-left:-105px;height:32px;border-radius:10px;background:#0d1828;border:1px solid var(--line);display:flex;align-items:center;font:700 12px var(--body)}
+.ga-seg span{flex:1;text-align:center;position:relative;color:var(--muted);animation:gaSegT 5s steps(1) infinite}
+.ga-seg span+span{animation-delay:-2.5s}
+.ga-seg i{position:absolute;left:3px;top:3px;width:calc(50% - 3px);height:24px;border-radius:8px;background:var(--ink);animation:gaSeg 5s var(--spring) infinite}
+@keyframes gaSeg{0%,40%{transform:translateX(0)}50%,90%{transform:translateX(100%)}100%{transform:translateX(0)}}
+@keyframes gaSegT{0%,45%{color:var(--ocean)}50%,100%{color:var(--muted)}}
+.ga-safe .ga-grid{top:64px}.ga-safe .ga-c{height:26px;position:relative;animation:gaPop .6s var(--spring-soft) both;animation-delay:calc(var(--i)*45ms);background:var(--st-free)}
+.ga-safe .ga-c:nth-child(3n){background:var(--st-visa)}.ga-safe .ga-c:nth-child(5n){background:var(--st-evisa)}
+.ga-safe .ga-c::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#5fb97f;opacity:0;animation:gaSafe 5s ease infinite}
+.ga-safe .ga-c:nth-child(4n)::after{background:#e2c14b}.ga-safe .ga-c:nth-child(7n)::after{background:#d2463c}.ga-safe .ga-c:nth-child(5n+2)::after{background:#e8893a}
+@keyframes gaSafe{0%,42%{opacity:0}52%,90%{opacity:1}100%{opacity:0}}
+.ga-land{position:absolute;left:14%;right:14%;top:22%;bottom:14%;border-radius:42% 58% 48% 52%/52% 44% 56% 48%;background:linear-gradient(140deg,#3f8f73,#2c6b57)}
+.ga-pin{position:absolute;color:var(--c);margin:-26px 0 0 -13px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));animation:gaDrop 4.6s var(--spring-soft) infinite;animation-delay:calc(var(--i)*.22s)}
+.ga-pin svg{fill:currentColor;stroke:#0c1626}
+@keyframes gaDrop{0%{transform:translateY(-60px);opacity:0}12%,80%{transform:none;opacity:1}92%,100%{transform:translateY(-12px);opacity:0}}
+.ga-plus{position:absolute;right:16px;bottom:14px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(255,138,92,.4);animation:gaPulse 2.3s var(--spring-soft) infinite}
+@keyframes gaPulse{0%,60%,100%{transform:scale(1)}70%{transform:scale(.86)}}
+.ga-hi{display:grid;place-items:center}
+.ga-orbit{position:absolute;left:50%;top:50%;width:0;height:0;animation:gaSpin 26s linear infinite}
+.ga-orbit span{position:absolute;left:0;top:0;transform:rotate(var(--a)) translateX(60px) rotate(calc(-1*var(--a)))}
+.ga-orbit b{display:block;width:30px;height:30px;margin:-15px;border-radius:50%;overflow:hidden;background:#2a3d5c;box-shadow:0 0 0 2px #101c30,0 6px 14px rgba(0,0,0,.35);animation:gaSpin 26s linear infinite reverse,gaPop .7s var(--spring-soft) both}
+.ga-orbit b .fimg{width:100%;height:100%;object-fit:cover;display:block}
+.ga-core{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#ffb08c,var(--accent));color:var(--accent-ink);box-shadow:0 10px 30px rgba(255,138,92,.45);animation:gaPop .7s var(--spring-soft) both,gaBob 3.2s ease-in-out .7s infinite}
+@keyframes gaSpin{to{transform:rotate(360deg)}}
+@keyframes gaBob{50%{transform:translateY(-6px)}}
+/* the tour over the real page */
+#tour{position:fixed;inset:0;z-index:80;opacity:0;transition:opacity .25s ease}
+#tour.on{opacity:1}
+.tr-spot{position:fixed;left:0;top:0;border-radius:14px;box-shadow:0 0 0 200vmax rgba(5,10,19,.74);transition:transform .55s var(--spring),width .55s var(--spring),height .55s var(--spring),border-radius .3s ease;will-change:transform}
+.tr-spot::after{content:"";position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--accent);animation:trGlow 1.8s ease-in-out infinite}
+@keyframes trGlow{50%{opacity:.35;transform:scale(1.04)}}
+.tr-bub{position:fixed;left:0;top:0;background:#16263f;border:1px solid #2c4062;border-radius:16px;padding:14px 16px 12px;box-shadow:0 18px 40px rgba(0,0,0,.45);transition:transform .5s var(--spring);will-change:transform}
+.tr-bub.pop>*{animation:gdRise .45s var(--spring) both}
+.tr-bub.pop>:nth-child(2){animation-delay:.04s}.tr-bub.pop>:nth-child(3){animation-delay:.08s}
+.tr-bub h3{margin:6px 0 4px;font:800 16px/1.25 var(--display)}
+.tr-bub p:not(.gd-k){margin:0;font-size:14px;line-height:1.5;color:#d3dbe8}
+.tr-bub .gd-foot .btn{min-height:42px;padding:8px 16px}
 .tabbar,.grab,.srchbtn,.srch-x{display:none}
 .iconbtn.srchbtn{pointer-events:auto;width:40px;height:40px;border-radius:12px;background:rgba(18,31,51,.92);border:1px solid var(--line);color:var(--ink);place-items:center}
 /* phone: the map fills the screen, the card is a sheet you pull up, sections live in a bottom bar */
@@ -1678,62 +1757,126 @@ function renderProfile(){
   on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
   updateTabs();
 }
-/* ---------- how to use: shown on the first visit, again from Профиль, and as «что нового» ----------
-   KEEP THIS IN STEP WITH THE SITE: when a feature is added or changed, add or edit a step here and give it
-   since: GUIDE_VER+1, then raise GUIDE_VER. People who already saw the guide get only the new steps. */
-const GUIDE_VER=1;
+/* ---------- how to use: a welcome, short animated cards, then a tour that lights up the real buttons ----------
+   KEEP THIS IN STEP WITH THE SITE: when a feature is added or changed, add or edit a card in GUIDE and/or a stop
+   in TOUR with since: GUIDE_VER+1, then raise GUIDE_VER. People who already saw the guide get only what is new.
+   Cards: t title, m text, mob text for phones (if it differs), art() the animated picture.
+   Tour stops: sel {m: phone selector, d: computer selector}, t title, m text. A stop whose button isn't on screen is skipped. */
+const GUIDE_VER=2;
+const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт.",
-    art:()=>`<div class="gd-sw">${[["--st-free","Без визы"],["--st-arrival","По прилёте"],["--st-evisa","Электронная"],["--st-visa","Виза"],["--st-banned","Закрыто"]].map(([c,l])=>`<span><i style="background:var(${c})"></i>${l}</span>`).join("")}</div>`},
+    art:()=>`<div class="ga ga-col"><div class="ga-grid">${gdBlobs(12,"ga-c")}</div><div class="ga-leg">${[["--st-free","Без визы"],["--st-arrival","По прилёте"],["--st-evisa","Электронная"],["--st-visa","Виза"],["--st-banned","Закрыто"]].map(([c,l],i)=>`<span style="--i:${i}"><i style="background:var(${c})"></i>${l}</span>`).join("")}</div></div>`},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
     mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
-    art:()=>`<div class="gd-ic">${ic("passport",40)}</div>`},
+    art:()=>`<div class="ga ga-pass">${["RU","BY","KZ"].map((k,i)=>`<div class="ga-pp" style="--i:${i}">${flagImg(k)||""}<b></b><b></b></div>`).join("")}<div class="ga-res">Самое строгое правило</div></div>`},
   {since:1, t:"Страна открывается касанием",
     m:"Нажмите на страну на карте или найдите её в списке справа. В карточке — условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
-    mob:"Нажмите на страну на карте или найдите её в разделе «Страны». В карточке — условия въезда, срок пребывания, опасные районы и ваши места. Карточку можно потянуть вверх.",
-    art:()=>`<div class="gd-ic">${ic("globe",40)}</div>`},
+    mob:"Нажмите на страну на карте или найдите её в разделе «Страны». В карточке — условия въезда, срок пребывания, опасные районы и ваши места.",
+    art:()=>`<div class="ga ga-card"><i class="ga-tap"></i><div class="ga-sheet"><b class="ga-h">${flagImg("TR")||""}Турция</b><span class="ga-row" style="--i:0"><i style="background:var(--st-free)"></i>Без визы · 60 дней</span><span class="ga-row" style="--i:1"><i style="background:${SAFE[2].c}"></i>У границы с Сирией — не ехать</span><span class="ga-row" style="--i:2"><i style="background:var(--pin-want)"></i>3 ваших места</span></div></div>`},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
-    art:()=>`<div class="gd-sw">${[1,2,3,4].map(l=>`<span><i style="background:${SAFE[l].c}"></i>${esc(SAFE[l].label)}</span>`).join("")}</div>`},
+    art:()=>`<div class="ga ga-safe"><div class="ga-seg"><i></i><span>Въезд</span><span>Безопасность</span></div><div class="ga-grid">${gdBlobs(12,"ga-c ga-s")}</div></div>`},
   {since:1, t:"Ваши места и общая карта",
     m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
     mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Все места собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах, ей можно поделиться.",
-    art:()=>`<div class="gd-ic">${ic("pin",40)}</div>`},
+    art:()=>`<div class="ga ga-pins"><div class="ga-land"></div>${[["--pin-want",28,38],["--pin-been",58,26],["--pin-love",44,58],["--pin-home",72,52]].map(([c,x,y],i)=>`<i class="ga-pin" style="--i:${i};left:${x}%;top:${y}%;--c:var(${c})">${ic("pin",26)}</i>`).join("")}<i class="ga-plus">${ic("plus",22)}</i></div>`},
+];
+const TOUR=[
+  {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
+  {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты. По городу или аэропорту откроется его страна."},
+  {since:2, sel:{m:'#tabbar [data-tab="countries"]',d:"#cfq"}, t:"Страны", m:"Список стран с фильтрами: без визы, по прилёте, только безопасные."},
+  {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
+  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим», «Были», «Любимое»."},
+  {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
+  {since:2, sel:{m:"#grab",d:null}, t:"Карточку можно двигать", m:"Потяните её вверх, чтобы читать, или вниз, чтобы видеть карту."},
 ];
 function guideSeen(){try{return +localStorage.getItem("atlas-guide")||0}catch(e){return 0}}
-function openGuide(start=0,steps=GUIDE,done){
-  let i=start;
+function guideDone(){try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}catch(e){}}
+/* the cards. opts: welcome (start with the greeting), news (title «Что нового»), tour (stops to light up after) */
+function openGuide(start=0,steps=GUIDE,done,opts={}){
+  let i=opts.welcome?-1:start, busy=false;
+  const tour=opts.tour??TOUR;
   const {el,close}=modal("guideBox",`<div class="gd" id="gdBody"></div>`,{labelledby:"gdTitle"});
   el.classList.add("gd-modal");
-  const finish=()=>{try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}catch(e){}close();done?.()};
-  el.querySelectorAll("[data-close]").forEach(x=>x.onclick=finish);
-  el.addEventListener("click",e=>{if(e.target===el){e.stopImmediatePropagation();finish()}},true);
-  el.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopImmediatePropagation();finish()}else if(e.key==="ArrowRight")go(i+1);else if(e.key==="ArrowLeft")go(i-1)},true);
-  const draw=()=>{const st=steps[i], last=i===steps.length-1, news=steps!==GUIDE;
-    el.querySelector("#gdBody").innerHTML=`<div class="gd-art">${st.art()}</div>
-      <p class="gd-k">${news?"Что нового":`Как пользоваться · ${i+1} из ${steps.length}`}</p>
+  const end=(toTour)=>{guideDone();close();if(toTour&&tour.length)setTimeout(()=>runTour(tour,done),REDUCED?0:260);else done?.()};
+  el.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>end(false));
+  el.addEventListener("click",e=>{if(e.target===el){e.stopImmediatePropagation();end(false)}},true);
+  el.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopImmediatePropagation();end(false)}else if(e.key==="ArrowRight")go(i+1,1);else if(e.key==="ArrowLeft"&&i>0)go(i-1,-1)},true);
+  const body=el.querySelector("#gdBody");
+  const pane=()=>{
+    if(i<0) return `<div class="gd-pane"><div class="gd-art">${welcomeArt()}</div>
+      <h2 id="gdTitle" class="gd-hello">Привет! Это «Наш атлас»</h2>
+      <p class="gd-m">Карта, на которой сразу видно, куда можно поехать по вашему паспорту и где спокойно. Сюда же собираются ваши места: где были, куда хотите и что советуют друзья.</p>
+      <div class="gd-foot"><button class="linkbtn" id="gdSkip">Разберусь сам</button><button class="btn primary" id="gdNext">Показать, как всё устроено</button></div></div>`;
+    const st=steps[i], last=i===steps.length-1;
+    return `<div class="gd-pane"><div class="gd-art">${st.art()}</div>
+      <p class="gd-k">${opts.news?"Что нового":`${i+1} из ${steps.length}`}</p>
       <h2 id="gdTitle">${esc(st.t)}</h2><p class="gd-m">${esc(MOB()&&st.mob?st.mob:st.m)}</p>
       <div class="gd-dots" aria-hidden="true">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>
-      <div class="gd-foot">${i?`<button class="btn" id="gdPrev">Назад</button>`:`<button class="linkbtn" id="gdSkip">Пропустить</button>`}<button class="btn primary" id="gdNext">${last?"Начать":"Дальше"}</button></div>`;
-    const pv=el.querySelector("#gdPrev"); if(pv) pv.onclick=()=>go(i-1);
-    const sk=el.querySelector("#gdSkip"); if(sk) sk.onclick=finish;
-    el.querySelector("#gdNext").onclick=()=>last?finish():go(i+1);
-    el.querySelector("#gdNext").focus();
+      <div class="gd-foot">${i?`<button class="btn" id="gdPrev">Назад</button>`:`<button class="linkbtn" id="gdSkip">Пропустить</button>`}<button class="btn primary" id="gdNext">${last?(tour.length?"Показать на сайте":"Готово"):"Дальше"}</button></div></div>`;
   };
-  const go=j=>{if(j<0||j>=steps.length)return;i=j;draw()};
-  // a swipe left or right turns the page on a phone
-  let sx0=null; el.addEventListener("touchstart",e=>{sx0=e.touches[0].clientX},{passive:true});
-  el.addEventListener("touchend",e=>{if(sx0==null)return;const dx=e.changedTouches[0].clientX-sx0;sx0=null;if(Math.abs(dx)>50)go(i+(dx<0?1:-1))});
+  const draw=(dir=0)=>{
+    const old=body.querySelector(".gd-pane");
+    body.insertAdjacentHTML("beforeend",pane());
+    const nw=body.lastElementChild;
+    if(old&&!REDUCED){busy=true;old.classList.add(dir<0?"gd-out-r":"gd-out-l");nw.classList.add(dir<0?"gd-in-l":"gd-in-r");
+      setTimeout(()=>{old.remove();busy=false},300)}else old?.remove();
+    const pv=nw.querySelector("#gdPrev"); if(pv) pv.onclick=()=>go(i-1,-1);
+    const sk=nw.querySelector("#gdSkip"); if(sk) sk.onclick=()=>end(false);
+    nw.querySelector("#gdNext").onclick=()=>i===steps.length-1?end(true):go(i+1,1);
+    nw.querySelector("#gdNext").focus({preventScroll:true});
+    if(i<0&&!S.flags){let n=0;const t=setInterval(()=>{if(S.flags||++n>20){clearInterval(t);const a=nw.querySelector(".gd-art");if(S.flags&&a&&a.isConnected)a.innerHTML=welcomeArt()}},250)}
+  };
+  const go=(j,dir)=>{if(busy||j<-1||j>=steps.length||(j<0&&!opts.welcome))return;i=j;draw(dir)};
+  // swipe left or right to turn the page
+  let sx0=null,sy0=0; el.addEventListener("touchstart",e=>{sx0=e.touches[0].clientX;sy0=e.touches[0].clientY},{passive:true});
+  el.addEventListener("touchend",e=>{if(sx0==null)return;const dx=e.changedTouches[0].clientX-sx0,dy=e.changedTouches[0].clientY-sy0;sx0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(i+(dx<0?1:-1),dx<0?1:-1)});
   draw();
 }
-/* first visit: the guide, then the passport picker; a returning visitor sees only steps added since */
+function welcomeArt(){
+  const ks=["TR","GE","TH","AE","IT","JP","EG","ID"];
+  return `<div class="ga ga-hi"><div class="ga-orbit">${ks.map((k,j)=>`<span style="--a:${j*45}deg"><b>${flagImg(k)||""}</b></span>`).join("")}</div><i class="ga-core">${ic("globe",38)}</i></div>`;
+}
+/* the tour: dims the page and lights up one real control at a time */
+function runTour(all,done){
+  const stops=all.map(s=>({...s,q:MOB()?s.sel.m:s.sel.d})).filter(s=>{if(!s.q)return false;const e=document.querySelector(s.q);if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight});
+  if(!stops.length){done?.();return}
+  if(MOB()&&sheet.state==="full") setSheet("half");
+  const ov=document.createElement("div"); ov.id="tour"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-labelledby","tourT");
+  ov.innerHTML=`<div class="tr-spot"></div><div class="tr-bub" role="document"><p class="gd-k" id="tourN"></p><h3 id="tourT"></h3><p id="tourM"></p><div class="gd-foot"><button class="linkbtn" id="tourSkip">Закончить</button><button class="btn primary" id="tourNext">Дальше</button></div></div>`;
+  document.body.appendChild(ov);
+  const spot=ov.querySelector(".tr-spot"), bub=ov.querySelector(".tr-bub"); let i=0;
+  const finish=()=>{ov.classList.remove("on");document.removeEventListener("keydown",key,true);setTimeout(()=>ov.remove(),REDUCED?0:250);done?.()};
+  const key=e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();finish()}else if(e.key==="Enter"||e.key==="ArrowRight"){e.preventDefault();next()}};
+  const place=()=>{
+    const s=stops[i], r=document.querySelector(s.q).getBoundingClientRect(), pad=6;
+    const x=r.left-pad,y=r.top-pad,w=r.width+pad*2,h=r.height+pad*2;
+    spot.style.transform=`translate(${x}px,${y}px)`; spot.style.width=w+"px"; spot.style.height=h+"px";
+    spot.style.borderRadius=getComputedStyle(document.querySelector(s.q)).borderRadius==="50%"?"50%":"14px";
+    ov.querySelector("#tourN").textContent=`${i+1} из ${stops.length}`;
+    ov.querySelector("#tourT").textContent=s.t; ov.querySelector("#tourM").textContent=MOB()&&s.mob?s.mob:s.m;
+    ov.querySelector("#tourNext").textContent=i===stops.length-1?"Готово":"Дальше";
+    const bw=Math.min(320,innerWidth-24), below=y+h+bub.offsetHeight+16<innerHeight&&(y+h/2<innerHeight/2||y<bub.offsetHeight+24);
+    const bx=Math.max(12,Math.min(innerWidth-bw-12,x+w/2-bw/2)), by=below?y+h+12:y-bub.offsetHeight-12;
+    bub.style.width=bw+"px"; bub.style.transform=`translate(${bx}px,${by}px)`;
+    bub.classList.remove("pop"); void bub.offsetWidth; bub.classList.add("pop");
+  };
+  const next=()=>{if(i>=stops.length-1){finish();return}i++;place()};
+  ov.querySelector("#tourNext").onclick=next; ov.querySelector("#tourSkip").onclick=finish;
+  ov.addEventListener("click",e=>{if(e.target===ov||e.target===spot)next()});
+  document.addEventListener("keydown",key,true);
+  place(); requestAnimationFrame(()=>ov.classList.add("on")); ov.querySelector("#tourNext").focus({preventScroll:true});
+}
 function startIntro(){
-  const seen=guideSeen(), fresh=GUIDE.filter(g=>g.since>seen);
-  if(!fresh.length){openPassports(false);return}
-  if(seen) openGuide(0,fresh,()=>openPassports(false));
-  else openGuide(0,GUIDE,()=>openPassports(false));
+  const seen=guideSeen(), after=()=>openPassports(false);
+  const cards=GUIDE.filter(g=>g.since>seen), stops=TOUR.filter(t=>t.since>seen);
+  if(!seen){openGuide(0,GUIDE,after,{welcome:true});return}
+  if(cards.length) openGuide(0,cards,after,{news:true,tour:stops});
+  else if(stops.length){guideDone();runTour(stops,after)}
+  else after();
 }
 /* the part of the map not covered by the top bar, the sheet and the tab bar: [top,bottom] in map px.
    A selection opens the sheet halfway on phones, so that is the space it is framed into. */
