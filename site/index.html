@@ -460,6 +460,18 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .cg-s{font-size:12px;color:var(--muted);margin-top:-4px}
 .cg-c{font-size:13px;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #cityGal .cg{width:200px}
+.ck-bar{position:fixed;left:16px;bottom:16px;z-index:60;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:0 18px 40px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateY(16px);transition:opacity .3s ease,transform .5s var(--spring-soft)}
+.ck-bar.on{opacity:1;transform:none}
+.ck-bar p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink)}.ck-bar a{color:#cfe6ff}
+.ck-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ck-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.ck-row span{display:flex;flex-direction:column;gap:2px}.ck-row small{color:var(--muted);font-size:12.5px}
+.ck-row input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+#ckBox .ck-acts{margin-top:14px}
+@media (max-width:860px){.ck-bar{left:10px;right:10px;max-width:none;bottom:calc(var(--tabh) + 10px)}}
+.ad-blk{gap:6px;min-height:0}.ad-l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ad-box{min-height:120px;border-radius:12px;overflow:hidden;background:var(--panel-2)}
+.ad-blk.on .ad-box{background:none}
 .lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .rg-list{display:flex;flex-direction:column;gap:6px}
 .rg-list.short>.rg:nth-child(n+7){display:none}
@@ -1128,6 +1140,54 @@ function bindRegionNav(){
   const list=box.querySelector(".rg-list"), all=box.querySelector(".rg-all"), q=box.querySelector(".rg-q");
   if(all) all.onclick=()=>{list.classList.remove("short");all.remove()};
   if(q) q.oninput=()=>{const v=nz(q.value);list.classList.toggle("short",!v&&!!box.querySelector(".rg-all"));list.querySelectorAll(".rg").forEach(r=>r.hidden=!!v&&!r.dataset.q.includes(v))};
+}
+
+/* ---------- cookies: the visit counter and ads load only after the visitor agrees ----------
+   Needed storage (settings, places before sign-in) needs no consent. The banner shows only once something
+   that needs consent is set up in config.js (metrikaId, ads); ?cookies in the address shows it anyway. */
+const CONSENT_KEY="atlas-consent";
+function consentGet(){try{return JSON.parse(localStorage.getItem(CONSENT_KEY)||"null")}catch(e){return null}}
+function consentUsed(){const c=window.ATLAS_CFG||{};return !!(c.metrikaId||c.ads?.country||c.ads?.places)||/[?&]cookies\b/.test(location.search)}
+function consentSet(an,ads){try{localStorage.setItem(CONSENT_KEY,JSON.stringify({an:!!an,ads:!!ads,at:Date.now()}))}catch(e){}
+  const b=document.getElementById("ckBar");if(b){b.classList.remove("on");setTimeout(()=>b.remove(),300)}consentApply()}
+let metrikaOn=false;
+function consentApply(){const c=consentGet()||{},cfg=window.ATLAS_CFG||{};
+  if(c.an&&cfg.metrikaId&&!metrikaOn){metrikaOn=true;const id=+cfg.metrikaId;
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");
+    window.ym(id,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true})}
+  fillAds()}
+function consentBar(){
+  if(!consentUsed()||consentGet()&&!/[?&]cookies\b/.test(location.search)||document.getElementById("ckBar")) return;
+  if(document.querySelector(".gd-modal,.amodal.on")){setTimeout(consentBar,1500);return} // after the guide or a dialog
+  const el=document.createElement("div");el.id="ckBar";el.className="ck-bar";el.setAttribute("role","dialog");el.setAttribute("aria-label","Cookie");
+  el.innerHTML=`<p>Сайт хранит ваши настройки в браузере. Счётчик посещений и реклама включаются, только если вы согласны. <a href="privacy.html#cookies" target="_blank" rel="noopener">Подробнее</a></p>
+    <div class="ck-acts"><button class="btn small" id="ckNo">Отклонить всё</button><button class="btn small ghost" id="ckSet">Настроить</button><button class="btn small primary" id="ckYes">Принять всё</button></div>`;
+  document.body.appendChild(el); requestAnimationFrame(()=>el.classList.add("on"));
+  el.querySelector("#ckYes").onclick=()=>consentSet(true,true);
+  el.querySelector("#ckNo").onclick=()=>consentSet(false,false);
+  el.querySelector("#ckSet").onclick=openCookieSettings;
+}
+function openCookieSettings(){const c=consentGet()||{an:false,ads:false};
+  const row=(id,t,d,on,dis)=>`<label class="ck-row"><span><b>${t}</b><small>${d}</small></span><input type="checkbox" id="${id}" ${on?"checked":""} ${dis?"disabled":""}></label>`;
+  const {el,close}=modal("ckBox",`<h2 id="ckT">Настройки cookie</h2>
+    ${row("ckN","Необходимые","Ваши настройки и места до входа. Без них сайт не работает",true,true)}
+    ${row("ckA","Счётчик посещений","Яндекс Метрика: сколько людей заходит и какие разделы смотрят",c.an)}
+    ${row("ckR","Реклама","Рекламная сеть Яндекса: показывает рекламу и учитывает ваши интересы",c.ads)}
+    <div class="ck-acts"><button class="btn small" id="ckSave">Сохранить</button><button class="btn small primary" id="ckAll">Принять всё</button></div>`,{labelledby:"ckT"});
+  el.querySelector("#ckSave").onclick=()=>{consentSet(el.querySelector("#ckA").checked,el.querySelector("#ckR").checked);close()};
+  el.querySelector("#ckAll").onclick=()=>{consentSet(true,true);close()};
+}
+/* ---------- ads: two places, filled only with consent and a block id in config.js ---------- */
+let yaP=null;
+function loadYaAds(){if(!yaP)yaP=new Promise((res,rej)=>{window.yaContextCb=window.yaContextCb||[];const s=document.createElement("script");s.src="https://yandex.ru/ads/system/context.js";s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s)});return yaP}
+function adSlotHTML(kind){const id=(window.ATLAS_CFG||{}).ads?.[kind];if(!id||!consentGet()?.ads)return "";
+  return `<section class="blk ad-blk" data-ad="${kind}"><span class="ad-l">Реклама</span><div class="ad-box"></div></section>`}
+let adN=0, adIO=null;
+function fillAds(){
+  const boxes=document.querySelectorAll(".ad-blk:not([data-b])"); if(!boxes.length) return;
+  if(!adIO) adIO=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;adIO.unobserve(e.target);const sec=e.target,box=sec.querySelector(".ad-box"),id=(window.ATLAS_CFG||{}).ads?.[sec.dataset.ad];
+    box.id="ad"+(++adN); loadYaAds().then(()=>window.yaContextCb.push(()=>{try{Ya.Context.AdvManager.render({blockId:id,renderTo:box.id,onRender:()=>sec.classList.add("on")})}catch(x){sec.remove()}})).catch(()=>sec.remove())}),{rootMargin:"200px 0px"});
+  boxes.forEach(b=>{b.dataset.b="1";adIO.observe(b)});
 }
 
 /* ---------- state ---------- */
@@ -2178,10 +2238,10 @@ function renderPlacesTab(){
       <p class="pv-lead">${all.length} ${ruPlural(all.length,"место","места","мест")} в ${new Set(all.map(p=>p.k)).size} ${ruPlural(new Set(all.map(p=>p.k)).size,"стране","странах","странах")}</p>
       ${add}
       <div class="chips pv-fs" role="group" aria-label="Показать места">${chip("","Все",all.length)}${Object.keys(PIN).filter(k=>cnt.get(k)).map(k=>chip(k,PIN[k].label,cnt.get(k))).join("")}</div>
-      ${groups.map(g=>`<section class="blk pv-g"><h2><button class="plain pv-c" data-ck="${esc(g.k)}">${flagImg(g.k)}<span>${esc(g.name)}</span></button> <span>${g.v.length}</span></h2><div class="list">${byLoc(g.v).map(placeItem).join("")}</div></section>`).join("")}`;
+      ${groups.map((g,gi)=>(gi===2?adSlotHTML("places"):"")+`<section class="blk pv-g"><h2><button class="plain pv-c" data-ck="${esc(g.k)}">${flagImg(g.k)}<span>${esc(g.name)}</span></button> <span>${g.v.length}</span></h2><div class="list">${byLoc(g.v).map(placeItem).join("")}</div></section>`).join("")}`;
     document.querySelectorAll("[data-plf]").forEach(b=>b.onclick=()=>{S.plf=b.dataset.plf;renderPlacesTab()});
     document.querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>select({type:"country",k:b.dataset.ck},true));
-    bindPlaceLinks();
+    bindPlaceLinks();fillAds();
   }
   const a=$("#pvAdd"); if(a) a.onclick=openAdd;
   const bk=$("#pvBack"); if(bk) bk.onclick=()=>{S.tab="countries";showSel()};
@@ -2199,11 +2259,11 @@ function renderProfile(){
   $("#pbody").innerHTML=`<div class="p-head"><h1>Профиль</h1></div>${acct}
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
-    <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="https://nash-atlas.ru/privacy.html">${ic("doc")}<span>Политика конфиденциальности</span></a></section>`;
+    <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="https://nash-atlas.ru/privacy.html">${ic("doc")}<span>Политика конфиденциальности</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
   on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);
-  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0));
+  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings);
   on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
   updateTabs();
 }
@@ -3075,6 +3135,7 @@ function renderCountry(k){
     ${cityPhotosHTML(k)}
     ${entryBlock(k)}
     ${safetyBlock(k)}
+    ${adSlotHTML("country")}
     ${k==="XK"||k==="RS"?`<section class="blk"><div class="warn-box"><span class="wi">!</span><div><b>Важно для маршрута: Косово → Сербия</b><p>${esc(WARN[0].text)}</p></div></div></section>`:""}
     ${m.status?`<section class="blk"><h2>Статус территории</h2><p class="status-note">${esc(m.status)}</p></section>`:""}
     ${m.disputes?`<section class="blk"><h2>Спорные территории</h2><p class="status-note">${esc(m.disputes)}</p></section>`:""}
@@ -3084,7 +3145,7 @@ function renderCountry(k){
     ${briefBlock(k,f.properties.ru)}
     ${regs.length?regionNavHTML(k,regs):S.adm?(cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""):`<section class="blk"><h2>Регионы</h2><p class="empty">Загружаю регионы…</p></section>`}
     ${vibeBlock({kind:"country",key:k,label:f.properties.ru,ctx:f.properties.ru})}`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);bindRegionNav();
+  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);bindRegionNav();fillAds();
   if(!S.cdesc) ensureCityDescs().then(()=>{if(S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});
   document.querySelectorAll("[data-reg]").forEach(b=>b.onclick=()=>ensureAdm().then(()=>select({type:"region",id:b.dataset.reg},true)));
   if(!S.adm) ensureAdm().then(()=>{if(S.sel.type==="country"&&S.sel.k===k) renderCountry(k)});
@@ -3685,7 +3746,7 @@ function ensureAdm(){
   return admPromise;
 }
 async function boot(){
-  size();
+  size(); consentApply(); setTimeout(consentBar,1200);
   const [ct,cities,meta,visa,lists,va,ap]=await Promise.all(["countries","cities","meta","visa","lists","visa_all","areaplaces"].map(n=>n==="lists"?(window.ATLAS_VER?Promise.resolve([]):getData(n).catch(()=>[])):getData(n))); // the website keeps personal lists in the account
   S.areaIds=ap||{};
   S.vm={p:va.p,d:va.d,idx:new Map(va.dest.map((k,i)=>[k,i]))};
