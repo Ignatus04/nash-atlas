@@ -13,7 +13,7 @@
   --ocean:#0c1626; --ocean-2:#101e33; --ink:#eef1f6; --muted:#9aa7bb; --line:#22324b; --panel:#121f33; --panel-2:#18283f;
   --accent:#ff8a5c; --accent-ink:#1a0d06;
   --st-free:#4fbf94; --st-eta:#a8cf5c; --st-arrival:#e6c553; --st-evisa:#e8994d; --st-visa:#7d6b8f; --st-banned:#c84a55; --st-unknown:#3d4a60; --st-home:#e9e3d6;
-  --pin-want:#ff8a5c; --pin-none:#8fb3d9; --pin-home:#ffffff;
+  --pin-want:#ff8a5c; --pin-been:#5fd0ff; --pin-none:#93a0b4; --pin-home:#ffffff;
   --display:"Unbounded", "Manrope", system-ui, sans-serif;
   --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme:dark;
@@ -201,6 +201,9 @@ body.hastiles .c-dot{fill:#fff;stroke:#14213a}
 .seg button{background:none;border:0;border-radius:9px;padding:7px 11px;color:var(--muted);font-weight:600;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--ocean)}
 .actions{margin-left:auto;display:flex;gap:8px}
+/* two tidy rows on a computer: brand, search, passports, account; then the layer switch and the buttons */
+.tb-br{flex-basis:100%;height:0}
+@media (min-width:1750px){.tb-br{display:none}}.actions .ibtn{display:grid;place-items:center;width:44px;padding:0}
 a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
 .btn{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:600}
 .btn:hover{border-color:#3a4f70}
@@ -473,7 +476,9 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ad-box{min-height:120px;border-radius:12px;overflow:hidden;background:var(--panel-2)}
 .ad-blk.on .ad-box{background:none}
 .pv-hero{border-radius:16px;padding:14px;background:linear-gradient(135deg,rgba(255,138,92,.16),rgba(255,138,92,.04));border:1px solid rgba(255,138,92,.35);display:flex;flex-direction:column;gap:12px}
-.pv-hero-t{display:flex;align-items:center;gap:12px}.pv-hero-t b{font:700 34px/1 Unbounded,Manrope,sans-serif;color:#ff8a5c}.pv-hero-t span{font-size:14px;line-height:1.35;color:var(--ink)}
+.pv-hero-t{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.pv-n{display:flex;align-items:center;gap:10px}.pv-hero-t b{font:700 34px/1 Unbounded,Manrope,sans-serif;color:#ff8a5c}.pv-hero-t b.b{color:#5fd0ff}.pv-n>span{font-size:13.5px;line-height:1.3;color:var(--ink);max-width:120px}
+.bsw{cursor:pointer;font:inherit;border:0;transition:transform .2s var(--spring)}.bsw:active{transform:scale(.94)}.bsw.pop{animation:bswPop .45s var(--spring)}
+@keyframes bswPop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 .pv-hero-a{display:flex;gap:8px;flex-wrap:wrap}.pv-hero-a .btn{flex:1 1 0;justify-content:center;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 12px;white-space:nowrap}
 .sm-opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;width:100%;padding:14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line);margin-top:10px}
 .sm-opt:hover{border-color:#3a4f70}.sm-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -665,6 +670,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+.ga-bn{display:flex;align-items:center;justify-content:center;gap:14px}
+.ga-bn span{opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards}
+.ga-b1,.ga-b2{font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px;color:#10151f}
+.ga-b1{background:#ff8a5c;animation-delay:.15s!important}.ga-ar{color:var(--muted);font-size:20px;animation-delay:.35s!important}.ga-b2{background:#5fd0ff;animation-delay:.55s!important}
 .ga-sh{display:flex;align-items:center;justify-content:center;gap:22px}
 .ga-story{width:96px;height:170px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);opacity:0;transform:translateY(14px) rotate(-4deg);animation:gaCg .8s var(--spring-soft) .15s forwards}
 .ga-story b{font-size:8px;color:#9aa7bb}.ga-story em{font-style:normal;font-weight:800;font-size:30px;color:#ff8a5c;line-height:1}
@@ -796,7 +805,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .brand{display:flex;padding:7px 12px 7px 8px;font-size:14px;gap:8px;min-height:40px}
   .brand .bflags img{width:20px;height:20px}
   .sharebtn{display:grid;margin-left:auto}.srchbtn{display:grid;margin-left:8px}
-  #passBtn,#acctBtn,.actions{display:none!important}
+  #passBtn,#acctBtn,.actions,.tb-br{display:none!important}
   .search{display:none;flex:1 1 0;max-width:none}
   .topbar.searching{z-index:13}
   .topbar.searching .search{display:flex;gap:8px;align-items:center}
@@ -838,15 +847,16 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
         <button data-mode="ru" aria-pressed="false" title="Паспорт РФ">РФ</button>
         <button data-mode="by" aria-pressed="false" title="Паспорт РБ">РБ</button>
       </div>
+      <span class="tb-br" aria-hidden="true"></span>
       <div class="seg" role="group" aria-label="Что показывать на карте">
         <button data-layer="entry" aria-pressed="true">Въезд</button>
         <button data-layer="safe" aria-pressed="false">Безопасность</button>
       </div>
       <div class="actions">
-        <button class="btn" id="shareTop">Поделиться</button>
+        <button class="btn ibtn" id="shareTop" aria-label="Поделиться" title="Поделиться: картинка для сторис и приглашение"></button>
         <button class="btn" id="placesBtn">Мои места</button>
         <button class="btn primary" id="addBtn" aria-label="Добавить место">+ Место</button>
-        <button class="btn" id="importBtn" title="Импорт из Google Карт">Импорт</button>
+        <button class="btn ibtn" id="importBtn" aria-label="Импорт из Google Карт" title="Импорт из Google Карт"></button>
       </div>
     </div>
     <div class="legend" id="legend"></div>
@@ -884,7 +894,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <div class="row2"><button type="button" class="btn small" id="addPick">Указать точку на карте</button><span id="addCoords" class="hint"></span></div>
     <label class="f" for="addName">Название<input class="txt" id="addName" required></label>
     <label class="f" for="addStatus">Статус
-      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="">Без отметки</option><option value="home">Дом</option></select>
+      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="been">Были</option><option value="">Без отметки</option><option value="home">Дом</option></select>
     </label>
     <label class="f" for="addTags">Вайб и метки через запятую<input class="txt" id="addTags" placeholder="кофе, вид, романтика"></label>
     <label class="f" for="addNote">Заметка<textarea class="note" id="addNote"></textarea></label>
@@ -927,8 +937,8 @@ const SAFE_NONE="#5b6579";
 const SRC={us:"Госдеп США",uk:"МИД Великобритании",au:"МИД Австралии",fr:"МИД Франции",ca:"МИД Канады",ru:"режимы, введённые в регионах РФ"};
 const SRC_WHY={us:"США — ближайший партнёр стран Америки и разбирает их по штатам",uk:"у британского МИД самая подробная разбивка по районам для Европы, Ближнего Востока, Южной Азии и Африки",au:"Австралия теснее всех связана с Юго-Восточной Азией и Океанией",fr:"Франция лучше всех знает франкоязычную Африку и Магриб",ru:"для России — официальные режимы по регионам: КТО, ЧС и уровни реагирования"};
 function safeOf(k){return S.safety?.c?.[k]||null}
-const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},home:{label:"Дом",c:"var(--pin-home)"}};
-// a place without a mark (the old «Были» and «Любимое» marks read as no mark; stored data is left as it was)
+const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},been:{label:"Были",c:"var(--pin-been)"},home:{label:"Дом",c:"var(--pin-home)"}};
+// a place without a mark (the old «Любимое» reads as no mark; stored data is left as it was)
 const NOPIN = {label:"Без отметки",c:"var(--pin-none)"};
 const pinOf = st => PIN[st]||NOPIN;
 const stOf = st => PIN[st]?st:"";
@@ -1256,52 +1266,58 @@ function bindFans(p,save){const b=$("#fanBtn"); if(!b) return;
     const h=document.querySelector(".fans h2 span"); if(h)h.textContent=Object.keys(f).length||""; draw()};
 }
 function openShareMenu(){
-  const want=[...S.places.values()].filter(p=>p.status==="want"), nk=new Set(want.map(p=>p.k).filter(Boolean)).size;
+  const all=[...S.places.values()], nbS=new Set(all.filter(p=>p.status==="been").map(p=>p.k).filter(Boolean)), nb=nbS.size, nk=new Set(all.filter(p=>p.status==="want").map(p=>p.k).filter(k=>k&&!nbS.has(k))).size;
   const {el,close}=modal("shMenu",`<h2 id="smT">Поделиться</h2>
-    <button class="sm-opt" id="smCard"><span class="sm-ic">${ic("share",22)}</span><span><b>Картинка для сторис</b><small>${nk?`Хочу побывать в ${nk} ${ruPlural(nk,"стране","странах","странах")}: карта, флаги и ссылка на вашу карту`:"Отметьте места «Хотим», и соберётся картинка с картой и флагами"}</small></span></button>
+    <button class="sm-opt" id="smCard"><span class="sm-ic">${ic("share",22)}</span><span><b>Картинка для сторис</b><small>${nk||nb?`${nb?`Был в ${nb}, `:""}хочу ${nb?"ещё ":""}в ${nk} ${ruPlural(nk,"стране","странах","странах")}: карта, флаги и ссылка на вашу карту`:"Отметьте места «Хотим» или «Были», и соберётся картинка с картой и флагами"}</small></span></button>
     ${CLOUD?`<button class="sm-opt" id="smInv"><span class="sm-ic">${ic("user",22)}</span><span><b>Пригласить друзей</b><small>Ссылка, по которой друг войдёт и будет отмечать места на вашей карте</small></span></button>`:""}`,{labelledby:"smT"});
   el.querySelector("#smCard").onclick=()=>{close();shareCard()};
   const iv=el.querySelector("#smInv"); if(iv) iv.onclick=()=>{close();invitePeople()};
 }
 /* the picture: the world with the countries we want to go to, big numbers, flags, the site address */
 async function shareCard(){
-  const want=[...S.places.values()].filter(p=>p.status==="want");
-  if(!want.length){status("Отметьте места «Хотим», и будет чем поделиться",3500);return}
-  const byK=d3.rollup(want,v=>v.length,p=>p.k), ks=[...byK.keys()].filter(Boolean);
+  const all=[...S.places.values()], want=all.filter(p=>p.status==="want"), been=all.filter(p=>p.status==="been");
+  if(!want.length&&!been.length){status("Отметьте места «Хотим» или «Были», и будет чем поделиться",3500);return}
+  const beenK=new Set(been.map(p=>p.k).filter(Boolean));
+  const byK=d3.rollup(want.filter(p=>!beenK.has(p.k)),v=>v.length,p=>p.k), ks=[...byK.keys()].filter(Boolean); // countries still to go to
   const W0=1080,H0=1920, c=document.createElement("canvas"); c.width=W0;c.height=H0; const g=c.getContext("2d");
   try{await document.fonts?.ready}catch(e){}
   const bg=g.createLinearGradient(0,0,0,H0); bg.addColorStop(0,"#0b1526"); bg.addColorStop(1,"#13243d"); g.fillStyle=bg; g.fillRect(0,0,W0,H0);
   // glow behind the map
-  const gl=g.createRadialGradient(W0/2,980,40,W0/2,980,620); gl.addColorStop(0,"rgba(255,138,92,.16)"); gl.addColorStop(1,"rgba(255,138,92,0)"); g.fillStyle=gl; g.fillRect(0,300,W0,1300);
+  const gl=g.createRadialGradient(W0/2,900,40,W0/2,900,620); gl.addColorStop(0,"rgba(255,138,92,.16)"); gl.addColorStop(1,"rgba(255,138,92,0)"); g.fillStyle=gl; g.fillRect(0,300,W0,1300);
   g.fillStyle="#eef1f6"; g.font="700 46px Unbounded, Manrope, sans-serif"; g.textBaseline="alphabetic"; g.fillText("Наш атлас",80,150);
-  g.fillStyle="#9aa7bb"; g.font="600 40px Manrope, sans-serif"; g.fillText("Хочу побывать",80,300);
-  g.fillStyle="#ff8a5c"; g.font="700 190px Unbounded, Manrope, sans-serif"; const nTxt=String(ks.length); g.fillText(nTxt,72,480);
-  const nw=g.measureText(nTxt).width; g.fillStyle="#eef1f6"; g.font="700 56px Manrope, sans-serif";
-  g.fillText(ruPlural(ks.length,"страна","страны","стран"),92+nw,420); g.fillStyle="#9aa7bb"; g.font="600 40px Manrope, sans-serif";
-  g.fillText(`${want.length} ${ruPlural(want.length,"место","места","мест")}`,92+nw,476);
+  // two numbers: where I've been and where I still want to go
+  const LOC=n=>ruPlural(n,"стране","странах","странах"), ACC=n=>ruPlural(n,"страну","страны","стран");
+  const big=(label,n,col,x0,sub,word)=>{g.fillStyle="#9aa7bb";g.font="600 38px Manrope, sans-serif";g.fillText(label,x0,300);
+    g.fillStyle=col;g.font="700 170px Unbounded, Manrope, sans-serif";g.fillText(String(n),x0-6,470);
+    g.fillStyle="#eef1f6";g.font="700 44px Manrope, sans-serif";g.fillText(word(n),x0,532);
+    g.fillStyle="#9aa7bb";g.font="500 34px Manrope, sans-serif";g.fillText(sub,x0,580)};
+  const pl=n=>`${n} ${ruPlural(n,"место","места","мест")}`;
+  if(beenK.size&&ks.length){big("Был в",beenK.size,"#5fd0ff",80,pl(been.length),LOC);big("Хочу ещё в",ks.length,"#ff8a5c",570,pl(want.length),ACC)}
+  else if(beenK.size) big("Был в",beenK.size,"#5fd0ff",80,pl(been.length),LOC);
+  else big("Хочу побывать в",ks.length,"#ff8a5c",80,pl(want.length),LOC);
   // map
   // the inhabited world edge to edge (no Antarctica), the countries we want to go to lit up
   const land={type:"FeatureCollection",features:S.countries.filter(f=>f.properties.k!=="AQ")};
-  const pj=d3.geoNaturalEarth1().fitExtent([[48,590],[W0-48,1110]],land);
+  const pj=d3.geoNaturalEarth1().fitExtent([[48,640],[W0-48,1150]],land);
   const thinP=d3.geoPath({stream:o=>pj.stream(thin(o,0.4))},g);
   g.save();
-  for(const f of S.countries){if(f.properties.k==="AQ"||byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#22324c";g.fill();g.strokeStyle="#0b1526";g.lineWidth=1.2;g.stroke()}
-  g.shadowColor="rgba(255,138,92,.6)"; g.shadowBlur=14;
-  for(const f of S.countries){if(!byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#ff8a5c";g.fill()}
+  const lit=k=>beenK.has(k)?"#5fd0ff":byK.has(k)?"#ff8a5c":null;
+  for(const f of S.countries){if(f.properties.k==="AQ"||lit(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#22324c";g.fill();g.strokeStyle="#0b1526";g.lineWidth=1.2;g.stroke()}
+  for(const f of S.countries){const c=lit(f.properties.k);if(!c)continue;g.shadowColor=c;g.shadowBlur=14;g.beginPath();thinP(f);g.fillStyle=c;g.fill()}
   g.shadowBlur=0;
   // one small dot per 16 px, so thousands of places don't turn into a blot
   const seen=new Set(); g.fillStyle="rgba(255,255,255,.92)";
-  for(const p of want){const xy=pj([p.lng,p.lat]);if(!xy)continue;const key=Math.round(xy[0]/16)+","+Math.round(xy[1]/16);if(seen.has(key))continue;seen.add(key);g.beginPath();g.arc(xy[0],xy[1],4.2,0,7);g.fill()}
+  for(const p of [...want,...been]){const xy=pj([p.lng,p.lat]);if(!xy)continue;const key=Math.round(xy[0]/16)+","+Math.round(xy[1]/16);if(seen.has(key))continue;seen.add(key);g.beginPath();g.arc(xy[0],xy[1],4.2,0,7);g.fill()}
   g.restore();
   // flags of the countries with the most places
-  const top=ks.sort((a,b)=>byK.get(b)-byK.get(a)).slice(0,8), fl=await Promise.all(top.map(k=>new Promise(res=>{const src=S.flags?.[k];if(!src)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src})));
-  let x=80; const fy=1200;
+  const allK=[...beenK,...ks.sort((a,b)=>byK.get(b)-byK.get(a))], top=allK.slice(0,8), fl=await Promise.all(top.map(k=>new Promise(res=>{const src=S.flags?.[k];if(!src)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src})));
+  let x=80; const fy=1230;
   top.forEach((k,i)=>{const im=fl[i]; if(!im) return; g.save(); g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.clip(); g.drawImage(im,x,fy,88,88); g.restore();
     g.strokeStyle="rgba(255,255,255,.35)"; g.lineWidth=3; g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.stroke(); x+=108});
   g.fillStyle="#cfd8e6"; g.font="600 38px Manrope, sans-serif";
-  const names=top.slice(0,4).map(k=>S.cByK.get(k)?.properties.ru||k); let line=names.join(", ")+(ks.length>4?` и ещё ${ks.length-4}`:"");
-  while(g.measureText(line).width>W0-160&&names.length>1){names.pop();line=names.join(", ")+` и ещё ${ks.length-names.length}`}
-  g.fillText(line,80,1360);
+  const names=top.slice(0,4).map(k=>S.cByK.get(k)?.properties.ru||k); let line=names.join(", ")+(allK.length>4?` и ещё ${allK.length-4}`:"");
+  while(g.measureText(line).width>W0-160&&names.length>1){names.pop();line=names.join(", ")+` и ещё ${allK.length-names.length}`}
+  g.fillText(line,80,1390);
   // footer
   g.fillStyle="rgba(255,255,255,.08)"; g.fillRect(80,1480,W0-160,2); // the bottom ~300 px stay free: stories put their reply bar there
   g.fillStyle="#eef1f6"; g.font="700 44px Manrope, sans-serif"; g.fillText("nash-atlas.ru",80,1570);
@@ -1309,10 +1325,10 @@ async function shareCard(){
   const blob=await new Promise(res=>c.toBlob(res,"image/png")); if(!blob){status("Не получилось собрать картинку",4000);return}
   const url=await inviteLink("viewer").catch(()=>null)||"https://nash-atlas.ru/";
   const file=new File([blob],"nash-atlas.png",{type:"image/png"}), src=URL.createObjectURL(blob);
-  const {el,close}=modal("cardBox",`<h2 id="cbT">Поделиться картой</h2><img class="cb-img" src="${src}" alt="Картинка: хочу побывать в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}">
+  const {el,close}=modal("cardBox",`<h2 id="cbT">Поделиться картой</h2><img class="cb-img" src="${src}" alt="Картинка: был в ${beenK.size}, хочу ещё в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}">
     <p class="hint">${url.includes("share=")?"Вместе с картинкой отправится ссылка: по ней друг увидит вашу карту целиком, но ничего не сможет изменить.":"Войдите в аккаунт, чтобы вместе с картинкой отправлять ссылку на вашу карту."}</p>
     <div class="ck-acts"><button class="btn primary" id="cbShare">Поделиться</button><a class="btn" id="cbSave" href="${src}" download="nash-atlas.png">Сохранить картинку</a></div>`,{labelledby:"cbT"});
-  el.querySelector("#cbShare").onclick=async()=>{const r=await shareOut({files:[file],title:"Наш атлас",text:`Хочу побывать в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}. Моя карта:`,url});
+  el.querySelector("#cbShare").onclick=async()=>{const r=await shareOut({files:[file],title:"Наш атлас",text:beenK.size?`Был в ${beenK.size} ${ruPlural(beenK.size,"стране","странах","странах")}${ks.length?`, хочу ещё в ${ks.length}`:""}. Моя карта:`:`Хочу побывать в ${ks.length} ${ruPlural(ks.length,"стране","странах","странах")}. Моя карта:`,url});
     if(r==="copied")status("Ссылка скопирована, картинку можно сохранить кнопкой рядом",4000);else if(r==="none")status("Сохраните картинку кнопкой рядом",3500)};
 }
 
@@ -2299,7 +2315,7 @@ function openTab(t){
 function openSheetFromCard(){if(sheet.state==="peek")setSheet("half")}
 function bindShell(){
   document.querySelectorAll("[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic,e.classList.contains("tb-plus")?24:22));
-  $("#srchBtn").innerHTML=ic("search",20); $("#shareBtn").innerHTML=ic("share",19);
+  $("#srchBtn").innerHTML=ic("search",20); $("#shareBtn").innerHTML=ic("share",19); $("#shareTop").innerHTML=ic("share",19); $("#importBtn").innerHTML=ic("import",19);
   document.querySelectorAll("#tabbar [data-tab]").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
   $("#placesBtn").onclick=()=>openTab("places");
   $("#srchBtn").onclick=()=>{$(".topbar").classList.add("searching");topH();setTimeout(()=>$("#q").focus(),30)};
@@ -2350,9 +2366,11 @@ function closeSearch(){const tb=$(".topbar");if(!tb?.classList.contains("searchi
 // on a computer there is no tab bar, so the section leads back to the map card it replaced
 function pvBack(){return MOB()?"":`<div class="backrow"><button class="backbtn" id="pvBack"><span aria-hidden="true">←</span> ${S.sel.type==="home"?"Ко всем странам":"Назад: "+esc(backLabel(S.sel)||"карточка")}</button></div>`}
 function renderPlacesTab(){
+  S._plIds=[...S.places.keys()].join();
   const all=[...S.places.values()], f=S.plf||"", ro=S.db&&!S.canWrite;
-  const wantN=[...S.places.values()].filter(p=>p.status==="want"), wk=new Set(wantN.map(p=>p.k).filter(Boolean)).size;
-  const add=ro?"":`${wantN.length?`<div class="pv-hero"><div class="pv-hero-t"><b>${wk}</b><span>${ruPlural(wk,"страна","страны","стран")} и ${wantN.length} ${ruPlural(wantN.length,"место","места","мест")}, куда хотите поехать</span></div><div class="pv-hero-a"><button class="btn primary" id="pvCard">${ic("share",17)}<span>Поделиться</span></button>${CLOUD?`<button class="btn" id="pvInv">${ic("user",17)}<span>Позвать друзей</span></button>`:""}</div></div>`:""}<div class="pv-acts"><button class="btn${wantN.length?"":" primary"}" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
+  const wantN=[...S.places.values()].filter(p=>p.status==="want"), beenN=[...S.places.values()].filter(p=>p.status==="been");
+  const bkS=new Set(beenN.map(p=>p.k).filter(Boolean)), wk=new Set(wantN.map(p=>p.k).filter(k=>k&&!bkS.has(k))).size;
+  const add=ro?"":`${wantN.length||beenN.length?`<div class="pv-hero"><div class="pv-hero-t">${bkS.size?`<span class="pv-n"><b class="b">${bkS.size}</b><span>${ruPlural(bkS.size,"страна","страны","стран")}, где были</span></span>`:""}<span class="pv-n"><b>${wk}</b><span>${bkS.size?"куда ещё хотите":ruPlural(wk,"страна, куда хотите","страны, куда хотите","стран, куда хотите")}</span></span></div><div class="pv-hero-a"><button class="btn primary" id="pvCard">${ic("share",17)}<span>Поделиться</span></button>${CLOUD?`<button class="btn" id="pvInv">${ic("user",17)}<span>Позвать друзей</span></button>`:""}</div></div>`:""}<div class="pv-acts"><button class="btn${wantN.length?"":" primary"}" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
   if(!all.length){
     $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
       <p class="pv-lead">Здесь соберутся места, где вы были и куда хотите поехать. Каждое место видно на карте и в карточке своей страны.</p>
@@ -2490,7 +2508,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=7;
+const GUIDE_VER=8;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2524,15 +2542,18 @@ const GUIDE=[
     m:"В карточке страны регионы теперь списком: сначала те, где есть ваши места, у каждого — центр, строка о нём и отметка, если там неспокойно. У столиц и центров регионов появились короткие описания: чем город интересен и что посмотреть рядом.",
     art:()=>`<div class="ga ga-rg">${[["Татарстан","Казань",1],["Карелия","Петрозаводск",0],["Алтай","Горно-Алтайск",0]].map(([a,b,n],i)=>`<div class="ga-rgr" style="--i:${i}"><b>${a}</b><span></span><i>центр: ${b}</i>${n?`<em>3 места</em>`:""}</div>`).join("")}</div>`},
   {since:6, t:"Поделиться и позвать друзей",
-    m:"В «Моих местах» и в Профиле — «Поделиться картой»: соберётся картинка для сторис с картой, числом стран и флагами, вместе со ссылкой на вашу карту. «Пригласить друзей» отправляет ссылку, по которой друг войдёт и будет отмечать места вместе с вами. В карточке места кнопка «Я тоже хочу» показывает, кто ещё хочет туда поехать. Отметок теперь две: «Хотим» и «Дом».",
+    m:"В «Моих местах» и в Профиле — «Поделиться картой»: соберётся картинка для сторис с картой, числом стран и флагами, вместе со ссылкой на вашу карту. «Пригласить друзей» отправляет ссылку, по которой друг войдёт и будет отмечать места вместе с вами. В карточке места кнопка «Я тоже хочу» показывает, кто ещё хочет туда поехать. ",
     art:()=>`<div class="ga ga-sh"><div class="ga-story"><b>Хочу побывать</b><em>23</em><i></i><span>nash-atlas.ru</span></div><div class="ga-fans">${["И","М","А"].map((x,i)=>`<span class="av" style="--i:${i}">${x}</span>`).join("")}<b>Я тоже хочу</b></div></div>`},
+  {since:8, t:"Где вы уже были",
+    m:"У мест три отметки: «Хотим», «Были» и «Дом». Побывали — нажмите на «Хотим» у места в списке, и оно станет «✓ Были». На картинке для сторис появится «Был в N странах, хочу ещё в M».",
+    art:()=>`<div class="ga ga-bn"><span class="ga-b1">Хотим</span><span class="ga-ar">→</span><span class="ga-b2">✓ Были</span></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
   {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты. По городу или аэропорту откроется его страна."},
   {since:2, sel:{m:'#tabbar [data-tab="countries"]',d:"#cfq"}, t:"Страны", m:"Список стран с фильтрами: без визы, по прилёте, только безопасные."},
   {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
-  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим» и «Дом»."},
+  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим», «Были» и «Дом»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
   {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
   {since:7, sel:{m:"#shareBtn",d:"#shareTop"}, t:"Поделиться", m:"Картинка для сторис с вашей картой и приглашение для друзей, чтобы отмечать места вместе."},
@@ -3078,10 +3099,17 @@ function byLoc(list){
 }
 function placeItem(p){
   const loc=placeLoc(p).line;
-  return `<div class="item"><div class="t"><span class="pl-th" data-th="${esc(p.id)}" aria-hidden="true">${flagImg(p.k)||""}</span><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span>${p.status?`<span class="badge" style="--c:${pinOf(p.status).c}">${esc(pinOf(p.status).label)}${fansOf(p).length>1?` · ${fansOf(p).length}`:""}</span>`:""}</div>
+  return `<div class="item"><div class="t"><span class="pl-th" data-th="${esc(p.id)}" aria-hidden="true">${flagImg(p.k)||""}</span><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span>${(p.status==="want"||p.status==="been")&&S.db&&S.canWrite?`<button class="badge bsw" data-been="${esc(p.id)}" style="--c:${pinOf(p.status).c}" aria-pressed="${p.status==="been"}" title="${p.status==="been"?"Вернуть в «Хотим»":"Нажмите, когда побываете"}">${p.status==="been"?"✓ Были":"Хотим"}${p.status==="want"&&fansOf(p).length>1?` · ${fansOf(p).length}`:""}</button>`:p.status?`<span class="badge" style="--c:${pinOf(p.status).c}">${esc(pinOf(p.status).label)}</span>`:""}</div>
   ${p.tags?.length||p.note?`<div class="meta">${esc([p.tags?.join(", "),p.note?.slice(0,90)].filter(Boolean).join(" · "))}</div>`:""}</div>`;
 }
-function bindPlaceLinks(){document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>select({type:"place",id:b.dataset.place},true));bindThumbs()}
+function bindPlaceLinks(){document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>select({type:"place",id:b.dataset.place},true));bindThumbs();
+  document.querySelectorAll("[data-been]").forEach(b=>b.onclick=()=>{const p=S.places.get(b.dataset.been);if(!p)return;const st=p.status==="been"?"want":"been";
+    setPlaceStatus(p,st);b.setAttribute("aria-pressed",st==="been");b.style.setProperty("--c",pinOf(st).c);b.textContent=st==="been"?"✓ Были":"Хотим";b.title=st==="been"?"Вернуть в «Хотим»":"Нажмите, когда побываете";
+    b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");if(st==="been")status(`«${p.name}» — отмечено, что вы тут были`,2200)})}
+// change a place's mark from a list (the place card saves through its own form)
+function setPlaceStatus(p,st){if(!S.db||!S.canWrite)return;const cur={...(S.places.get(p.id)||p),status:st};const {id,seed,...rest}=cur;
+  S.dbPlaces.set(p.id,{...(S.dbPlaces.get(p.id)||{}),...cur});rebuildPlaces();scheduleOverlay();
+  S.db.doc("places/"+p.id).set({...rest,edited:Date.now(),...(st==="been"?{beenAt:Date.now()}:{})}).catch(()=>status("Не получилось сохранить"))}
 
 function factsBlock(k){
   const m=S.meta[k]; if(!m) return "";
@@ -3496,7 +3524,9 @@ function subscribePlaces(){
     if(!snap.metadata.fromCache) clearTimeout(to);
     S.dbPlaces=new Map(snap.docs.map(d=>[d.id,{id:d.id,...d.data()}])); rebuildPlaces();
     scheduleOverlay();
-    if(S.sel.type==="home") renderHome();
+    // «Мои места» open: redraw only when places were added or removed (a changed mark is already shown), keeping the scroll
+    if(S.tab==="places"){const ids=[...S.places.keys()].join();if(ids!==S._plIds){S._plIds=ids;const sc=$("#pbody").scrollTop;renderPlacesTab();$("#pbody").scrollTop=sc}}
+    else if(S.tab!=="profile"&&S.sel.type==="home") renderHome();
   },e=>{clearTimeout(to);status("Наши места сейчас недоступны",6000)});
 }
 
@@ -3614,7 +3644,7 @@ const ALIAS={US:["сша","америка","штаты"],GB:["британия",
 const AREA_WORDS=[["европ",["europe"]],["африк",["africa"]],["азия",["southasia","eastasia","sea","rusca"]],["азии",["southasia","eastasia","sea","rusca"]],["юго восточн",["sea"]],["восточная азия",["eastasia"]],["южная азия",["southasia"]],["ближний восток",["mideast"]],["кавказ",["mideast"]],["средняя азия",["rusca"]],["центральная азия",["rusca"]],["океани",["oceania"]],["латинск",["camerica","samerica"]],["южная америк",["samerica"]],["северная америк",["namerica"]],["центральная америк",["camerica"]],["кариб",["camerica"]],["америк",["namerica","camerica","samerica"]]];
 const ENTRY_WORDS=[["без виз",["F"]],["безвиз",["F"]],["виза не нужна",["F"]],["по прилет",["A"]],["на границе",["A"]],["электронн",["E","V"]],["e visa",["V"]],["евиз",["V"]],["онлайн",["E","V"]],["нужна виза",["R"]],["визов",["R"]],["закрыт",["X"]],["легкий въезд",["F","E","A"]],["просто въехать",["F","E","A"]]];
 const SAFE_WORDS=[["безопасн",[1]],["спокойн",[1]],["осторожн",[2]],["опасн",[3,4]],["не ехать",[4]],["воюет",[4]],["война",[4]]];
-const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["дом",["home"]]];
+const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["были",["been"]],["был",["been"]],["дом",["home"]]];
 let SIX=null;
 const SYN={пляж:["beach","playa","praia","plage","plaj","strand","spiaggia"],музей:["museum","muzesi","musee","museo"],храм:["temple","wat","church","pagoda"],водопад:["waterfall","falls","selale"],озеро:["lake","lago","golu","gol"],гора:["mount","mountain","dag","peak"],парк:["park","parque"],рынок:["market","bazaar","bazar","mercado","pazar"],кофе:["coffee","cafe","kahve"],кафе:["cafe","coffee"],замок:["castle","kale","castillo","schloss"],собор:["cathedral","catedral"],мечеть:["mosque","camii","masjid"],остров:["island","isla","koh","ada"],пещера:["cave","cueva","magara"],каньон:["canyon","kanyon"],вулкан:["volcano","volcan"],дворец:["palace","palacio","saray"],монастырь:["monastery","monastir"],мост:["bridge","kopru","puente"],ресторан:["restaurant"],бар:["bar","pub"],смотровая:["viewpoint","mirador"],крепость:["fortress","fort","kalesi"],сад:["garden","bahce"],пустыня:["desert"],заповедник:["reserve","national park"]};
 const synOf=t=>{const out=[t];for(const [k,v] of Object.entries(SYN))if(t.startsWith(k.slice(0,Math.max(4,k.length-1)))||k.startsWith(t)&&t.length>=4)out.push(k,...v);return [...new Set(out)]};
@@ -3722,7 +3752,7 @@ function searchAll(raw){
 }
 function countryHint(k){const c=legendCode(codeFor(k)), sf=safeOf(k), n=placesIn(p=>p.k===k).length;
   return [ST[c]?.label,sf?.l?SAFE[sf.l].label.toLowerCase():"",n?`${n} ${ruPlural(n,"место","места","мест")}`:""].filter(Boolean).join(" · ")}
-const QUICK=[["без визы","Без визы вдвоём"],["без визы безопасно","Без визы и спокойно"],["хотим","Где хотим побывать"],["пляж","Пляжи"],["безвиз европа","Безвиз в Европе"],["евро","Страны с евро"],["испанский","Говорят по-испански"],["не ехать","Куда лучше не ехать"]];
+const QUICK=[["без визы","Без визы вдвоём"],["без визы безопасно","Без визы и спокойно"],["хотим","Где хотим побывать"],["были","Где уже были"],["пляж","Пляжи"],["безвиз европа","Безвиз в Европе"],["евро","Страны с евро"],["испанский","Говорят по-испански"],["не ехать","Куда лучше не ехать"]];
 function suggestions(){let recent=[];try{recent=JSON.parse(localStorage.getItem("atlas-recent")||"[]")}catch(e){}
   return [...recent.slice(0,4).map(r=>({g:"Недавние",t:r,ic:"recent",s:"",fill:r,sc:0})),...QUICK.map(([q,t])=>({g:"Попробуй",t,ic:"spark",s:q,fill:q,sc:1}))]}
 let resSel=-1,resArr=[];
