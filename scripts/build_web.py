@@ -50,6 +50,19 @@ head='''<meta name="theme-color" content="#13213a">
 <link rel="preload" href="data/countries.json?v=%s" as="fetch" crossorigin>
 ''' % ver
 html=html.replace('<title>Наш атлас</title>','<title>Наш атлас</title>\n'+head)
+# Content-Security-Policy: the browser runs only our own scripts (plus the hashed inline ones and, after consent,
+# Yandex Metrika / ads). A missed escape somewhere then cannot run injected code. New outside hosts go here.
+import hashlib,base64
+hashes=' '.join("'sha256-%s'"%base64.b64encode(hashlib.sha256(b.encode()).digest()).decode() for b in re.findall(r'<script>([\s\S]*?)</script>',html))
+YA='https://yandex.ru https://*.yandex.ru https://*.yandex.net https://yastatic.net https://*.yandexadexchange.net https://yandexadexchange.net'
+CSP=("default-src 'self'; "
+  f"script-src 'self' {hashes} https://mc.yandex.ru {YA} https://accounts.google.com/gsi/client; "
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; "
+  "img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' data: blob:; "
+  f"connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.wikipedia.org https://commons.wikimedia.org https://nominatim.openstreetmap.org https://mc.yandex.ru {YA} https://accounts.google.com; "
+  f"frame-src {YA} https://accounts.google.com; worker-src 'self' blob:; manifest-src 'self'; "
+  "object-src 'none'; base-uri 'self'; form-action 'self'")
+html=html.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="%s">'%CSP,1)
 open(OUT+'index.html','w',encoding='utf-8').write(html)
 
 # data, minified
@@ -62,8 +75,10 @@ for f in sorted(os.listdir(S+'data')):
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
 
 shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
-shutil.copy(SRC+'privacy.html',OUT+'privacy.html')
-shutil.copy(SRC+'terms.html',OUT+'terms.html')
+for f in ('privacy.html','terms.html'):
+  t=open(SRC+f,encoding='utf-8').read()
+  t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)
+  open(OUT+f,'w',encoding='utf-8').write(t)
 for f in ['icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']: shutil.copy(SRC+f,OUT+'icons/'+f)
 json.dump({"name":"Наш атлас","short_name":"Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
   "lang":"ru","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",

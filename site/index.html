@@ -1355,6 +1355,9 @@ const S = {pass:(()=>{try{const a=JSON.parse(localStorage.getItem("atlas-pass")|
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// links and pictures that came from people (a place's link, a photo): only http(s), and pictures also as data:image.
+// esc() alone is not enough for an href: «javascript:…» has nothing to escape and would run on click.
+const safeUrl=(u,img)=>{u=String(u??"").trim();if(/^https?:\/\//i.test(u))return u;if(img&&/^data:image\/(png|jpe?g|webp|gif);base64,[a-z0-9+\/=\s]+$/i.test(u))return u;return ""};
 function fnv(str){let h=0x811c9dc5;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193)}return (h>>>0).toString(36)}
 function slugId(prefix,key){return prefix+"-"+fnv(key)}
 function status(msg,ms=2600){const el=$("#status");el.textContent=msg;el.classList.add("on");clearTimeout(status.t);if(ms)status.t=setTimeout(()=>el.classList.remove("on"),ms)}
@@ -3460,7 +3463,7 @@ function renderPlace(p){
     <section class="blk"><h2>Заметка <span class="saved" id="pSaved"></span></h2><textarea class="note" id="pNote" ${ro?"disabled":""}>${esc(p.note||"")}</textarea></section>
     ${p.why?`<section class="blk"><h2>Почему Claude советовал</h2><p style="margin:0">${esc(p.why)}</p></section>`:""}
     <section class="blk"><div class="row2">
-      <a class="btn small" href="${p.url?esc(p.url):gmapsSearch(p.name+(p.city?", "+p.city:""))}" target="_blank" rel="noopener">Открыть в Google Картах</a>
+      <a class="btn small" href="${safeUrl(p.url)?esc(safeUrl(p.url)):gmapsSearch(p.name+(p.city?", "+p.city:""))}" target="_blank" rel="noopener">Открыть в Google Картах</a>
       <button class="btn small" id="pMove" ${ro?"disabled":""}>Передвинуть точку</button>
       <button class="btn small ghost" id="pDel" ${ro?"disabled":""}>Удалить</button></div>
       <div class="hint">${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}${p.approx?" · точку подобрал Claude по названию, она может быть неточной":""}</div>
@@ -3494,7 +3497,7 @@ function galleryHTML(p,dbItems){
   const canUp=!!S.assets&&S.canWrite;
   const gq=gmapsSearch(p.name+(p.city?", "+p.city:"")+(S.cByK.get(p.k)?", "+S.cByK.get(p.k).properties.en:""));
   if(!list.length) return `<div class="nophoto" style="--c:${pinOf(p.status).c}"><span class="big">${S.meta[p.k]?.flag||"📍"}</span><div class="acts">${canUp?`<button class="btn small" id="phAdd">Добавить фото</button>`:""}<a class="btn small" href="${gq}" target="_blank" rel="noopener">Фото в Google Картах</a></div></div><input type="file" id="phFile" accept="image/*" multiple hidden>${canUp?`<div class="hint" style="margin-top:6px">Фото из интернета: скопируй картинку и нажми Ctrl+V (⌘V) здесь или перетащи её в карточку.</div>`:""}`;
-  return `<div class="gallery">${list.map((x,i)=>`<button class="ph" data-ph="${i}" aria-label="Открыть фото ${i+1}"><img src="${esc(x.url)}" alt="${esc(p.name)}" loading="lazy"></button>`).join("")}${canUp?`<button class="add" id="phAdd"><span style="font-size:22px">+</span>Добавить фото</button>`:""}</div><input type="file" id="phFile" accept="image/*" multiple hidden>
+  return `<div class="gallery">${list.map((x,i)=>`<button class="ph" data-ph="${i}" aria-label="Открыть фото ${i+1}"><img src="${esc(safeUrl(x.url,1))}" alt="${esc(p.name)}" loading="lazy"></button>`).join("")}${canUp?`<button class="add" id="phAdd"><span style="font-size:22px">+</span>Добавить фото</button>`:""}</div><input type="file" id="phFile" accept="image/*" multiple hidden>
   <div class="row2"><a class="btn small ghost" href="${gq}" target="_blank" rel="noopener">Больше фото в Google Картах</a></div>${canUp?`<div class="hint">Фото из интернета: скопируй картинку и нажми Ctrl+V (⌘V) здесь или перетащи её в карточку.</div>`:""}`;
 }
 function bindGallery(p,dbItems){
@@ -3535,7 +3538,7 @@ function loadMedia(p){
     $("#pMedia").innerHTML=galleryHTML(p,items); bindGallery(p,items);
   },()=>{});
 }
-function openLB(i){if(!lbList.length)return;lbI=(i+lbList.length)%lbList.length;$("#lbImg").src=lbList[lbI].url;$("#lbCap").textContent=lbList[lbI].cap+(lbList.length>1?` · ${lbI+1} из ${lbList.length}`:"");$("#lb").classList.add("on");$("#lbP").hidden=$("#lbN").hidden=lbList.length<2}
+function openLB(i){if(!lbList.length)return;lbI=(i+lbList.length)%lbList.length;$("#lbImg").src=safeUrl(lbList[lbI].url,1);$("#lbCap").textContent=lbList[lbI].cap+(lbList.length>1?` · ${lbI+1} из ${lbList.length}`:"");$("#lb").classList.add("on");$("#lbP").hidden=$("#lbN").hidden=lbList.length<2}
 function closeLB(){$("#lb").classList.remove("on")}
 async function loadDesc(p){
   if(descCtl){descCtl.abort();descCtl=null}
@@ -3578,7 +3581,7 @@ function sampleErr(e){
 }
 
 /* ---------- places: db ---------- */
-function placeDoc(p){return {name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:p.url||"",city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()}}
+function placeDoc(p){return {name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:safeUrl(p.url),city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()}}
 async function addPlace(p){
   const doc=placeDoc(p);
   if(!S.db){const id="local-"+Date.now()+Math.random().toString(36).slice(2,6);S.dbPlaces.set(id,{id,...doc});rebuildPlaces();scheduleOverlay();return id}
