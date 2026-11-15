@@ -230,7 +230,7 @@ a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
 
 /* panel */
 aside{background:var(--panel);border-left:1px solid var(--line);overflow:auto;position:relative}
-.p-inner{padding:20px 22px 40px;display:flex;flex-direction:column;gap:18px}
+.p-inner{--px:22px;padding:20px var(--px) 40px;display:flex;flex-direction:column;gap:18px}
 .backrow{margin:-4px 0 8px}
 .backbtn{display:inline-flex;align-items:center;gap:8px;max-width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 12px 7px 10px;color:inherit;font:700 13px var(--body);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .backbtn span{font-size:16px;line-height:1;color:#e9c46a}
@@ -444,7 +444,21 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .item .t{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .item .t b{font-weight:700}
 .item .meta{font-size:12.5px;color:var(--muted)}
-.pl-name{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pl-name{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.pl-th{flex:none;width:44px;height:44px;border-radius:10px;overflow:hidden;position:relative;background:var(--panel);display:grid;place-items:center}
+.pl-th>.fimg{width:18px;height:18px;border-radius:50%;opacity:.55}
+.pl-th>img:not(.fimg){position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity .35s ease,transform .6s var(--spring-soft)}
+.pl-th.on>img:not(.fimg){opacity:1;transform:none}
+.cgal{gap:10px}
+.cg{flex:none;width:148px;border:0;padding:0;background:none;text-align:left;scroll-snap-align:start;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
+.cg-ph{display:block;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(110deg,var(--panel-2) 30%,#22324b 50%,var(--panel-2) 70%) 0 0/300% 100%;animation:cgShim 1.4s linear infinite}
+.cg-ph.on,.cg-ph.none{animation:none;background:var(--panel-2)}
+.cg-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .4s ease,transform .7s var(--spring-soft)}
+.cg-ph.on img{opacity:1;transform:none}
+.cg:active .cg-ph img{transform:scale(.97)}
+.cg-n{font-weight:700;font-size:14px;line-height:1.2}
+.cg-s{font-size:12px;color:var(--muted);margin-top:-4px}
+@keyframes cgShim{to{background-position:-300% 0}}
 .pl-loc{font-size:12px;color:var(--muted);line-height:1.3}
 .item .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;align-items:center}
 .item button.plain{background:none;border:0;padding:0;text-align:left;font-weight:700}
@@ -469,7 +483,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--mu
 .close{position:absolute;right:12px;top:12px;background:none;border:0;font-size:20px;color:var(--muted);display:none}
 
 /* place media */
-.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -22px;padding:0 22px 4px;scrollbar-width:thin}
+.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 calc(-1*var(--px,22px));padding:0 var(--px,22px) 4px;scroll-padding-inline:var(--px,22px);scrollbar-width:thin}
 .gallery button.ph{flex:none;width:230px;height:160px;border-radius:14px;overflow:hidden;border:0;padding:0;background:var(--panel-2);scroll-snap-align:start;position:relative}
 .gallery button.ph:first-child{width:100%;max-width:340px}
 .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.22,.61,.36,1)}
@@ -606,6 +620,14 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-seg2 span:not(.lq){flex:1;text-align:center;position:relative;z-index:1;color:var(--muted);transition:color .3s ease}
 .ga-seg2 span.act{color:var(--ocean)}
 .ga-pass{display:grid;place-items:center}
+.ga-ph{display:flex;gap:10px;justify-content:center;padding-top:12px}
+.ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;opacity:0;transform:translateY(14px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-cg i{display:block;height:50px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.ga-cg b{font-size:12px;color:var(--ink)}
+.ga-row{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;opacity:0;animation:gaCg .7s var(--spring-soft) .6s forwards;transform:translateY(14px)}
+.ga-row i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
+.ga-row span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-row b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-row b+b{width:60%;background:#2a3b57}
+@keyframes gaCg{to{opacity:1;transform:none}}
 .ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFanL 4.2s var(--spring) infinite}
 .ga-pp:nth-child(2){animation-name:gaFanC;z-index:1}.ga-pp:nth-child(3){animation-name:gaFanR}
 .ga-pp:nth-child(2){background:linear-gradient(160deg,#20456e,#14263f);--x:0px;--r:0deg}.ga-pp:nth-child(3){background:linear-gradient(160deg,#1d6b5c,#123d35);--x:62px;--r:11deg}
@@ -704,7 +726,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   aside#panel{position:fixed;left:0;right:0;bottom:var(--tabh);height:calc(100dvh - var(--tabh) - var(--toph,104px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;z-index:9;
     transform:translateY(var(--off,0px));transition:transform .34s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain;box-shadow:0 -12px 32px rgba(0,0,0,.35)}
   aside#panel.dragging{transition:none}
-  aside#panel .p-inner{padding:2px 18px calc(var(--padb,0px) + 28px)}
+  aside#panel .p-inner{--px:18px;padding:2px var(--px) calc(var(--padb,0px) + 28px)}
   .grab{display:block;position:sticky;top:0;z-index:3;height:26px;margin-bottom:-4px;background:linear-gradient(var(--panel) 70%,transparent);touch-action:none;cursor:grab}
   .grab::before{content:"";position:absolute;left:50%;top:9px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#3a4c69}
   .close{display:none!important}
@@ -964,6 +986,58 @@ function ensureWiki(p){
   })().finally(()=>wikiPending.delete(p.id));
   wikiPending.set(p.id,pr); return pr;
 }
+
+/* Wikimedia serves thumbnails at fixed widths; ask for the nearest one instead of the 900px original */
+function wthumb(u,w){return String(u||"").replace(/\/(\d+)px-([^/?]+)(\?.*)?$/,(m,n,f,q)=>+n>w?`/${w}px-${f}${q||""}`:m)}
+function fadeImg(box,u,full){const im=new Image();im.decoding="async";im.alt="";
+  im.onload=()=>{box.appendChild(im);requestAnimationFrame(()=>box.classList.add("on"))};
+  im.onerror=()=>{if(full&&im.src!==full){im.src=full}else box.classList.add("none")};im.src=u}
+/* a long list asks Wikipedia about three places at a time */
+const wikiQ=[]; let wikiRun=0;
+function wikiSoon(p){return new Promise(res=>{wikiQ.push([p,res]);wikiPump()})}
+function wikiPump(){while(wikiRun<3&&wikiQ.length){const [p,res]=wikiQ.shift();wikiRun++;ensureWiki(p).catch(()=>{}).finally(()=>{wikiRun--;res();wikiPump()})}}
+/* one small photo per place in the lists, loaded when the row scrolls into view */
+let thumbIO=null;
+function bindThumbs(){
+  const els=document.querySelectorAll(".pl-th[data-th]:not([data-b])"); if(!els.length) return;
+  if(!thumbIO&&"IntersectionObserver" in window) thumbIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){thumbIO.unobserve(e.target);loadThumb(e.target)}}),{rootMargin:"300px 0px"});
+  els.forEach(el=>{el.dataset.b="1";const u=S.media?.[el.dataset.th]?.ph?.[0];if(u)fadeImg(el,wthumb(u,250),u);else if(thumbIO)thumbIO.observe(el);else loadThumb(el)});
+}
+function loadThumb(el){const p=S.places.get(el.dataset.th);if(!p||!STANDALONE)return;
+  wikiSoon(p).then(()=>{if(!el.isConnected)return;const u=S.media?.[p.id]?.ph?.[0];if(u)fadeImg(el,wthumb(u,250),u);else el.classList.add("none")})}
+/* country card: photos of the capital and the largest cities, from their Wikipedia articles */
+function topCities(k){const all=S.citiesByIso?.get(k)||[];
+  return [...all.filter(c=>c[8]===1).slice(0,1),...all.filter(c=>c[8]!==1).sort((a,b)=>(b[6]||0)-(a[6]||0))].slice(0,6)}
+function cityPhotosHTML(k){const cs=topCities(k); if(!cs.length) return "";
+  return `<div class="gallery cgal" role="list" aria-label="Города">${cs.map(c=>`<button class="cg" role="listitem" data-city="${esc(cityKey(c))}"><span class="cg-ph"></span><span class="cg-n">${esc(c[0])}</span>${c[8]===1?`<span class="cg-s">столица</span>`:""}</button>`).join("")}</div>`}
+const cphMem=new Map();
+async function cityPhotos(k){
+  if(cphMem.has(k)) return cphMem.get(k);
+  const key="atlas-cph:"+k;
+  try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.at<1000*3600*24*60){cphMem.set(k,c.ph);return c.ph}}catch(e){}
+  const cs=topCities(k), ph={}, e0=wqErr;
+  // ask each language once for all the cities: English names first, then Russian ones for what is left
+  for(const [L,col] of [["en",1],["ru",0]]){
+    const left=cs.filter(c=>!ph[cityKey(c)]&&c[col]); if(!left.length) break;
+    try{const j=await wq(L+".wikipedia.org",{prop:"pageimages|coordinates|pageprops",ppprop:"disambiguation",piprop:"thumbnail",pithumbsize:"500",pilimit:"20",colimit:"20",redirects:"1",titles:left.map(c=>c[col]).join("|")});
+      const to=new Map(); [...(j.query?.normalized||[]),...(j.query?.redirects||[])].forEach(x=>to.set(x.from,x.to));
+      const pages=new Map(Object.values(j.query?.pages||{}).map(x=>[x.title,x]));
+      for(const c of left){let t=c[col];for(let i=0;i<3&&to.has(t);i++)t=to.get(t);const pg=pages.get(t);
+        if(!pg||"missing" in pg||pg.pageprops?.disambiguation!==undefined||!pg.thumbnail?.source) continue;
+        // a city, not its province or emirate; a photo, not a flag or a locator map
+        if(/province|emirate|governorate|prefecture|county|department|region|oblast|провинция|эмират|область|губернаторство/i.test(pg.title)||/\.svg|flag|map|locator|karte|карта/i.test(pg.thumbnail.source)) continue;
+        const co=pg.coordinates?.[0]; if(co&&distKm(c[2],c[3],co.lat,co.lon)>60) continue;
+        ph[cityKey(c)]={u:pg.thumbnail.source,t:`https://${L}.wikipedia.org/wiki/`+encodeURIComponent(pg.title.replace(/ /g,"_"))}}
+    }catch(e){}
+  }
+  if(!Object.keys(ph).length&&wqErr>e0) return ph; // offline: try again next time
+  cphMem.set(k,ph); try{localStorage.setItem(key,JSON.stringify({at:Date.now(),ph}))}catch(e){}
+  return ph;
+}
+function fillCityPhotos(k){const box=document.querySelector(".cgal"); if(!box||!STANDALONE) return;
+  cityPhotos(k).then(ph=>{if(!box.isConnected)return;box.querySelectorAll(".cg").forEach(b=>{const x=ph[b.dataset.city],el=b.querySelector(".cg-ph");if(!el||el.dataset.b)return;el.dataset.b="1";
+    if(x){fadeImg(el,x.u);b.title=b.querySelector(".cg-n").textContent+" · фото из Википедии"}else b.remove()});
+    if(!box.querySelector(".cg"))box.remove()})}
 
 /* ---------- state ---------- */
 const S = {pass:(()=>{try{const a=JSON.parse(localStorage.getItem("atlas-pass")||"null");if(Array.isArray(a)&&a.length)return a;const m=localStorage.getItem("atlas-mode");if(m==="ru"||m==="by")return [m]}catch(e){}return ["ru","by"]})(), layer:(()=>{try{return localStorage.getItem("atlas-layer")==="safe"?"safe":"entry"}catch(e){return "entry"}})(), sel:{type:"home"}, area:null, areaGeo:new Map(), countries:[], cByK:new Map(), adm:null, cities:[], meta:{}, visa:null,
@@ -2110,7 +2184,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=3;
+const GUIDE_VER=4;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2137,6 +2211,9 @@ const GUIDE=[
     mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны, все они собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах.",
     art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("plus",22)}</i></div>`,
     run:r=>{if(!MOB())gaPinScene(r)}},
+  {since:4, t:"Фото городов и мест",
+    m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
+    art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-row"><i></i><span><b></b><b></b></span></div></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -2688,10 +2765,10 @@ function byLoc(list){
 }
 function placeItem(p){
   const loc=placeLoc(p).line;
-  return `<div class="item"><div class="t"><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span><span class="badge" style="--c:${PIN[p.status]?.c}">${esc(PIN[p.status]?.label||"")}</span></div>
+  return `<div class="item"><div class="t"><span class="pl-th" data-th="${esc(p.id)}" aria-hidden="true">${flagImg(p.k)||""}</span><span class="pl-name"><button class="plain" data-place="${esc(p.id)}">${esc(p.name)}</button>${loc?`<span class="pl-loc">${esc(loc)}</span>`:""}</span><span class="badge" style="--c:${PIN[p.status]?.c}">${esc(PIN[p.status]?.label||"")}</span></div>
   ${p.tags?.length||p.note?`<div class="meta">${esc([p.tags?.join(", "),p.note?.slice(0,90)].filter(Boolean).join(" · "))}</div>`:""}</div>`;
 }
-function bindPlaceLinks(){document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>select({type:"place",id:b.dataset.place},true))}
+function bindPlaceLinks(){document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>select({type:"place",id:b.dataset.place},true));bindThumbs()}
 
 function factsBlock(k){
   const m=S.meta[k]; if(!m) return "";
@@ -2877,6 +2954,7 @@ function renderCountry(k){
   $("#pbody").innerHTML=`
     ${crumbs([{t:"Весь мир",go:{type:"home"}},{t:f.properties.ru}])}
     <div class="p-head"><div class="flag">${m.flag||(S.flags?.[k]?`<img src="${S.flags[k]}" alt="" style="width:40px;height:40px;border-radius:50%">`:"")}</div><div class="grow"><h1>${esc(f.properties.ru)}</h1><p>${esc(f.properties.en)}${m.sub?" · "+esc(subRu(m.sub)):""}</p></div></div>
+    ${cityPhotosHTML(k)}
     ${entryBlock(k)}
     ${safetyBlock(k)}
     ${k==="XK"||k==="RS"?`<section class="blk"><div class="warn-box"><span class="wi">!</span><div><b>Важно для маршрута: Косово → Сербия</b><p>${esc(WARN[0].text)}</p></div></div></section>`:""}
@@ -2889,7 +2967,7 @@ function renderCountry(k){
     ${cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""}
     <section class="blk"><h2>Регионы <span>${regs.length||""}</span></h2>${regs.length?`<div class="chips">${regs.slice(0,80).map(r=>`<button class="chip link" data-reg="${esc(r.properties.id)}">${esc(r.properties.ru)}</button>`).join("")}</div>`:`<p class="empty">${S.adm?"Регионов в данных нет":"Загружаю регионы…"}</p>`}</section>
     ${vibeBlock({kind:"country",key:k,label:f.properties.ru,ctx:f.properties.ru})}`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();
+  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);
   document.querySelectorAll("[data-reg]").forEach(b=>b.onclick=()=>ensureAdm().then(()=>select({type:"region",id:b.dataset.reg},true)));
   if(!S.adm) ensureAdm().then(()=>{if(S.sel.type==="country"&&S.sel.k===k) renderCountry(k)});
 }
