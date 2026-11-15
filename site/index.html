@@ -189,6 +189,7 @@ body.hastiles .c-dot{fill:#fff;stroke:#14213a}
 .results .rb.warn{width:18px;height:18px;display:grid;place-items:center;font:800 11px var(--body);color:#14213a}
 .results .rf{background:linear-gradient(90deg,rgba(255,138,91,.16),transparent)}
 .results .rf .ri{background:#ff8a5b;color:#14213a;font-weight:900}
+.results .rfoot a{color:inherit}
 .results .rfoot{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--muted);padding:9px 14px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--panel)}
 #fpill{position:absolute;left:50%;top:76px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;background:#ff8a5b;color:#14213a;font:700 13px var(--body);border-radius:999px;padding:6px 6px 6px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:70%}
 #fpill span{cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -820,7 +821,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .search{display:none;flex:1 1 0;max-width:none}
   .topbar.searching{z-index:13}
   .topbar.searching .search{display:flex;gap:8px;align-items:center}
-  .rfoot{display:none!important}
+  .rfoot:not(.osm){display:none!important}
   .topbar.searching .brand,.topbar.searching .srchbtn,.topbar.searching .sharebtn{display:none}
   .srch-x{display:block;order:2;background:none;border:0;color:var(--ink);font-weight:600;padding:8px 4px;white-space:nowrap}
   .search input{padding:10px 12px;font-size:16px}
@@ -2564,7 +2565,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=10;
+const GUIDE_VER=11;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2610,12 +2611,15 @@ const GUIDE=[
     m:"Вставьте в «+ Место» любую ссылку Google Карт или Яндекс Карт, даже короткую: точка и название найдутся сами.",
     mob:"В Google Картах или Яндекс Картах нажмите «Поделиться» у места: на Android выберите «Атлас» (после «Установить приложение»), на iPhone скопируйте ссылку и вставьте в «+ Место». Точка и название найдутся сами. Подробности — в Профиле.",
     art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Поделиться</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
+  {since:11, t:"Любое место через поиск",
+    m:"Наберите в поиске музей, пляж, парк или улицу и выберите «Найти на карте мира». Нажмите на найденное место, и оно откроется в «+ Место» с готовой точкой.",
+    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Лувр</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
-  {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты. По городу или аэропорту откроется его страна."},
+  {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты, а через «Найти на карте мира» — любое место: музей, пляж, парк."},
   {since:2, sel:{m:'#tabbar [data-tab="countries"]',d:"#cfq"}, t:"Страны", m:"Список стран с фильтрами: без визы, по прилёте, только безопасные."},
-  {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
+  {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт, через поиск или точкой на карте."},
   {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим» и «Были»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
   {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
@@ -3835,16 +3839,48 @@ function searchAll(raw){
   const by={};out.sort((a,b)=>a.sc-b.sc).forEach(x=>{(by[x.g]=by[x.g]||[]).push(x)});
   const order=G.filter(g=>by[g]).sort((a,b)=>(a==="Показать на карте"?-9:by[a][0].sc)-(b==="Показать на карте"?-9:by[b][0].sc));
   const res=[];order.forEach(g=>by[g].slice(0,LIM[g]).forEach(x=>res.push(x)));
+  // any place in the world: a search on OpenStreetMap, only when asked (Nominatim allows no search-as-you-type)
+  const wq=rest.trim();
+  if(wq.length>=3){const w=WORLD.get(nz(wq));
+    if(w&&w!=="wait"&&w.length) w.forEach(x=>res.push(x));
+    else res.push({g:"В мире",t:w==="wait"?"Ищу…":w?`Ничего не нашлось на карте мира`:`Найти «${wq}» на карте мира`,s:w?"":"музеи, пляжи, парки, улицы, кафе",ic:"globe",world:wq,sc:50});}
   if(!res.length) res.push({g:"",t:"Ничего не нашлось",s:"попробуй «без визы европа», «пляж таиланд», «хотим», «безопасно»",ic:"none",sel:null,sc:9});
   return res;
 }
+// search results from OpenStreetMap (Nominatim), kept for the session: query → items | "wait"
+const WORLD=new Map();
+const OSM_T={museum:"музей",gallery:"галерея",attraction:"достопримечательность",viewpoint:"смотровая площадка",artwork:"арт-объект",zoo:"зоопарк",theme_park:"парк развлечений",aquarium:"океанариум",
+  beach:"пляж",peak:"вершина",volcano:"вулкан",waterfall:"водопад",cave_entrance:"пещера",bay:"залив",island:"остров",islet:"остров",lake:"озеро",water:"водоём",spring:"источник",glacier:"ледник",cape:"мыс",
+  castle:"замок",fort:"крепость",ruins:"руины",monument:"памятник",memorial:"мемориал",archaeological_site:"раскопки",palace:"дворец",place_of_worship:"храм",church:"церковь",cathedral:"собор",mosque:"мечеть",temple:"храм",monastery:"монастырь",
+  park:"парк",garden:"сад",nature_reserve:"заповедник",national_park:"национальный парк",protected_area:"охраняемая территория",square:"площадь",pedestrian:"пешеходная улица",
+  restaurant:"ресторан",cafe:"кафе",bar:"бар",pub:"паб",fast_food:"фастфуд",hotel:"отель",hostel:"хостел",guest_house:"гостевой дом",camp_site:"кемпинг",
+  city:"город",town:"город",village:"посёлок",hamlet:"деревня",suburb:"район",neighbourhood:"квартал",
+  aerodrome:"аэропорт",station:"станция",ski:"горнолыжный курорт",winter_sports:"горнолыжный курорт",stadium:"стадион",theatre:"театр",marketplace:"рынок",mall:"торговый центр",university:"университет",bridge:"мост",lighthouse:"маяк",tower:"башня"};
+async function worldSearch(q){const key=nz(q);if(WORLD.get(key)&&WORLD.get(key)!=="wait")return;WORLD.set(key,"wait");
+  let items=[];
+  try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&accept-language=ru&q=${encodeURIComponent(q)}`);
+    if(r.ok){const j=await r.json();const seen=new Set();
+      for(const x of j){const lat=+x.lat,lng=+x.lon;if(!isFinite(lat)||!isFinite(lng))continue;
+        const a=x.address||{},name=x.name||String(x.display_name||"").split(",")[0];const id=name+"|"+lat.toFixed(3)+"|"+lng.toFixed(3);if(!name||seen.has(id))continue;seen.add(id);
+        const where=a.city||a.town||a.village||a.municipality||a.county||a.state||"";const k=countryOf(lat,lng);
+        items.push({g:"В мире · OpenStreetMap",t:name,k,ic:k?"city":"globe",s:[OSM_T[x.type]||OSM_T[x.addresstype]||"",where!==name?where:"",a.country||""].filter(Boolean).join(" · "),wsel:{name,lat,lng,k,type:x.type},sc:51})}}}catch(e){}
+  WORLD.set(key,items.length?items:[]);
+  if(nz(parseQuery($("#q").value).rest.trim())===key&&document.activeElement===$("#q")){resArr=searchAll($("#q").value);resSel=resArr.findIndex(x=>x.wsel);renderResults()}}
+// a place found in the world: show it on the map and open «+ Место» with it
+function addFromWorld(w){
+  if(w.k&&S.cByK.get(w.k))select({type:"country",k:w.k},false);
+  const big=/^(city|town|island|lake|national_park|nature_reserve|protected_area|bay|glacier)$/.test(w.type||"");
+  setTimeout(()=>zoomToPoint(w.lat,w.lng,TILES?(big?600:4000):(big?40:60)),60);
+  if(S.db&&!S.canWrite&&!writableMaps().length){status("У тебя доступ только на просмотр");return}
+  openAdd(); $("#addName").value=w.name; setAddLL(w.lat,w.lng);
+  $("#addParse").className="ok"; $("#addParse").textContent="Точка из поиска по карте мира. Ссылку можно не вставлять"}
 function countryHint(k){const c=legendCode(codeFor(k)), sf=safeOf(k), n=placesIn(p=>p.k===k).length;
   return [ST[c]?.label,sf?.l?SAFE[sf.l].label.toLowerCase():"",n?`${n} ${ruPlural(n,"место","места","мест")}`:""].filter(Boolean).join(" · ")}
 const QUICK=[["без визы","Без визы вдвоём"],["без визы безопасно","Без визы и спокойно"],["хотим","Где хотим побывать"],["были","Где уже были"],["пляж","Пляжи"],["безвиз европа","Безвиз в Европе"],["евро","Страны с евро"],["испанский","Говорят по-испански"],["не ехать","Куда лучше не ехать"]];
 function suggestions(){let recent=[];try{recent=JSON.parse(localStorage.getItem("atlas-recent")||"[]")}catch(e){}
   return [...recent.slice(0,4).map(r=>({g:"Недавние",t:r,ic:"recent",s:"",fill:r,sc:0})),...QUICK.map(([q,t])=>({g:"Попробуй",t,ic:"spark",s:q,fill:q,sc:1}))]}
 let resSel=-1,resArr=[];
-const RES_IC={filter:"◎",place:"",city:"●",region:"▦",list:"☰",tag:"#",recent:"↺",spark:"✦",none:"…"};
+const RES_IC={globe:"⌕",filter:"◎",place:"",city:"●",region:"▦",list:"☰",tag:"#",recent:"↺",spark:"✦",none:"…"};
 function hl(t,q){const n=nz(q).split(" ").filter(w=>w.length>1);if(!n.length)return esc(t);const low=nz(t);let best=-1,len=0;for(const w of n){const i=low.indexOf(w);if(i>=0&&w.length>len){best=i;len=w.length}}
   if(best<0||low.length!==t.length)return esc(t);return esc(t.slice(0,best))+"<mark>"+esc(t.slice(best,best+len))+"</mark>"+esc(t.slice(best+len))}
 function resIcon(x){
@@ -3855,6 +3891,7 @@ function renderResults(){const r=$("#results");const q=$("#q").value;let g0=null
   r.innerHTML=resArr.map((x,i)=>{const head=x.g!==g0?`<div class="rg">${esc(x.g)}</div>`:"";g0=x.g;
     const badge=x.ic==="country"?`<span class="rb" style="--c:${ST[legendCode(codeFor(x.k))]?.c}"></span>${safeOf(x.k)?.l?`<span class="rb" style="--c:${SAFE[safeOf(x.k).l].c}"></span>`:""}`:x.zone?.l>=3?`<span class="rb warn" style="--c:${SAFE[x.zone.l].c}" title="${esc(SAFE[x.zone.l].label)}">!</span>`:"";
     return `${head}<button role="option" class="${i===resSel?"hl":""}${x.ic==="filter"?" rf":""}" data-i="${i}">${resIcon(x)}<span class="rt"><span>${hl(x.t,q)}</span><small>${esc(x.s||"")}</small></span>${badge}</button>`}).join("")
+    +(resArr.some(x=>x.wsel)?`<div class="rfoot osm"><span>Данные © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span></div>`:"")
     +(resArr.length?`<div class="rfoot"><span>↑↓ выбрать · Enter открыть · Esc закрыть</span><span>/ — поиск</span></div>`:"");
   r.classList.toggle("on",resArr.length>0);
   r.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{e.preventDefault();pick(+b.dataset.i)});
@@ -3862,6 +3899,8 @@ function renderResults(){const r=$("#results");const q=$("#q").value;let g0=null
 function remember(q){q=q.trim();if(q.length<2)return;try{let r=JSON.parse(localStorage.getItem("atlas-recent")||"[]");r=[q,...r.filter(x=>x!==q)].slice(0,6);localStorage.setItem("atlas-recent",JSON.stringify(r))}catch(e){}}
 function pick(i){const x=resArr[i];if(!x)return;
   if(x.fill!=null){$("#q").value=x.fill;resArr=searchAll(x.fill);resSel=0;renderResults();return}
+  if(x.world){if(WORLD.get(nz(x.world))==null){worldSearch(x.world);resArr=searchAll($("#q").value);resSel=resArr.findIndex(y=>y.world);renderResults()}return}
+  if(x.wsel){remember($("#q").value);$("#q").value="";resArr=[];renderResults();$("#q").blur();if(typeof closeSearch==="function")closeSearch();addFromWorld(x.wsel);return}
   if(!x.sel)return;
   remember($("#q").value);$("#q").value="";resArr=[];renderResults();$("#q").blur();
   if(x.sel.type==="filter"){applyFilter(x.sel);return}
