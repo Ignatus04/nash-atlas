@@ -3860,7 +3860,7 @@ async function worldSearch(q){const key=nz(q);if(WORLD.get(key)&&WORLD.get(key)!
   // famous places first from Russian Wikipedia (it knows «Эрмитаж» is the museum), then anything else from OpenStreetMap
   const wiki=(async()=>{const out=[];try{const r=await fetch(`https://ru.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=8&prop=coordinates|description&coprimary=primary&format=json&formatversion=2&origin=*`);
     if(r.ok){const j=await r.json();for(const p of (j.query?.pages||[]).sort((a,b)=>a.index-b.index)){const c=p.coordinates?.[0];if(!c||c.globe&&c.globe!=="earth")continue;
-      const name=p.title.replace(/\s*\([^)]*\)$/,"");const k=countryOf(c.lat,c.lon);const d=String(p.description||"").replace(/\s+/g," ");
+      const pm=p.title.match(/^(.*?)\s*\(([^)]*)\)$/);const name=!pm?p.title:/^(пляж|озеро|гора|остров|вулкан|водопад|парк|музей|залив|мыс|пещера|храм|собор|монастырь)$/i.test(pm[2])?pm[2][0].toUpperCase()+pm[2].slice(1)+" "+pm[1]:pm[1];const k=countryOf(c.lat,c.lon);const d=String(p.description||"").replace(/\s+/g," ");
       out.push({g:"В мире",t:name,k,ic:k?"city":"globe",s:[d.length>70?d.slice(0,68)+"…":d,k&&!d.includes(S.cByK.get(k)?.properties.ru||"@@")?S.cByK.get(k)?.properties.ru:""].filter(Boolean).join(" · "),wsel:{name,lat:c.lat,lng:c.lon,k,type:/город|посёлок|село|остров|озеро|район|провинц|област|национальный парк/i.test(d)?"city":""},sc:51});if(out.length>=4)break}}}catch(e){}return out})();
   const osm=(async()=>{const out=[];try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&accept-language=ru&q=${encodeURIComponent(q)}`);
     if(r.ok){const j=await r.json();
