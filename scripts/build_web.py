@@ -60,7 +60,7 @@ CSP=("default-src 'self'; "
   f"script-src 'self' {hashes} https://mc.yandex.ru {YA} {SC} https://accounts.google.com/gsi/client; "
   "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style https://smartcaptcha.yandexcloud.net; "
   "img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' data: blob:; "
-  f"connect-src 'self' {SC} https://*.supabase.co wss://*.supabase.co https://*.wikipedia.org https://commons.wikimedia.org https://nominatim.openstreetmap.org https://mc.yandex.ru {YA} https://accounts.google.com; "
+  f"connect-src 'self' {SC} https://api.nash-atlas.ru wss://api.nash-atlas.ru https://*.supabase.co wss://*.supabase.co https://*.wikipedia.org https://commons.wikimedia.org https://nominatim.openstreetmap.org https://mc.yandex.ru {YA} https://accounts.google.com; "
   f"frame-src {YA} {SC} https://accounts.google.com; worker-src 'self' blob:; manifest-src 'self'; "
   "object-src 'none'; base-uri 'self'; form-action 'self'")
 html=html.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="%s">'%CSP,1)
@@ -76,6 +76,8 @@ for f in sorted(os.listdir(S+'data')):
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
 
 shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
+# the login email template: our own Supabase server fetches it from here (server/docker-compose.atlas.yml)
+os.makedirs(OUT+'email',exist_ok=True); shutil.copy(ROOT+'supabase/email/login.html',OUT+'email/login.html')
 for f in ('privacy.html','terms.html'):
   t=open(SRC+f,encoding='utf-8').read()
   t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)

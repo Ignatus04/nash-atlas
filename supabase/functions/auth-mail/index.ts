@@ -11,7 +11,8 @@
 // SUPABASE_URL and SUPABASE_DB_URL are provided by Supabase itself.
 import { Webhook } from "npm:standardwebhooks@1.0.0";
 
-const URL_ = Deno.env.get("SUPABASE_URL")!;
+// the public address (on our own server SUPABASE_URL is the internal gateway, not reachable from an email)
+const URL_ = Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL")!;
 const FROM = "=?UTF-8?B?" + btoa(String.fromCharCode(...new TextEncoder().encode("Наш атлас"))) + "?= <noreply@nash-atlas.ru>";
 const SUBJECT = "Код для входа в «Наш атлас»";
 const CORS = {
