@@ -34,7 +34,7 @@ assert gf; html=html.replace(gf.group(0),'')
 # styles and the app script out of the page
 st=re.search(r'<style>(.*?)</style>',html,re.S); css='\n'.join(faces)+'\n'+st.group(1)
 m=re.search(r'<script>\n"use strict";(.*?)</script>',html,re.S); js='"use strict";'+m.group(1)
-ver=hashlib.sha1((css+js+''.join(open(S+'data/'+f,'rb').read().hex()[:2000] for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
+ver=hashlib.sha1((css+js+open(SRC+'config.js').read()+''.join(open(S+'data/'+f,'rb').read().hex()[:2000] for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
 open(OUT+'app.css','w',encoding='utf-8').write(css)
 open(OUT+'app.js','w',encoding='utf-8').write(js)
 html=html.replace(st.group(0),f'<link rel="stylesheet" href="app.css?v={ver}">')
