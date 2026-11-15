@@ -8,11 +8,15 @@ W=/opt/atlas/migrate; mkdir -p $W; chmod 700 $W; cd $W
 say() { printf '\n\033[1;36m== %s\033[0m\n' "$*"; }
 PSQL="docker exec -i supabase-db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres -q"
 
-echo "Строка подключения к облачной базе: Supabase → кнопка Connect вверху → Session pooler → URI."
-echo "Вставьте её целиком, заменив [YOUR-PASSWORD] на пароль базы (ввод не отображается)."
-read -r -s -p "Строка подключения: " CLOUD </dev/tty; echo
-[[ "$CLOUD" == postgres* ]] || { echo "Это не похоже на строку подключения."; exit 1; }
-DUMP="docker run --rm -i --network host postgres:17 pg_dump"
+echo "Нужен пароль облачной базы Supabase (Project Settings → Database). Ввод не отображается."
+read -r -s -p "Пароль облачной базы: " PGPW </dev/tty; echo
+[ -n "$PGPW" ] || { echo "Пароль пустой."; exit 1; }
+# the pooler address and user of the cloud project; the password goes in an environment variable, not in a URL
+CLOUD="host=aws-1-eu-west-3.pooler.supabase.com port=5432 dbname=postgres user=postgres.hvqdjcpbevwuaymdrpye sslmode=require"
+DUMP="docker run --rm -i --network host -e PGPASSWORD postgres:17 pg_dump"
+export PGPASSWORD="$PGPW"
+echo "Проверяю пароль…"
+docker run --rm --network host -e PGPASSWORD postgres:17 psql "$CLOUD" -tAc "select 1" >/dev/null || { echo "Пароль не подошёл. Сбросьте его в Supabase (Project Settings → Database → Reset database password) и запустите снова."; exit 1; }
 
 say "Выгружаю из облака (схема public, пользователи, данные)"
 $DUMP "$CLOUD" --schema=public --schema-only --no-owner > schema.sql
