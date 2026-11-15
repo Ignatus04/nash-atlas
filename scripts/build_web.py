@@ -67,6 +67,7 @@ shutil.copy(SRC+'terms.html',OUT+'terms.html')
 for f in ['icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']: shutil.copy(SRC+f,OUT+'icons/'+f)
 json.dump({"name":"Наш атлас","short_name":"Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
   "lang":"ru","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",
+  "share_target":{"action":"./","method":"GET","params":{"title":"addtitle","text":"addtext","url":"add"}},
   "icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png"},
            {"src":"icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},
   open(OUT+'manifest.webmanifest','w',encoding='utf-8'),ensure_ascii=False,indent=1)

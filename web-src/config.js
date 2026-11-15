@@ -11,6 +11,8 @@ window.ATLAS_CFG = {
   metrikaId: "",
   // Yandex Advertising Network (RSYA) block ids, e.g. "R-A-1234567-1"; shown only after the visitor agrees to ad cookies. Empty: no ads.
   ads: { country: "", places: "" },
+  // iPhone shortcut that sends a shared map link to nash-atlas.ru/?add=… (iCloud link). Empty: the help shows copy-and-paste instead.
+  iosShortcut: "",
   // Google sign-in runs on our own page (shows nash-atlas.ru, not the Supabase address); same client as in Supabase
   googleClientId: "444988932037-ve1fbt66uu4vlmi6qkhmrjaq2761e594.apps.googleusercontent.com"
 };

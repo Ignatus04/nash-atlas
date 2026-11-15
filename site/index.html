@@ -496,6 +496,8 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .mapsw-r{margin-left:auto;font-size:12.5px;color:var(--muted);white-space:nowrap}.mapsw-c{color:var(--muted)}
 .mapsw-note{margin:-6px 0 0;font-size:13px;line-height:1.4;color:#ffd166}
 .mp-opt.on{border-color:var(--accent)}#mpNew{display:inline-flex;align-items:center;gap:8px}
+.hm-ol{margin:6px 0 12px;padding-left:20px}.hm-ol li{margin-bottom:6px;line-height:1.45}
+#fmBox h3{font-size:15px;margin:16px 0 4px}
 .lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .rg-list{display:flex;flex-direction:column;gap:6px}
 .rg-list.short>.rg:nth-child(n+7){display:none}
@@ -1450,6 +1452,10 @@ function oauthErrorFromUrl(){const u=new URL(location.href),h=new URLSearchParam
   if(!e) return; ["error","error_code","error_description"].forEach(k=>u.searchParams.delete(k));
   history.replaceState(null,"",u.pathname+(u.search||""));
   setTimeout(()=>status(/access_denied|denied/i.test(e)?"Вход отменён.":"Войти не получилось. Попробуйте ещё раз или войдите по почте.",6000),800)}
+function addFromUrl(){const u=new URL(location.href),q=u.searchParams;
+  const t=[q.get("add"),q.get("addtext"),q.get("addtitle")].filter(Boolean); if(!t.length) return;
+  ["add","addtext","addtitle"].forEach(k=>q.delete(k)); history.replaceState(null,"",u.pathname+(q.toString()?"?"+q:"")+u.hash);
+  const sp=splitShared(t.join("\n")); setTimeout(()=>{openAdd();const i=$("#addUrl");if(!i)return;i.value=sp.url;if(sp.name)$("#addName").value=sp.name;i.dispatchEvent(new Event("input"))},900)}
 function shareTokenFromUrl(){const u=new URL(location.href);return u.searchParams.get("share")}
 function dropShareParam(){const u=new URL(location.href);if(u.searchParams.has("share")){u.searchParams.delete("share");history.replaceState(null,"",u.pathname+(u.search?u.search:"")+u.hash)}}
 async function myMaps(){
@@ -1635,6 +1641,11 @@ function openMapSwitch(){const a=S.acct; if(!a?.user) return;
   el.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>{if(b.dataset.map===a.map?.id){close();return}switchMap(b.dataset.map)});
   el.querySelector("#mpNew").onclick=async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)};
 }
+function openFromMapsHelp(){const ios=/iPhone|iPad|iPod/.test(navigator.userAgent), sc=(window.ATLAS_CFG||{}).iosShortcut;
+  const android=`<h3>Android</h3><ol class="hm-ol"><li>Откройте nash-atlas.ru в Chrome, меню ⋮ → «Установить приложение» (или «Добавить на главный экран»).</li><li>В Google Картах или Яндекс Картах откройте место → «Поделиться» → выберите «Атлас».</li><li>Откроется «Новое место» с уже найденной точкой: проверьте название и нажмите «Сохранить».</li></ol>`;
+  const iphone=`<h3>iPhone</h3>${sc?`<ol class="hm-ol"><li>Установите команду: <a href="${esc(sc)}" target="_blank" rel="noopener">«В Наш атлас»</a> → «Добавить быструю команду».</li><li>В Google Картах или Яндекс Картах откройте место → «Поделиться» → «В Наш атлас».</li><li>Проверьте название и нажмите «Сохранить».</li></ol>`
+    :`<ol class="hm-ol"><li>В Google Картах или Яндекс Картах откройте место → «Поделиться» → «Скопировать».</li><li>На сайте нажмите «+ Место» и вставьте ссылку: точка найдётся сама.</li></ol><p class="hint">Скоро здесь появится быстрая команда, с ней хватит одного «Поделиться».</p>`}`;
+  modal("fmBox",`<h2 id="fmT">Места из приложений карт</h2><p class="hint">Подходят ссылки Google Карт и Яндекс Карт, в том числе короткие maps.app.goo.gl и yandex.ru/maps/-/…</p>${ios?iphone+android:android+iphone}`,{labelledby:"fmT"})}
 /* deleting the account by the person themselves: everything they own goes, irreversibly (supabase/schema.sql: delete_my_account) */
 function openDeleteAccount(){
   const a=S.acct; if(!a?.user) return;
@@ -2450,13 +2461,14 @@ function renderProfile(){
   const tiles=TILES?`<button class="ap-item" id="pfBm" role="switch" aria-checked="${basemap==="otm"}">${ic("layers")}<span>Подложка с рельефом<small>Горы, дороги и города. Грузится дольше</small></span><span class="sw-t" aria-hidden="true"></span></button>`:"";
   $("#pbody").innerHTML=`<div class="p-head"><h1>Профиль</h1></div>${acct}
     <section class="blk"><h2>Поделиться</h2><button class="ap-item" id="pfCard">${ic("share")}<span>Картинка для сторис<small>Сколько стран и мест вы хотите посетить</small></span></button>${CLOUD?`<button class="ap-item" id="pfInv">${ic("user")}<span>Пригласить друзей<small>Отмечать места на одной карте вместе</small></span></button>`:""}</section>
+    <section class="blk"><h2>Добавлять места</h2><button class="ap-item" id="pfFromMaps">${ic("pin")}<span>Из Google Карт и Яндекс Карт<small>Прямо из приложения на телефоне, через «Поделиться»</small></span></button></section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
     <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="/terms.html">${ic("doc")}<span>Пользовательское соглашение</span></a><a class="ap-item" href="/privacy.html">${ic("doc")}<span>Политика обработки данных</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
   on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);
-  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings); on("pfCard",shareCard); on("pfInv",invitePeople);
+  on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings); on("pfCard",shareCard); on("pfInv",invitePeople); on("pfFromMaps",openFromMapsHelp);
   on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
   updateTabs();
 }
@@ -2552,7 +2564,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=9;
+const GUIDE_VER=10;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2594,6 +2606,10 @@ const GUIDE=[
   {since:9, t:"Своя карта и общие",
     m:"Присоединившись к общей карте, вы не теряете свою. Наверху «Моих мест» видно, какая карта открыта; нажмите на неё, чтобы переключиться или завести новую. При добавлении места можно выбрать, в какую карту оно попадёт.",
     art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Мой атлас</span><span class="ga-ar">⇄</span><span class="ga-b2" style="background:#ffd166">Отпуск вдвоём</span></div>`},
+  {since:10, t:"Места прямо из Google Карт",
+    m:"Вставьте в «+ Место» любую ссылку Google Карт или Яндекс Карт, даже короткую: точка и название найдутся сами.",
+    mob:"В Google Картах или Яндекс Картах нажмите «Поделиться» у места: на Android выберите «Атлас» (после «Установить приложение»), на iPhone скопируйте ссылку и вставьте в «+ Место». Точка и название найдутся сами. Подробности — в Профиле.",
+    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Поделиться</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -3583,13 +3599,23 @@ function parseGoogle(s){
   s=String(s||"").trim(); let lat=null,lng=null,name="";
   let m=s.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
   if(!m) m=s.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-  if(!m) m=s.match(/[?&](?:q|query|ll|center|destination|daddr)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i);
+  if(!m&&!/yandex\.[a-z]+\/maps/i.test(s)) m=s.match(/[?&](?:q|query|ll|center|destination|daddr)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i);
   if(!m) m=s.match(/^\s*(-?\d{1,2}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)\s*$/);
   if(m){lat=+m[1];lng=+m[2]; if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}
   const n=s.match(/\/place\/([^/@?]+)/); if(n){try{name=decodeURIComponent(n[1].replace(/\+/g," "))}catch(e){name=n[1].replace(/\+/g," ")}}
   if(!name){const q=s.match(/[?&](?:q|query)=([^&]+)/);if(q&&!/^-?\d/.test(q[1])){try{name=decodeURIComponent(q[1].replace(/\+/g," "))}catch(e){}}}
-  return {lat,lng,name,short:/goo\.gl|maps\.app/.test(s)};
+  // Yandex Maps: coordinates go longitude first (ll=, pt=, whatshere[point]=)
+  if(lat==null&&/yandex\.[a-z]+\/maps/i.test(s)){let y=null;try{y=decodeURIComponent(s)}catch(e){y=s}
+    const ym=y.match(/whatshere\[point\]=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||y.match(/[?&]pt=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||y.match(/[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+    if(ym){lng=+ym[1];lat=+ym[2];if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}}
+  return {lat,lng,name,short:/goo\.gl|maps\.app|yandex\.[a-z]+\/maps\/-\//i.test(s)};
 }
+// what the phone's share sheet sends is often «Название\nhttps://maps.app.goo.gl/…»: the link, and a name if there is one
+function splitShared(t){t=String(t||"").trim();const m=t.match(/https?:\/\/\S+/);if(!m)return {url:t,name:""};
+  const name=t.replace(m[0],"").split("\n").map(x=>x.trim()).filter(Boolean).filter(x=>!/^https?:/.test(x))[0]||"";return {url:m[0].replace(/[),.;]+$/,""),name}}
+// a short Google or Yandex Maps link → the full one, through our server function (supabase/functions/expand-link)
+async function expandLink(u){const cfg=window.ATLAS_CFG||{};if(!cfg.supabaseUrl)return null;
+  try{const r=await fetch(`${cfg.supabaseUrl}/functions/v1/expand-link?u=${encodeURIComponent(u)}`,{headers:{apikey:cfg.supabaseKey}});if(!r.ok)return null;return (await r.json()).url||null}catch(e){return null}}
 let addLL=null;
 function openAdd(){
   const wm=writableMaps();
@@ -3902,6 +3928,7 @@ async function boot(){
   getData("urban").then(u=>{S.urban=u;if(S.sel.type==="city"||S.sel.type==="place")updateFocus()}).catch(()=>{});
   getData("flags").then(f=>{S.flags=f;scheduleOverlay();brandFlags();renderPassBtn();S.flagsReady?.()}).catch(()=>{});
   initClaude();
+  addFromUrl();
 }
 async function initClaude(){
   if(STANDALONE){S.descs=window.__DATA?.descs||{};if(!window.__DATA)getData("descs").then(d=>{S.descs=d||{}}).catch(()=>{});
@@ -3999,9 +4026,14 @@ function brandFlags(){
 }
 $("#addBtn").onclick=openAdd;
 $("#addCancel").onclick=closeAdd;
-$("#addUrl").addEventListener("input",e=>{const g=parseGoogle(e.target.value);
+let addExp=0;
+$("#addUrl").addEventListener("input",async e=>{const sp=splitShared(e.target.value);if(sp.url!==e.target.value.trim()){e.target.value=sp.url;if(sp.name&&!$("#addName").value)$("#addName").value=sp.name}
+  let g=parseGoogle(e.target.value);
+  if(g.lat==null&&g.short){const my=++addExp;$("#addParse").className="hint";$("#addParse").textContent="Определяю место по ссылке…";
+    const full=await expandLink(e.target.value.trim()); if(my!==addExp) return;
+    if(full){const g2=parseGoogle(full);if(g2.lat!=null)g={...g2,short:false};else if(g2.name)g={...g,name:g2.name}}}
   if(g.lat!=null){setAddLL(g.lat,g.lng);$("#addParse").className="ok";$("#addParse").textContent="Координаты нашлись в ссылке"}
-  else if(e.target.value.trim()){ $("#addParse").className=g.short?"err":"hint"; $("#addParse").textContent=g.short?"В короткой ссылке нет координат. Открой её в браузере, скопируй адрес из строки и вставь сюда. Или укажи точку на карте.":"Координат в ссылке нет. Укажи точку на карте."}
+  else if(e.target.value.trim()){ $("#addParse").className=g.short?"err":"hint"; $("#addParse").textContent=g.short?"По этой ссылке не получилось найти точку. Укажите её на карте кнопкой ниже.":"Координат в ссылке нет. Укажи точку на карте."}
   if(g.name&&!$("#addName").value) $("#addName").value=g.name;});
 $("#addPick").onclick=()=>{$("#addModal").classList.remove("on");S.pickFromAdd=true;startPick((lat,lng)=>{S.pickFromAdd=false;setAddLL(lat,lng);$("#addModal").classList.add("on")})};
 $("#pickCancel").onclick=()=>{endPick();if(S.pickFromAdd){S.pickFromAdd=false;$("#addModal").classList.add("on")}};
