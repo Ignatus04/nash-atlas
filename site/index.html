@@ -472,7 +472,13 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ad-blk{gap:6px;min-height:0}.ad-l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ad-box{min-height:120px;border-radius:12px;overflow:hidden;background:var(--panel-2)}
 .ad-blk.on .ad-box{background:none}
-.pv-share{margin-bottom:-8px}.pv-acts.pv-share .btn{min-height:40px;padding:8px 12px;font-size:14px}
+.pv-hero{border-radius:16px;padding:14px;background:linear-gradient(135deg,rgba(255,138,92,.16),rgba(255,138,92,.04));border:1px solid rgba(255,138,92,.35);display:flex;flex-direction:column;gap:12px}
+.pv-hero-t{display:flex;align-items:center;gap:12px}.pv-hero-t b{font:700 34px/1 Unbounded,Manrope,sans-serif;color:#ff8a5c}.pv-hero-t span{font-size:14px;line-height:1.35;color:var(--ink)}
+.pv-hero-a{display:flex;gap:8px;flex-wrap:wrap}.pv-hero-a .btn{flex:1 1 0;justify-content:center;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 12px;white-space:nowrap}
+.sm-opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;width:100%;padding:14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line);margin-top:10px}
+.sm-opt:hover{border-color:#3a4f70}.sm-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sm-opt b{display:block;font-size:15.5px}.sm-opt small{display:block;color:var(--muted);font-size:13px;line-height:1.4;margin-top:3px}
+.sm-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(255,138,92,.15);color:#ff8a5c;flex:none}
 .cb-img{display:block;width:100%;max-height:56vh;object-fit:contain;border-radius:16px;background:#0b1526;margin:6px 0 10px}
 .fans-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .fans-av{display:flex}.fans-av>span+span{margin-left:-6px}.fans-av .av{box-shadow:0 0 0 2px var(--panel)}
@@ -760,7 +766,8 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .sm-x:active{background:#22324b}
   .sm-up{flex:none;color:var(--muted);display:grid;place-items:center;width:20px}
 }
-.tabbar,.grab,.srchbtn,.srch-x{display:none}
+.tabbar,.grab,.srchbtn,.sharebtn,.srch-x{display:none}
+.iconbtn.sharebtn{pointer-events:auto;width:40px;height:40px;border-radius:12px;background:rgba(18,31,51,.92);border:1px solid var(--line);color:var(--ink);place-items:center}
 .iconbtn.srchbtn{pointer-events:auto;width:40px;height:40px;border-radius:12px;background:rgba(18,31,51,.92);border:1px solid var(--line);color:var(--ink);place-items:center}
 /* phone: the map fills the screen, the card is a sheet you pull up, sections live in a bottom bar */
 @media (max-width:860px){
@@ -788,13 +795,13 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .topbar{left:10px;right:10px;top:calc(8px + env(safe-area-inset-top,0px));gap:8px;flex-wrap:wrap;align-items:center}
   .brand{display:flex;padding:7px 12px 7px 8px;font-size:14px;gap:8px;min-height:40px}
   .brand .bflags img{width:20px;height:20px}
-  .srchbtn{display:grid;margin-left:auto}
+  .sharebtn{display:grid;margin-left:auto}.srchbtn{display:grid;margin-left:8px}
   #passBtn,#acctBtn,.actions{display:none!important}
   .search{display:none;flex:1 1 0;max-width:none}
   .topbar.searching{z-index:13}
   .topbar.searching .search{display:flex;gap:8px;align-items:center}
   .rfoot{display:none!important}
-  .topbar.searching .brand,.topbar.searching .srchbtn{display:none}
+  .topbar.searching .brand,.topbar.searching .srchbtn,.topbar.searching .sharebtn{display:none}
   .srch-x{display:block;order:2;background:none;border:0;color:var(--ink);font-weight:600;padding:8px 4px;white-space:nowrap}
   .search input{padding:10px 12px;font-size:16px}
   .results{left:0;width:calc(100vw - 20px);min-width:0;max-height:calc(100dvh - 180px)}
@@ -817,6 +824,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <svg id="map" aria-label="Карта мира с правилами въезда и нашими местами"></svg>
     <div class="topbar">
       <button class="brand" id="brand" title="Весь мир"><span class="bflags" aria-hidden="true"></span><span class="btxt">Наш атлас</span></button>
+      <button class="iconbtn sharebtn" id="shareBtn" aria-label="Поделиться картой"></button>
       <button class="iconbtn srchbtn" id="srchBtn" aria-label="Поиск"></button>
       <div class="search">
         <button class="srch-x" id="srchX" type="button">Отмена</button>
@@ -835,6 +843,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
         <button data-layer="safe" aria-pressed="false">Безопасность</button>
       </div>
       <div class="actions">
+        <button class="btn" id="shareTop">Поделиться</button>
         <button class="btn" id="placesBtn">Мои места</button>
         <button class="btn primary" id="addBtn" aria-label="Добавить место">+ Место</button>
         <button class="btn" id="importBtn" title="Импорт из Google Карт">Импорт</button>
@@ -1246,6 +1255,14 @@ function bindFans(p,save){const b=$("#fanBtn"); if(!b) return;
     save(patch, on?"отмечено":"снято"); b.setAttribute("aria-pressed",on); b.textContent=on?"Я хочу ✓":"Я тоже хочу"; b.classList.toggle("primary",!on);
     const h=document.querySelector(".fans h2 span"); if(h)h.textContent=Object.keys(f).length||""; draw()};
 }
+function openShareMenu(){
+  const want=[...S.places.values()].filter(p=>p.status==="want"), nk=new Set(want.map(p=>p.k).filter(Boolean)).size;
+  const {el,close}=modal("shMenu",`<h2 id="smT">Поделиться</h2>
+    <button class="sm-opt" id="smCard"><span class="sm-ic">${ic("share",22)}</span><span><b>Картинка для сторис</b><small>${nk?`Хочу побывать в ${nk} ${ruPlural(nk,"стране","странах","странах")}: карта, флаги и ссылка на вашу карту`:"Отметьте места «Хотим», и соберётся картинка с картой и флагами"}</small></span></button>
+    ${CLOUD?`<button class="sm-opt" id="smInv"><span class="sm-ic">${ic("user",22)}</span><span><b>Пригласить друзей</b><small>Ссылка, по которой друг войдёт и будет отмечать места на вашей карте</small></span></button>`:""}`,{labelledby:"smT"});
+  el.querySelector("#smCard").onclick=()=>{close();shareCard()};
+  const iv=el.querySelector("#smInv"); if(iv) iv.onclick=()=>{close();invitePeople()};
+}
 /* the picture: the world with the countries we want to go to, big numbers, flags, the site address */
 async function shareCard(){
   const want=[...S.places.values()].filter(p=>p.status==="want");
@@ -1264,28 +1281,31 @@ async function shareCard(){
   g.fillText(`${want.length} ${ruPlural(want.length,"место","места","мест")}`,92+nw,476);
   // map
   // the inhabited world edge to edge (no Antarctica), the countries we want to go to lit up
-  const pj=d3.geoNaturalEarth1().fitExtent([[-30,560],[W0+30,1290]],{type:"MultiPoint",coordinates:[[-168,-56],[179,80]]});
-  const thinP=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))},g);
-  g.save(); g.beginPath(); g.rect(0,540,W0,770); g.clip();
+  const land={type:"FeatureCollection",features:S.countries.filter(f=>f.properties.k!=="AQ")};
+  const pj=d3.geoNaturalEarth1().fitExtent([[48,590],[W0-48,1110]],land);
+  const thinP=d3.geoPath({stream:o=>pj.stream(thin(o,0.4))},g);
+  g.save();
   for(const f of S.countries){if(f.properties.k==="AQ"||byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#22324c";g.fill();g.strokeStyle="#0b1526";g.lineWidth=1.2;g.stroke()}
-  g.shadowColor="rgba(255,138,92,.85)"; g.shadowBlur=26;
+  g.shadowColor="rgba(255,138,92,.6)"; g.shadowBlur=14;
   for(const f of S.countries){if(!byK.has(f.properties.k))continue;g.beginPath();thinP(f);g.fillStyle="#ff8a5c";g.fill()}
   g.shadowBlur=0;
-  for(const p of want){const xy=pj([p.lng,p.lat]);if(!xy)continue;g.beginPath();g.arc(xy[0],xy[1],7,0,7);g.fillStyle="#ffffff";g.fill();g.lineWidth=3;g.strokeStyle="#ff8a5c";g.stroke()}
+  // one small dot per 16 px, so thousands of places don't turn into a blot
+  const seen=new Set(); g.fillStyle="rgba(255,255,255,.92)";
+  for(const p of want){const xy=pj([p.lng,p.lat]);if(!xy)continue;const key=Math.round(xy[0]/16)+","+Math.round(xy[1]/16);if(seen.has(key))continue;seen.add(key);g.beginPath();g.arc(xy[0],xy[1],4.2,0,7);g.fill()}
   g.restore();
   // flags of the countries with the most places
   const top=ks.sort((a,b)=>byK.get(b)-byK.get(a)).slice(0,8), fl=await Promise.all(top.map(k=>new Promise(res=>{const src=S.flags?.[k];if(!src)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src})));
-  let x=80; const fy=1340;
+  let x=80; const fy=1200;
   top.forEach((k,i)=>{const im=fl[i]; if(!im) return; g.save(); g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.clip(); g.drawImage(im,x,fy,88,88); g.restore();
     g.strokeStyle="rgba(255,255,255,.35)"; g.lineWidth=3; g.beginPath(); g.arc(x+44,fy+44,44,0,7); g.stroke(); x+=108});
   g.fillStyle="#cfd8e6"; g.font="600 38px Manrope, sans-serif";
   const names=top.slice(0,4).map(k=>S.cByK.get(k)?.properties.ru||k); let line=names.join(", ")+(ks.length>4?` и ещё ${ks.length-4}`:"");
   while(g.measureText(line).width>W0-160&&names.length>1){names.pop();line=names.join(", ")+` и ещё ${ks.length-names.length}`}
-  g.fillText(line,80,1500);
+  g.fillText(line,80,1360);
   // footer
-  g.fillStyle="rgba(255,255,255,.08)"; g.fillRect(80,1690,W0-160,2);
-  g.fillStyle="#eef1f6"; g.font="700 44px Manrope, sans-serif"; g.fillText("nash-atlas.ru",80,1790);
-  g.fillStyle="#9aa7bb"; g.font="500 34px Manrope, sans-serif"; g.fillText("Карта виз, безопасности и мест, куда хочется",80,1846);
+  g.fillStyle="rgba(255,255,255,.08)"; g.fillRect(80,1480,W0-160,2); // the bottom ~300 px stay free: stories put their reply bar there
+  g.fillStyle="#eef1f6"; g.font="700 44px Manrope, sans-serif"; g.fillText("nash-atlas.ru",80,1570);
+  g.fillStyle="#9aa7bb"; g.font="500 34px Manrope, sans-serif"; g.fillText("Карта виз, безопасности и мест, куда хочется",80,1626);
   const blob=await new Promise(res=>c.toBlob(res,"image/png")); if(!blob){status("Не получилось собрать картинку",4000);return}
   const url=await inviteLink("viewer").catch(()=>null)||"https://nash-atlas.ru/";
   const file=new File([blob],"nash-atlas.png",{type:"image/png"}), src=URL.createObjectURL(blob);
@@ -2279,7 +2299,7 @@ function openTab(t){
 function openSheetFromCard(){if(sheet.state==="peek")setSheet("half")}
 function bindShell(){
   document.querySelectorAll("[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic,e.classList.contains("tb-plus")?24:22));
-  $("#srchBtn").innerHTML=ic("search",20);
+  $("#srchBtn").innerHTML=ic("search",20); $("#shareBtn").innerHTML=ic("share",19);
   document.querySelectorAll("#tabbar [data-tab]").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
   $("#placesBtn").onclick=()=>openTab("places");
   $("#srchBtn").onclick=()=>{$(".topbar").classList.add("searching");topH();setTimeout(()=>$("#q").focus(),30)};
@@ -2331,7 +2351,8 @@ function closeSearch(){const tb=$(".topbar");if(!tb?.classList.contains("searchi
 function pvBack(){return MOB()?"":`<div class="backrow"><button class="backbtn" id="pvBack"><span aria-hidden="true">←</span> ${S.sel.type==="home"?"Ко всем странам":"Назад: "+esc(backLabel(S.sel)||"карточка")}</button></div>`}
 function renderPlacesTab(){
   const all=[...S.places.values()], f=S.plf||"", ro=S.db&&!S.canWrite;
-  const add=ro?"":`<div class="pv-acts pv-share"><button class="btn small" id="pvCard">${ic("share",17)}<span>Поделиться картой</span></button>${CLOUD?`<button class="btn small" id="pvInv">${ic("user",17)}<span>Пригласить</span></button>`:""}</div><div class="pv-acts"><button class="btn primary" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
+  const wantN=[...S.places.values()].filter(p=>p.status==="want"), wk=new Set(wantN.map(p=>p.k).filter(Boolean)).size;
+  const add=ro?"":`${wantN.length?`<div class="pv-hero"><div class="pv-hero-t"><b>${wk}</b><span>${ruPlural(wk,"страна","страны","стран")} и ${wantN.length} ${ruPlural(wantN.length,"место","места","мест")}, куда хотите поехать</span></div><div class="pv-hero-a"><button class="btn primary" id="pvCard">${ic("share",17)}<span>Поделиться</span></button>${CLOUD?`<button class="btn" id="pvInv">${ic("user",17)}<span>Позвать друзей</span></button>`:""}</div></div>`:""}<div class="pv-acts"><button class="btn${wantN.length?"":" primary"}" id="pvAdd">${ic("plus",17)}<span>Добавить место</span></button><button class="btn" id="pvImp">${ic("import",17)}<span>Импорт из Google Карт</span></button></div>`;
   if(!all.length){
     $("#pbody").innerHTML=`${pvBack()}<div class="p-head"><h1>Мои места</h1></div>
       <p class="pv-lead">Здесь соберутся места, где вы были и куда хотите поехать. Каждое место видно на карте и в карточке своей страны.</p>
@@ -2469,7 +2490,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=6;
+const GUIDE_VER=7;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2514,6 +2535,7 @@ const TOUR=[
   {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим» и «Дом»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
   {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
+  {since:7, sel:{m:"#shareBtn",d:"#shareTop"}, t:"Поделиться", m:"Картинка для сторис с вашей картой и приглашение для друзей, чтобы отмечать места вместе."},
 ];
 function guideSeen(){try{return +localStorage.getItem("atlas-guide")||0}catch(e){return 0}}
 function guideDone(){try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}catch(e){}}
@@ -3907,6 +3929,7 @@ $("#addForm").addEventListener("submit",async e=>{e.preventDefault();
   try{const id=await addPlace({name,lat:addLL.lat,lng:addLL.lng,status:$("#addStatus").value,tags:splitTags($("#addTags").value),note:$("#addNote").value,url:$("#addUrl").value.trim()});closeAdd();select({type:"place",id},true)}
   catch(err){$("#addErr").textContent=err?.code==="quota_exceeded"?"В базе закончилось место":"Не получилось сохранить, попробуй ещё раз"}
   $("#addSave").disabled=false;});
+$("#shareBtn").onclick=openShareMenu; $("#shareTop").onclick=openShareMenu;
 $("#importBtn").onclick=()=>{if(S.db&&!S.canWrite){status("У тебя доступ только на просмотр");return}impItems=[];$("#impFile").value="";$("#impInfo").innerHTML="";$("#impGo").disabled=true;$("#impModal").classList.add("on")};
 $("#impCancel").onclick=()=>$("#impModal").classList.remove("on");
 $("#impFile").onchange=async e=>{$("#impInfo").innerHTML="<p>Читаю файл…</p>";try{impItems=await readImport([...e.target.files]);renderImp()}catch(x){$("#impInfo").innerHTML=`<p class="err">Не получилось прочитать файл. Подойдёт архив Takeout или .csv/.json из него.</p>`}};
