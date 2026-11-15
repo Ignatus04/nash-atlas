@@ -488,6 +488,8 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .cb-img{display:block;width:100%;max-height:56vh;object-fit:contain;border-radius:16px;background:#0b1526;margin:6px 0 10px}
 .fans-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .fans-av{display:flex}.fans-av>span+span{margin-left:-6px}.fans-av .av{box-shadow:0 0 0 2px var(--panel)}
+.del-list{margin:6px 0 10px;padding-left:20px}.del-list li{margin-bottom:4px}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}.btn.danger:disabled{opacity:.45}
 .lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .rg-list{display:flex;flex-direction:column;gap:6px}
 .rg-list.short>.rg:nth-child(n+7){display:none}
@@ -1562,7 +1564,8 @@ function openLogin(){
       <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
         <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
         <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
-        <button class="btn primary lg-go" id="lgGo">Получить код</button></form></div>
+        <button class="btn primary lg-go" id="lgGo">Получить код</button></form>
+      <p class="lg-note">Входя, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a> и даёте согласие на обработку персональных данных на условиях <a href="/privacy.html" target="_blank" rel="noopener">Политики</a>.</p></div>
     <div class="lg-step" id="lgS2" hidden><h2>Введите код</h2>
       <p class="lg-lead" id="lgSent"></p>
       <form id="lgCode" novalidate><label class="f" for="lgOtp">Код из письма</label>
@@ -1613,6 +1616,25 @@ function openLogin(){
   el.querySelector("#lgBack").onclick=()=>{clearInterval(timer);el.querySelector("#lgS1").hidden=false;el.querySelector("#lgS2").hidden=true;setTimeout(()=>em.focus(),30)};
 }
 
+/* deleting the account by the person themselves: everything they own goes, irreversibly (supabase/schema.sql: delete_my_account) */
+function openDeleteAccount(){
+  const a=S.acct; if(!a?.user) return;
+  const {el,close}=modal("delBox",`<h2 id="delT">Удалить аккаунт</h2>
+    <p>Будут удалены навсегда, без возможности восстановить:</p>
+    <ul class="del-list"><li>аккаунт и адрес почты ${esc(a.user.email||"")};</li><li>все ваши карты, в том числе те, которыми вы поделились: у приглашённых людей они тоже пропадут;</li><li>ваше участие в чужих картах и отметки «Я тоже хочу».</li></ul>
+    <p class="hint">Места и заметки, которые вы добавили в чужие карты, останутся у их владельцев. Сначала можно сохранить копию: меню аккаунта → «Скачать копию карты».</p>
+    <label class="f" for="delIn">Чтобы подтвердить, напишите слово «удалить»</label>
+    <input class="txt" id="delIn" autocomplete="off" spellcheck="false">
+    <div class="ck-acts" style="margin-top:14px"><button class="btn" id="delCopy">Скачать копию</button><button class="btn danger" id="delGo" disabled>Удалить навсегда</button></div>`,{labelledby:"delT"});
+  const inp=el.querySelector("#delIn"), go=el.querySelector("#delGo");
+  inp.oninput=()=>go.disabled=inp.value.trim().toLowerCase()!=="удалить";
+  el.querySelector("#delCopy").onclick=()=>exportBackup();
+  go.onclick=async()=>{go.disabled=true;go.textContent="Удаляю…";
+    const {error}=await sb.rpc("delete_my_account");
+    if(error){go.disabled=false;go.textContent="Удалить навсегда";status("Не получилось удалить аккаунт. Попробуйте ещё раз или напишите на ignat.shubin0409@gmail.com",7000);return}
+    try{["atlas-map","atlas-migrate-hide"].forEach(k=>localStorage.removeItem(k))}catch(e){}
+    await sb.auth.signOut().catch(()=>{}); close(); status("Аккаунт удалён",4000); setTimeout(()=>location.reload(),900)};
+}
 /* the account popover: who, which map, and a short list of actions */
 function mapStats(){const n=S.places?.size||0;const ks=new Set();S.places?.forEach(p=>p.k&&ks.add(p.k));
   return n?`${n} ${ruPlural(n,"место","места","мест")} в ${ks.size} ${ruPlural(ks.size,"стране","странах","странах")}`:"Пока без мест"}
@@ -1636,7 +1658,7 @@ function acctMenuHTML(){
       ${!ro?item("apIn","up","Загрузить копию"):""}
       ${item("apNew","plus","Новая карта")}
     </div>
-    <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}</div>`;
+    <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}${item("apDel","x","Удалить аккаунт")}</div>`;
 }
 /* the account actions; `close` hides the popover (if any), `rerender` redraws whichever view shows them */
 function bindAcctMenu(p,close,rerender){
@@ -1648,6 +1670,7 @@ function bindAcctMenu(p,close,rerender){
   on("apIn",()=>{close();importBackup()});
   on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
   on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  on("apDel",()=>{close();openDeleteAccount()});
   on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
   p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
   on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
@@ -2409,7 +2432,7 @@ function renderProfile(){
     <section class="blk"><h2>Поделиться</h2><button class="ap-item" id="pfCard">${ic("share")}<span>Картинка для сторис<small>Сколько стран и мест вы хотите посетить</small></span></button>${CLOUD?`<button class="ap-item" id="pfInv">${ic("user")}<span>Пригласить друзей<small>Отмечать места на одной карте вместе</small></span></button>`:""}</section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
-    <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="https://nash-atlas.ru/privacy.html">${ic("doc")}<span>Политика конфиденциальности</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
+    <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="/terms.html">${ic("doc")}<span>Пользовательское соглашение</span></a><a class="ap-item" href="/privacy.html">${ic("doc")}<span>Политика обработки данных</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
   on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);

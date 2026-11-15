@@ -63,6 +63,7 @@ for f in sorted(os.listdir(S+'data')):
 
 shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
 shutil.copy(SRC+'privacy.html',OUT+'privacy.html')
+shutil.copy(SRC+'terms.html',OUT+'terms.html')
 for f in ['icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']: shutil.copy(SRC+f,OUT+'icons/'+f)
 json.dump({"name":"Наш атлас","short_name":"Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
   "lang":"ru","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",

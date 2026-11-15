@@ -140,3 +140,18 @@ grant execute on function public.shared_map(text), public.shared_asset(text,text
 do $$ begin
   alter publication supabase_realtime add table public.docs;
 exception when duplicate_object then null; when undefined_object then null; end $$;
+
+-- the person deletes their own account: their maps (with everything in them), memberships and invites go
+-- through the foreign keys; in other people's maps their «Я тоже хочу» marks and authorship are cleared
+create or replace function public.delete_my_account() returns void
+language plpgsql security definer set search_path = public, auth as $$
+declare me uuid := auth.uid();
+begin
+  if me is null then raise exception 'not signed in'; end if;
+  update public.docs set data = data #- array['fans', me::text] where data ? 'fans' and data->'fans' ? me::text;
+  update public.docs set data = jsonb_set(data, '{by}', 'null'::jsonb) where data->>'by' = me::text;
+  update public.docs set updated_by = null where updated_by = me;
+  delete from auth.users where id = me;
+end $$;
+revoke execute on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
