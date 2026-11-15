@@ -4,5 +4,7 @@ window.ATLAS_CFG = {
   supabaseUrl: "https://hvqdjcpbevwuaymdrpye.supabase.co",
   supabaseKey: "sb_publishable_pVRfI-YUFLDwhTXSqoQhaw_0_bArhAB",
   // one-tap sign-in buttons; a provider is listed here only after it is set up in Supabase
-  oauth: ["yandex", "google"]
+  oauth: ["yandex", "google"],
+  // Google sign-in runs on our own page (shows nash-atlas.ru, not the Supabase address); same client as in Supabase
+  googleClientId: "444988932037-ve1fbt66uu4vlmi6qkhmrjaq2761e594.apps.googleusercontent.com"
 };

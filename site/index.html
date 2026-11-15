@@ -323,6 +323,7 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .lg-step[hidden]{display:none}
 .lg-oauth{display:flex;flex-direction:column;gap:8px}
 .lg-prov{padding:11px 14px;font-size:15px;width:100%}
+.lg-gsi{min-height:44px;display:flex;justify-content:center}.lg-gsi>.lg-prov{flex:1}
 .lg-or{display:flex;align-items:center;gap:12px;margin:16px 0 12px;color:var(--muted);font-size:12.5px}
 .lg-or::before,.lg-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .lg-step h2{padding-right:40px}
@@ -919,12 +920,29 @@ function modal(id,html,{labelledby}={}){let el=document.getElementById(id);if(el
       if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus()}}});
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=close);return {el,close}}
 
+/* Google sign-in on our own page: Google's window then names nash-atlas.ru instead of the Supabase address.
+   If Google's script can't load, the plain button (redirect through Supabase) stays in place. */
+let gsiLoad=null;
+function loadGsi(){return gsiLoad||=new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;s.onload=()=>window.google?.accounts?.id?ok():no();s.onerror=()=>{gsiLoad=null;no()};document.head.appendChild(s)})}
+async function sha256hex(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function googleButton(box,done){
+  try{await loadGsi()}catch(e){return}
+  if(!box.isConnected) return;
+  const raw=[...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,"0")).join("");
+  google.accounts.id.initialize({client_id:CFG.googleClientId,nonce:await sha256hex(raw),ux_mode:"popup",auto_select:false,itp_support:true,use_fedcm_for_button:true,
+    callback:async r=>{const {error}=await sb.auth.signInWithIdToken({provider:"google",token:r.credential,nonce:raw});
+      done(error?(navigator.onLine?"Не получилось войти через Google. Попробуйте ещё раз или войдите по почте.":"Нет интернета. Подключитесь и попробуйте снова."):null)}});
+  const w=Math.max(200,Math.min(400,Math.round(box.getBoundingClientRect().width)||320));
+  box.innerHTML="";
+  google.accounts.id.renderButton(box,{type:"standard",theme:"outline",size:"large",text:"signin_with",shape:"rectangular",logo_alignment:"center",width:w,locale:"ru"});
+}
+
 /* sign in: e-mail, then the code from the letter (works on any device); the button in the letter also works in the same browser */
 function openLogin(){
   const share=S.acct.share;
   const {el,close}=modal("loginBox",`<div class="lg-step" id="lgS1"><h2 id="lgTitle">Вход</h2>
       <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите. `:""}${oauthList().length?"Пароль не нужен.":"Пришлём на почту код, пароль не нужен."}</p>
-      ${oauthList().length?`<div class="lg-oauth">${oauthList().map(p=>`<button type="button" class="btn lg-prov" data-prov="${p.id}">${p.label}</button>`).join("")}</div><div class="lg-or"><span>или по почте</span></div>`:""}
+      ${oauthList().length?`<div class="lg-oauth">${oauthList().map(p=>p.id==="google"&&CFG.googleClientId?`<div class="lg-gsi" id="lgGsi"><button type="button" class="btn lg-prov" data-prov="google">${p.label}</button></div>`:`<button type="button" class="btn lg-prov" data-prov="${p.id}">${p.label}</button>`).join("")}</div><div class="lg-or"><span>или по почте</span></div>`:""}
       <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
         <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
         <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
@@ -943,6 +961,7 @@ function openLogin(){
     const redirectTo=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
     const {error}=await sb.auth.signInWithOAuth({provider:b.dataset.prov,options:{redirectTo}});
     if(error){b.disabled=false;b.textContent=label;setMsg(msg1,navigator.onLine?"Вход через этот сервис сейчас не работает. Войдите по почте.":"Нет интернета. Подключитесь и попробуйте снова.")}});
+  if(el.querySelector("#lgGsi")) googleButton(el.querySelector("#lgGsi"),async err=>{if(err){setMsg(msg1,err);return}close()});
   let left=0, timer=null, busy=false;
   try{em.value=localStorage.getItem("atlas-last-email")||""}catch(e){}
   setTimeout(()=>em.focus(),60);
