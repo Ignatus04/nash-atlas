@@ -3857,14 +3857,21 @@ const OSM_T={museum:"музей",gallery:"галерея",attraction:"досто
   city:"город",town:"город",village:"посёлок",hamlet:"деревня",suburb:"район",neighbourhood:"квартал",
   aerodrome:"аэропорт",station:"станция",ski:"горнолыжный курорт",winter_sports:"горнолыжный курорт",stadium:"стадион",theatre:"театр",marketplace:"рынок",mall:"торговый центр",university:"университет",bridge:"мост",lighthouse:"маяк",tower:"башня"};
 async function worldSearch(q){const key=nz(q);if(WORLD.get(key)&&WORLD.get(key)!=="wait")return;WORLD.set(key,"wait");
-  let items=[];
-  try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&accept-language=ru&q=${encodeURIComponent(q)}`);
-    if(r.ok){const j=await r.json();const seen=new Set();
+  // famous places first from Russian Wikipedia (it knows «Эрмитаж» is the museum), then anything else from OpenStreetMap
+  const wiki=(async()=>{const out=[];try{const r=await fetch(`https://ru.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=8&prop=coordinates|description&coprimary=primary&format=json&formatversion=2&origin=*`);
+    if(r.ok){const j=await r.json();for(const p of (j.query?.pages||[]).sort((a,b)=>a.index-b.index)){const c=p.coordinates?.[0];if(!c||c.globe&&c.globe!=="earth")continue;
+      const name=p.title.replace(/\s*\([^)]*\)$/,"");const k=countryOf(c.lat,c.lon);const d=String(p.description||"").replace(/\s+/g," ");
+      out.push({g:"В мире",t:name,k,ic:k?"city":"globe",s:[d.length>70?d.slice(0,68)+"…":d,k&&!d.includes(S.cByK.get(k)?.properties.ru||"@@")?S.cByK.get(k)?.properties.ru:""].filter(Boolean).join(" · "),wsel:{name,lat:c.lat,lng:c.lon,k,type:/город|посёлок|село|остров|озеро|район|провинц|област|национальный парк/i.test(d)?"city":""},sc:51});if(out.length>=4)break}}}catch(e){}return out})();
+  const osm=(async()=>{const out=[];try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&accept-language=ru&q=${encodeURIComponent(q)}`);
+    if(r.ok){const j=await r.json();
       for(const x of j){const lat=+x.lat,lng=+x.lon;if(!isFinite(lat)||!isFinite(lng))continue;
-        const a=x.address||{},name=x.name||String(x.display_name||"").split(",")[0];const id=name+"|"+lat.toFixed(3)+"|"+lng.toFixed(3);if(!name||seen.has(id))continue;seen.add(id);
+        const a=x.address||{},name=x.name||String(x.display_name||"").split(",")[0];if(!name)continue;
         const where=a.city||a.town||a.village||a.municipality||a.county||a.state||"";const k=countryOf(lat,lng);
-        items.push({g:"В мире · OpenStreetMap",t:name,k,ic:k?"city":"globe",s:[OSM_T[x.type]||OSM_T[x.addresstype]||"",where!==name?where:"",a.country||""].filter(Boolean).join(" · "),wsel:{name,lat,lng,k,type:x.type},sc:51})}}}catch(e){}
-  WORLD.set(key,items.length?items:[]);
+        out.push({g:"В мире",t:name,k,ic:k?"city":"globe",s:[OSM_T[x.type]||OSM_T[x.addresstype]||"",where!==name?where:"",a.country||""].filter(Boolean).join(" · "),wsel:{name,lat,lng,k,type:x.type},sc:52})}}}catch(e){}return out})();
+  const [w,o]=await Promise.all([wiki,osm]);const items=[];
+  const near=(x,y)=>Math.abs(x.wsel.lat-y.wsel.lat)<0.004&&Math.abs(x.wsel.lng-y.wsel.lng)<0.006;
+  for(const x of [...w,...o]){if(items.some(y=>near(x,y)&&(nz(y.t).includes(nz(x.t))||nz(x.t).includes(nz(y.t)))))continue;items.push(x);if(items.length>=8)break}
+  WORLD.set(key,items);
   if(nz(parseQuery($("#q").value).rest.trim())===key&&document.activeElement===$("#q")){resArr=searchAll($("#q").value);resSel=resArr.findIndex(x=>x.wsel);renderResults()}}
 // a place found in the world: show it on the map and open «+ Место» with it
 function addFromWorld(w){
@@ -3891,7 +3898,7 @@ function renderResults(){const r=$("#results");const q=$("#q").value;let g0=null
   r.innerHTML=resArr.map((x,i)=>{const head=x.g!==g0?`<div class="rg">${esc(x.g)}</div>`:"";g0=x.g;
     const badge=x.ic==="country"?`<span class="rb" style="--c:${ST[legendCode(codeFor(x.k))]?.c}"></span>${safeOf(x.k)?.l?`<span class="rb" style="--c:${SAFE[safeOf(x.k).l].c}"></span>`:""}`:x.zone?.l>=3?`<span class="rb warn" style="--c:${SAFE[x.zone.l].c}" title="${esc(SAFE[x.zone.l].label)}">!</span>`:"";
     return `${head}<button role="option" class="${i===resSel?"hl":""}${x.ic==="filter"?" rf":""}" data-i="${i}">${resIcon(x)}<span class="rt"><span>${hl(x.t,q)}</span><small>${esc(x.s||"")}</small></span>${badge}</button>`}).join("")
-    +(resArr.some(x=>x.wsel)?`<div class="rfoot osm"><span>Данные © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span></div>`:"")
+    +(resArr.some(x=>x.wsel)?`<div class="rfoot osm"><span>Данные: Википедия и © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></span></div>`:"")
     +(resArr.length?`<div class="rfoot"><span>↑↓ выбрать · Enter открыть · Esc закрыть</span><span>/ — поиск</span></div>`:"");
   r.classList.toggle("on",resArr.length>0);
   r.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{e.preventDefault();pick(+b.dataset.i)});
