@@ -77,3 +77,13 @@ sw=open(SRC+'sw.js',encoding='utf-8').read().replace('__VER__',ver).replace('__C
 open(OUT+'sw.js','w',encoding='utf-8').write(sw)
 tot=sum(os.path.getsize(os.path.join(dp,f)) for dp,_,fs in os.walk(OUT) for f in fs)
 print('version',ver,'| total',round(tot/1e6,1),'MB | app.js',os.path.getsize(OUT+'app.js')//1024,'KB')
+
+# A/B: the previous SVG renderer at /svg/ for comparing smoothness on a real phone (temporary; delete site/ab-svg.html to drop it)
+if os.path.exists(S+'ab-svg.html'):
+    h2=open(S+'ab-svg.html',encoding='utf-8').read()
+    st2=re.search(r'<style>(.*?)</style>',h2,re.S); m2=re.search(r'<script>\n"use strict";(.*?)</script>',h2,re.S)
+    open(OUT+'svg-app.css','w',encoding='utf-8').write('\n'.join(faces)+'\n'+st2.group(1))
+    open(OUT+'svg-app.js','w',encoding='utf-8').write('"use strict";'+m2.group(1))
+    os.makedirs(OUT+'svg',exist_ok=True)
+    ix=open(OUT+'index.html',encoding='utf-8').read().replace(f'app.css?v={ver}',f'svg-app.css?v={ver}').replace(f'src="app.js?v={ver}"',f'src="svg-app.js?v={ver}"').replace('<head>','<head>\n<base href="../">',1)
+    open(OUT+'svg/index.html','w',encoding='utf-8').write(ix)
