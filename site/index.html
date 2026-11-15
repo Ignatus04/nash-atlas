@@ -123,7 +123,7 @@ body.tilesmode #tileLayer{display:block}
 body.tilesmode .focus{display:none}
 #tilePane img.b{z-index:0}#tilePane img.s{z-index:1}#tilePane img.f{z-index:2}
 body.tilesmode #map .sphere{fill:transparent}
-#ov{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+#ov{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible;transform-origin:0 0;will-change:transform}
 #ov .cty,#ov .pn,#ov .cl,#ov .ch{pointer-events:auto}
 #ov .c-lab{pointer-events:auto}
 .ch-bg{fill:#fff;stroke:var(--accent);stroke-width:2.2}
@@ -645,6 +645,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-pin2 .fimg{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:50%;object-fit:cover}
 .ga-pin2.on{animation:gaDrop2 .75s var(--spring-soft) forwards}
 .ga-still svg{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:860px){.ga-pl .ga-pin2{opacity:1;animation:none}}
 .ga-still path{stroke:#1b3a5f;stroke-width:.5}
 @keyframes gaDrop2{0%{opacity:0;transform:translateY(-70px) scale(.7)}35%{opacity:1}100%{opacity:1;transform:none}}
 .ga-plus{position:absolute;right:16px;bottom:14px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(255,138,92,.4);animation:gaPulse 2.3s var(--spring-soft) infinite}
@@ -1363,6 +1364,11 @@ let W=0,H=0,proj,path,zoom,T=d3.zoomIdentity;
    caught by the container (zt), which never moves. */
 const zt=d3.select("#mapwrap"); let R=d3.zoomIdentity, OVS=0, lastDraw=0;
 function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);updateCopies();setLod(lodFor(T.k))}
+/* the labels and pins keep their own anchor (ovR) for the whole gesture: they ride as one picture and are
+   re-placed once, when the move ends — however many places there are */
+let ovR=d3.zoomIdentity;
+function ovMove(){if(ovR===T){ovSvg.style("transform",null);return}const s=T.k/ovR.k;ovSvg.style("transform",`translate(${T.x-ovR.x*s}px,${T.y-ovR.y*s}px) scale(${s})`)}
+function renderAll(){renderAt();ovR=T;ovSvg.style("transform",null);placeOverlay()}
 /* Detail levels for country outlines: zoomed out, points closer than ~0.7 screen px to the previous one are dropped,
    so the whole world draws from a fraction of its 145k points. Each level is computed once and kept. */
 const lodCache=new Map(); let lodLvl=-1;
@@ -1381,8 +1387,8 @@ function setLod(l){
 function svgMove(){
   const s=T.k/R.k, dx=T.x-R.x*s, dy=T.y-R.y*s;
   const far=s>1.6||s<0.65||Math.abs(dx)>OVS*0.75||Math.abs(dy)>OVS*0.75;
-  if(far&&performance.now()-lastDraw>120){svg.classed("moving",true);world.classed("moving",true);renderAt();return}
-  svg.style("transform",`translate(${dx}px,${dy}px) scale(${s})`);
+  if(far&&performance.now()-lastDraw>120){svg.classed("moving",true);world.classed("moving",true);renderAt();ovMove();return}
+  svg.style("transform",`translate(${dx}px,${dy}px) scale(${s})`); ovMove();
 }
 function size(){const r=$("#mapwrap").getBoundingClientRect();W=r.width;H=r.height;
   OVS=Math.round(Math.min(300,Math.min(W,H)*0.4));
@@ -1530,12 +1536,12 @@ function setupZoom(){
   if(TILES) zoom.constrain(t=>clampT(t)); else zoom.translateExtent([[-W*0.2,-H*0.2],[W*1.2,H*1.2]]);
   zoom
     .on("start",e=>{if(e.sourceEvent&&MOB()&&sheet.state!=="peek"&&e.sourceEvent.type!=="wheel")setSheet("peek");clearTimeout(moveEndT);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
-    .on("zoom",e=>{const wrap=TILES&&Math.round((viewC(T)-viewC(e.transform))/mercW())!==0;shiftT0(T,e.transform);T=e.transform;if(wrap)renderAt();else svgMove();if(blurEl)killBlur();moveOverlay();hideTip()})
-    .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAt();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
+    .on("zoom",e=>{const wrap=TILES&&Math.round((viewC(T)-viewC(e.transform))/mercW())!==0;shiftT0(T,e.transform);T=e.transform;if(wrap)renderAll();else svgMove();if(blurEl)killBlur();moveOverlay();hideTip()})
+    .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAll();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
   zoom.filter(e=>(!e.ctrlKey||e.type==="wheel")&&!e.button&&!!e.target.closest&&!!e.target.closest("#map,#ov,#tileLayer"));
   zt.call(zoom).on("dblclick.zoom",null);
   if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);T=c}}
-  renderAt();
+  renderAll();
   svg.on("click",e=>{
     if(S.pickCb){const [x,y]=T.invert(d3.pointer(e));const ll=proj.invert([x,y]);if(ll){const cb=S.pickCb;endPick();cb(ll[1],normLon(ll[0]))}}
   });
@@ -1709,13 +1715,16 @@ function applyOverlayOpacity(){
 }
 function moveOverlay(){
   if(movePending) return; movePending=true;
-  requestAnimationFrame(()=>{movePending=false; if(TILES){paneTransform();const now=performance.now();if(now-(moveOverlay.lt||0)>220){moveOverlay.lt=now;drawTiles()}} if(!S.area) return;
+  requestAnimationFrame(()=>{movePending=false; if(TILES){paneTransform();const now=performance.now();if(now-(moveOverlay.lt||0)>220){moveOverlay.lt=now;drawTiles()}}
+    // mid-move the labels and pins travel with the map picture (see svgMove); they are re-placed only when the map is redrawn
+    if(ovR===T) placeOverlay()});
+}
+function placeOverlay(){ if(!S.area) return;
     gCities.selectAll("g.cty").attr("transform",d=>`translate(${sx(d.px)},${T.applyY(d.py)})`);
     gPins.selectAll("g.pn").attr("transform",d=>`translate(${sx(d.px)},${T.applyY(d.py)}) scale(${S.sel.type==="place"&&S.sel.id===d.p.id?1.25:1})`);
     gPins.selectAll("g.cl").attr("transform",d=>`translate(${sx(d.cx)},${T.applyY(d.cy)})`);
     gPins.selectAll("g.ch").attr("transform",d=>`translate(${sx(d.cx)+(d.dx||0)},${T.applyY(d.cy)+(d.dy||0)})`);
     gWarn.selectAll("g.warn").attr("transform",d=>`translate(${sx(d.px)},${T.applyY(d.py)})`);
-  });
 }
 /* ---------- phone shell: the sheet (peek / half / full), the tab bar, the search toggle ---------- */
 const MOB=()=>window.innerWidth<=860;
@@ -2015,7 +2024,7 @@ const GUIDE=[
     m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
     mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны, все они собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах.",
     art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("plus",22)}</i></div>`,
-    run:r=>gaPinScene(r)},
+    run:r=>{if(!MOB())gaPinScene(r)}},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -2157,15 +2166,23 @@ function drawWarn(){
 function hits(b,occ){return occ.some(o=>!(b[2]<o[0]||b[0]>o[2]||b[3]<o[1]||b[1]>o[3]))}
 const _tw=document.createElement("canvas").getContext("2d"),_twc=new Map();
 function textW(t,px){const k=px+"|"+t;let v=_twc.get(k);if(v==null){_tw.font=`600 ${px}px Manrope, system-ui, sans-serif`;v=_tw.measureText(t).width;_twc.set(k,v)}return v}
+/* With the whole world in view only a few landmark cities are labelled (3–4 per continent) plus the capitals of
+   the chosen passports; once a country is open or the map is zoomed in, the usual labels come back. */
+const WORLD_CITIES=new Set(["GB|London","FR|Paris","IT|Rome","TR|Istanbul","JP|Tokyo","CN|Beijing","AE|Dubai","TH|Bangkok",
+  "EG|Cairo","NG|Lagos","KE|Nairobi","ZA|Cape Town","US|New York","US|Los Angeles","MX|Mexico City","CA|Toronto",
+  "BR|Rio de Janeiro","AR|Buenos Aires","PE|Lima","CL|Santiago","AU|Sydney","NZ|Auckland"]);
+const DETAIL_K=4;
 function drawCities(occ){
   if(TILES&&tilesOk&&BASEMAPS[basemap].url&&T.k>=14){gCities.selectAll("g.cty").remove();return}
   const k=T.k, maxRank=Math.min(10,Math.floor(1+Math.log2(k)*1.35)), selK=S.sel.k;
   const out=[]; let budget=window.innerWidth<=860?60:120;
+  const world=!selK&&k<DETAIL_K, home=new Set(S.pass.map(p=>p.toUpperCase()));
   for(const c of S.cities){
     const [ru,en,lat,lon,iso,adm,pop,rank,cap]=c;
-    if(!inA(iso)) continue;
+    if(world){if(!WORLD_CITIES.has(iso+"|"+en)&&!(cap&&home.has(iso)))continue}
+    else if(!inA(iso)) continue;
     const boost=(selK&&iso===selK)?2:0;
-    if(rank>maxRank+boost && !(cap&&k>2.2)) continue;
+    if(!world&&rank>maxRank+boost && !(cap&&k>2.2)) continue;
     const p=proj([lon,lat]); if(!p) continue;
     const x=sx(p[0]), y=T.applyY(p[1]);
     if(x<-20||y<-20||x>W+20||y>H+20) continue;
