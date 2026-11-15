@@ -460,6 +460,20 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .cg-s{font-size:12px;color:var(--muted);margin-top:-4px}
 .cg-c{font-size:13px;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #cityGal .cg{width:200px}
+.lead-d{margin:-4px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
+.rg-list{display:flex;flex-direction:column;gap:6px}
+.rg-list.short>.rg:nth-child(n+7){display:none}
+.rg{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.rg[hidden]{display:none!important}
+.rg-main{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:10px 12px 8px}
+.rg-main:focus-visible,.rg-c:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.rg-t{display:flex;align-items:center;gap:8px}.rg-t b{font-weight:700;font-size:14.5px}
+.rg-z{width:8px;height:8px;border-radius:50%;flex:none}
+.rg-n{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.rg-d{font-size:13px;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rg-c{all:unset;cursor:pointer;font-size:12.5px;color:#cfe6ff;padding:0 12px 10px;align-self:flex-start}
+.rg-c:hover,.rg-main:hover b{text-decoration:underline}
+.rg-all{align-self:flex-start}
 @keyframes cgShim{to{background-position:-300% 0}}
 .pl-loc{font-size:12px;color:var(--muted);line-height:1.3}
 .item .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;align-items:center}
@@ -630,6 +644,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-row i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-row span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-row b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-row b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+.ga-rg{display:flex;flex-direction:column;gap:8px;padding:14px 24px}
+.ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-rgr b{font-size:12.5px;color:var(--ink)}.ga-rgr span{height:6px;width:80%;border-radius:3px;background:#3a4f70}.ga-rgr i{font-style:normal;font-size:11px;color:#cfe6ff}
+.ga-rgr em{position:absolute;right:10px;top:7px;font-style:normal;font-size:11px;color:var(--muted)}
 .ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFanL 4.2s var(--spring) infinite}
 .ga-pp:nth-child(2){animation-name:gaFanC;z-index:1}.ga-pp:nth-child(3){animation-name:gaFanR}
 .ga-pp:nth-child(2){background:linear-gradient(160deg,#20456e,#14263f);--x:0px;--r:0deg}.ga-pp:nth-child(3){background:linear-gradient(160deg,#1d6b5c,#123d35);--x:62px;--r:11deg}
@@ -1085,6 +1103,32 @@ function fillCityGallery(c){const box=$("#cityGal"); if(!box) return;
   cityGallery(c).then(ph=>{if(!box.isConnected)return; if(!ph.length){box.remove();return}
     box.innerHTML=ph.map((x,i)=>`<span class="cg" title="Фото из Википедии"><span class="cg-ph" data-i="${i}"></span>${x.cap?`<span class="cg-c">${esc(x.cap)}</span>`:""}</span>`).join("");
     box.querySelectorAll(".cg-ph").forEach(el=>fadeImg(el,ph[+el.dataset.i].u))})}
+
+/* written descriptions of capitals and region centres, and which city is each region's centre (loaded when first needed) */
+let cdescP=null;
+function ensureCityDescs(){if(!cdescP)cdescP=Promise.all([getData("citydescs").catch(()=>({})),getData("centers").catch(()=>({reg:{}}))]).then(([d,c])=>{S.cdesc=d;S.centers=c});return cdescP}
+function cityDesc(c){return S.cdesc?.[cityKey(c)]||""}
+function firstSentence(t){const m=String(t).match(/^.*?[.!?](\s|$)/);return (m?m[0]:t).trim()}
+/* the regions of a country as a list to scan: centre, a line about it, our places there, safety */
+function regionNavHTML(k,regs){
+  if(!regs.length) return "";
+  const cnt=new Map(); for(const p of S.places.values()) if(p.k===k){const r=placeRegion(p);if(r)cnt.set(r.id,(cnt.get(r.id)||0)+1)}
+  const rows=regs.map(f=>{const p=f.properties,ck=S.centers?.reg?.[p.id],c=ck?cityByKey(ck):null;return {p,c,n:cnt.get(p.id)||0,z:zoneInfo(p.id)?.l||0,pop:c?.[6]||0}})
+    .sort((a,b)=>b.n-a.n||b.pop-a.pop||(a.p.ru||"").localeCompare(b.p.ru||"","ru"));
+  const row=x=>{const d=x.c?firstSentence(cityDesc(x.c)):"";
+    return `<div class="rg" data-q="${esc(nz((x.p.ru||"")+" "+(x.c?.[0]||"")))}"><button class="rg-main" data-reg="${esc(x.p.id)}"><span class="rg-t"><b>${esc(x.p.ru||x.p.en)}</b>${x.z>1?`<i class="rg-z" style="background:${SAFE[x.z].c}" title="${esc(SAFE[x.z].label)}"></i>`:""}${x.n?`<span class="rg-n">${x.n} ${ruPlural(x.n,"место","места","мест")}</span>`:""}</span>${d?`<span class="rg-d">${esc(d)}</span>`:""}</button>${x.c&&x.c[0]!==x.p.ru?`<button class="rg-c" data-city="${esc(cityKey(x.c))}">${x.c[8]===1?"столица":"центр"}: ${esc(x.c[0])}</button>`:""}</div>`};
+  const many=rows.length>6;
+  return `<section class="blk rgs"><h2>Регионы <span>${rows.length}</span></h2>
+    ${rows.length>15?`<input class="txt rg-q" type="search" placeholder="Найти регион или город" aria-label="Найти регион или город">`:""}
+    <div class="rg-list${many?" short":""}">${rows.map(row).join("")}</div>
+    ${many?`<button class="btn small ghost rg-all">Все ${rows.length} ${ruPlural(rows.length,"регион","региона","регионов")}</button>`:""}</section>`;
+}
+function bindRegionNav(){
+  const box=document.querySelector(".rgs"); if(!box) return;
+  const list=box.querySelector(".rg-list"), all=box.querySelector(".rg-all"), q=box.querySelector(".rg-q");
+  if(all) all.onclick=()=>{list.classList.remove("short");all.remove()};
+  if(q) q.oninput=()=>{const v=nz(q.value);list.classList.toggle("short",!v&&!!box.querySelector(".rg-all"));list.querySelectorAll(".rg").forEach(r=>r.hidden=!!v&&!r.dataset.q.includes(v))};
+}
 
 /* ---------- state ---------- */
 const S = {pass:(()=>{try{const a=JSON.parse(localStorage.getItem("atlas-pass")||"null");if(Array.isArray(a)&&a.length)return a;const m=localStorage.getItem("atlas-mode");if(m==="ru"||m==="by")return [m]}catch(e){}return ["ru","by"]})(), layer:(()=>{try{return localStorage.getItem("atlas-layer")==="safe"?"safe":"entry"}catch(e){return "entry"}})(), sel:{type:"home"}, area:null, areaGeo:new Map(), countries:[], cByK:new Map(), adm:null, cities:[], meta:{}, visa:null,
@@ -2255,7 +2299,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=4;
+const GUIDE_VER=5;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2285,6 +2329,9 @@ const GUIDE=[
   {since:4, t:"Фото городов и мест",
     m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его: там тоже лента фото. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
     art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-row"><i></i><span><b></b><b></b></span></div></div>`},
+  {since:5, t:"Регионы и описания городов",
+    m:"В карточке страны регионы теперь списком: сначала те, где есть ваши места, у каждого — центр, строка о нём и отметка, если там неспокойно. У столиц и центров регионов появились короткие описания: чем город интересен и что посмотреть рядом.",
+    art:()=>`<div class="ga ga-rg">${[["Татарстан","Казань",1],["Карелия","Петрозаводск",0],["Алтай","Горно-Алтайск",0]].map(([a,b,n],i)=>`<div class="ga-rgr" style="--i:${i}"><b>${a}</b><span></span><i>центр: ${b}</i>${n?`<em>3 места</em>`:""}</div>`).join("")}</div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -3035,10 +3082,10 @@ function renderCountry(k){
     ${notesBlock("country",k,f.properties.ru)}
     ${placesBlock(pl)}
     ${briefBlock(k,f.properties.ru)}
-    ${cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""}
-    <section class="blk"><h2>Регионы <span>${regs.length||""}</span></h2>${regs.length?`<div class="chips">${regs.slice(0,80).map(r=>`<button class="chip link" data-reg="${esc(r.properties.id)}">${esc(r.properties.ru)}</button>`).join("")}</div>`:`<p class="empty">${S.adm?"Регионов в данных нет":"Загружаю регионы…"}</p>`}</section>
+    ${regs.length?regionNavHTML(k,regs):S.adm?(cities.length?`<section class="blk"><h2>Города</h2><div class="chips">${cities.map(c=>`<button class="chip link" data-city="${esc(cityKey(c))}">${esc(c[0])}</button>`).join("")}</div></section>`:""):`<section class="blk"><h2>Регионы</h2><p class="empty">Загружаю регионы…</p></section>`}
     ${vibeBlock({kind:"country",key:k,label:f.properties.ru,ctx:f.properties.ru})}`;
-  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);
+  bindCrumbs();bindNotes();bindPlaceLinks();bindChipsNav();bindBrief(k,f.properties.ru);bindVibe();fillCityPhotos(k);bindRegionNav();
+  if(!S.cdesc) ensureCityDescs().then(()=>{if(S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});
   document.querySelectorAll("[data-reg]").forEach(b=>b.onclick=()=>ensureAdm().then(()=>select({type:"region",id:b.dataset.reg},true)));
   if(!S.adm) ensureAdm().then(()=>{if(S.sel.type==="country"&&S.sel.k===k) renderCountry(k)});
 }
@@ -3092,6 +3139,7 @@ function renderCity(c){
   $("#pbody").innerHTML=`
     ${crumbs(crumb)}
     <div class="p-head"><div class="flag">${S.meta[iso]?.flag||""}</div><div class="grow"><h1>${esc(ru)}</h1><p>${esc([en!==ru?en:"",pop?"население около "+fmtPop(pop):""].filter(Boolean).join(" · "))}</p></div></div>
+    ${cityDesc(c)?`<p class="lead-d">${esc(cityDesc(c))}</p>`:""}
     ${cityGalleryHTML()}
     ${entryMini(iso)}
     ${notesBlock("city",cityKey(c),ru)}
@@ -3099,6 +3147,7 @@ function renderCity(c){
     ${vibeBlock({kind:"city",key:cityKey(c),label:ru,ctx:`${ru} (${en}), ${cf?.properties.ru||""}`,lat,lng:lon})}
     <section class="blk"><div class="row2"><a class="btn small" href="${gmapsSearch(en+", "+(cf?.properties.en||""))}" target="_blank" rel="noopener">Открыть в Google Картах</a></div></section>`;
   bindCrumbs();bindNotes();bindPlaceLinks();bindVibe();fillCityGallery(c);
+  if(!S.cdesc) ensureCityDescs().then(()=>{if(cityDesc(c)&&S.sel.type==="city"&&S.sel.key===ck){const h=document.querySelector("#pbody .p-head");if(h&&!document.querySelector(".lead-d"))h.insertAdjacentHTML("afterend",`<p class="lead-d">${esc(cityDesc(c))}</p>`)}});
 }
 function renderPlace(p){
   const cf=S.cByK.get(p.k);
