@@ -41,7 +41,12 @@ if [ ! -f $APP/.env ]; then
 else
   echo "Supabase уже установлен в $APP, обновляю только наши настройки."
 fi
+systemctl enable --now docker >/dev/null 2>&1 || true
+for i in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 2; done
+docker info >/dev/null 2>&1 || { echo "Docker не запустился: systemctl status docker"; exit 1; }
 cd $APP
+# finish key generation if the official setup stopped half-way (e.g. Docker was not running yet)
+grep -q "^SUPABASE_PUBLISHABLE_KEY=sb_" .env || sh utils/add-new-auth-keys.sh --update-env
 # replace or add KEY=value in .env without sed (secrets may contain | or &)
 setenv() { grep -v "^$1=" .env > .env.new || true; printf '%s=%s\n' "$1" "$2" >> .env.new; mv .env.new .env; chmod 600 .env; }
 getenv() { grep "^$1=" .env | head -n1 | cut -d= -f2-; }
