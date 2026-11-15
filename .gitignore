@@ -4,6 +4,7 @@
 !/scripts/
 !/web-src/
 !/supabase/
+!/server/
 !/.github/
 !/package.json
 !/README.md
