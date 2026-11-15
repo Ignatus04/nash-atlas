@@ -33,18 +33,18 @@ a{color:#9cd3ff}
 .grat{fill:none;stroke:#1a2a42;stroke-width:.6;vector-effect:non-scaling-stroke}
 .country{stroke:var(--ocean);stroke-width:.6;vector-effect:non-scaling-stroke;cursor:pointer}
 /* while the map moves: drop the costly bits, restore when it stops */
-.moving:not(.hastiles) .country{stroke:none}
-.moving .grat,.moving .adm-line,.moving .area-lab{display:none}
-.moving .c-lab,.moving .pin-lab,body.moving .c-lab,body.moving .pin-lab{stroke:none}
+g.moving:not(.hastiles) .country{stroke:none}
+g.moving .grat,g.moving .adm-line,g.moving .area-lab{display:none}
+body.moving .c-lab,body.moving .pin-lab{stroke:none}
 body.moving .pin-shadow,body.moving .cl-ring{display:none}
 .country,.sphere{will-change:auto}
-#map.moving{cursor:grabbing}
+body.moving #mapwrap{cursor:grabbing}
 #map{shape-rendering:geometricPrecision}
 #map.moving{shape-rendering:optimizeSpeed;text-rendering:optimizeSpeed}
 .country:hover{fill-opacity:.82}
 .df-hatch{fill:url(#dfHatch);pointer-events:none;stroke:none}
 .df-front{fill:none;stroke:#b3261e;stroke-width:2;stroke-dasharray:6 3;vector-effect:non-scaling-stroke;pointer-events:none}
-.moving .df-hatch{display:none}
+g.moving .df-hatch{display:none}
 .status-note{font-size:13.5px;line-height:1.5;color:var(--ink-2,#c9d2e3);margin:0}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .p-inner>*{animation:fadeUp .42s cubic-bezier(.22,.61,.36,1) both}
@@ -107,12 +107,12 @@ body.moving .pin-shadow,body.moving .cl-ring{display:none}
 .c-lab.big .c-ru{font-size:10.5px}
 .c-lab.sel,.c-dot.sel{fill:var(--accent)}
 .pn,.cl,.ch{cursor:pointer}
-body.moving .focus path{stroke:none}
+g.moving .focus path{stroke:none}
 .focus path{fill:rgba(6,12,24,.5);fill-rule:evenodd;stroke:rgba(6,12,24,.25);stroke-width:10;vector-effect:non-scaling-stroke;stroke-linejoin:round;pointer-events:none}
 .hastiles .focus path{fill:rgba(18,26,44,.38);stroke:rgba(18,26,44,.18)}
 #focusBlur{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity .45s ease;-webkit-backdrop-filter:blur(3px) saturate(.55);backdrop-filter:blur(3px) saturate(.55)}
 #focusBlur.on{opacity:1}
-#mapwrap svg#map{position:relative;z-index:0}
+#mapwrap svg#map{position:absolute;z-index:0;will-change:transform;max-width:none}
 #tileLayer{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none;background:#c9dbe6;display:none}
 body.tilesmode #tileLayer{display:block}
 #tilePane{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
@@ -401,7 +401,7 @@ input.txt[aria-invalid="true"]{border-color:#ff9b9b}
 @media (max-width:560px){#ppick{padding:10px}.pp-box{padding:18px 12px;max-height:calc(100dvh - 20px)}.pp-box h1{font-size:21px}.pp-lead{font-size:13px}.pp-q{flex:1 1 100%}.pp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pp-grid .pp-cover{max-width:84px}.pp-foot{gap:10px}.pp-go{flex:1}.pp-cred{font-size:10.5px}}
 @media (prefers-reduced-motion:reduce){#ppick,.pp-box,.pp-svg,.pp-flag,.pp-check{transition:none}}
 .zone{stroke-width:1.2;stroke-opacity:.9;vector-effect:non-scaling-stroke;pointer-events:none}
-.moving .zone{fill-opacity:.6}
+g.moving .zone{fill-opacity:.6}
 #ov .pin-warn{fill:none;stroke-width:3;pointer-events:none}
 .safe-badge{display:flex;align-items:center;gap:10px;border-radius:14px;padding:12px 14px;background:color-mix(in srgb,var(--c) 18%,transparent);border:1.5px solid var(--c);font-weight:700}
 .safe-badge .dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
@@ -1102,8 +1102,38 @@ const TILES=STANDALONE;
 const root=svg.append("g"), world=root.append("g").attr("id","wrld"), gTiles=world.append("g").attr("class","tiles"), gBase=world.append("g"), gCountries=world.append("g"), gZones=world.append("g").attr("class","zones"), gDF=world.append("g").attr("class","df"), gAreas=world.append("g"), gAdm=world.append("g"), gFocus=world.append("g").attr("class","focus"), gCopies=root.append("g").attr("class","copies"), ovSvg=d3.select("#ov"), overlay=ovSvg.append("g"), gCities=overlay.append("g"), gPins=overlay.append("g"), gWarn=overlay.append("g");
 ovSvg.append("defs").html('<clipPath id="flagclip2" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>');
 let W=0,H=0,proj,path,zoom,T=d3.zoomIdentity;
-document.getElementById("ov").addEventListener("wheel",e=>{if(e.target.closest&&e.target.closest(".cty,.pn,.cl,.ch,.c-lab,.warn")){e.preventDefault();svg.node().dispatchEvent(new WheelEvent("wheel",e))}},{passive:false});
-function size(){const r=$("#mapwrap").getBoundingClientRect();W=r.width;H=r.height;svg.attr("viewBox",[0,0,W,H]);d3.select("#ov").attr("viewBox",[0,0,W,H])}
+/* Fast moves. Redrawing ~250 country outlines on every frame is what made the map stutter on phones.
+   While the map moves, the drawing made at R is shifted and scaled as a picture (the GPU does that);
+   it is redrawn at T when the move ends, or sooner if the picture has drifted too far or blurred.
+   The drawing extends OVS px past each edge so a drag doesn't uncover empty space. Gestures are
+   caught by the container (zt), which never moves. */
+const zt=d3.select("#mapwrap"); let R=d3.zoomIdentity, OVS=0, lastDraw=0;
+function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);updateCopies();setLod(lodFor(T.k))}
+/* Detail levels for country outlines: zoomed out, points closer than ~0.7 screen px to the previous one are dropped,
+   so the whole world draws from a fraction of its 145k points. Each level is computed once and kept. */
+const lodCache=new Map(); let lodLvl=-1;
+function lodFor(k){return k>=32?99:Math.max(0,Math.floor(Math.log2(k)))}
+function thin(out,tol){let lx=0,ly=0,px=0,py=0,n=0,pend=false;
+  return {point(x,y){if(n++===0||Math.abs(x-lx)+Math.abs(y-ly)>tol){out.point(x,y);lx=x;ly=y;pend=false}else{px=x;py=y;pend=true}},
+    lineStart(){n=0;pend=false;out.lineStart()},lineEnd(){if(pend)out.point(px,py);out.lineEnd()},
+    polygonStart(){out.polygonStart()},polygonEnd(){out.polygonEnd()},sphere(){out.sphere&&out.sphere()}}}
+function setLod(l){
+  if(l===lodLvl||!path) return; lodLvl=l;
+  let ds=lodCache.get(l);
+  if(!ds){const tol=0.7/2**l, pth=l===99?path:d3.geoPath({stream:o=>proj.stream(thin(o,tol))});ds=new Map();lodCache.set(l,ds);
+    gCountries.selectAll("path.country").each(d=>ds.set(d,pth(d)))}
+  gCountries.selectAll("path.country").attr("d",d=>ds.get(d)??path(d));
+}
+function svgMove(){
+  const s=T.k/R.k, dx=T.x-R.x*s, dy=T.y-R.y*s;
+  const far=s>1.6||s<0.65||Math.abs(dx)>OVS*0.75||Math.abs(dy)>OVS*0.75;
+  if(far&&performance.now()-lastDraw>120){svg.classed("moving",true);world.classed("moving",true);renderAt();return}
+  svg.style("transform",`translate(${dx}px,${dy}px) scale(${s})`);
+}
+function size(){const r=$("#mapwrap").getBoundingClientRect();W=r.width;H=r.height;
+  OVS=Math.round(Math.min(300,Math.min(W,H)*0.4));
+  svg.attr("viewBox",[-OVS,-OVS,W+2*OVS,H+2*OVS]).style("left",-OVS+"px").style("top",-OVS+"px").style("width",W+2*OVS+"px").style("height",H+2*OVS+"px").style("transform-origin",`${OVS}px ${OVS}px`);
+  d3.select("#ov").attr("viewBox",[0,0,W,H])}
 function setupProjection(){
   const mob=window.innerWidth<=860;
   const ext=mob?[[8,96],[W-8,H*0.54-8]]:[[10,70],[W-10,H-10]];
@@ -1128,7 +1158,7 @@ function shiftT0(a,b){if(!TILES)return;const n=Math.round((viewC(a)-viewC(b))/me
 function sx(px){if(!TILES)return T.applyX(px);const Wm=mercW();return T.applyX(px+Math.round((viewC(T)-px)/Wm)*Wm)}
 function updateCopies(){
   if(!TILES){gCopies.selectAll("use").remove();return}
-  const Wm=mercW(),c=viewC(T),half=W/(2*T.k),t0=proj.translate()[0],ns=[];
+  const Wm=mercW(),c=viewC(T),half=(W/2+OVS)/T.k,t0=proj.translate()[0],ns=[];
   for(let n=Math.ceil((c-half-t0-Wm/2)/Wm);n<=Math.floor((c+half-t0+Wm/2)/Wm);n++) if(n) ns.push(n);
   gCopies.selectAll("use").data(ns,d=>d).join(e=>e.append("use").attr("href","#wrld")
       .on("click",(e)=>{if(S.pickCb)return;const k=hitCountry(e);if(k){e.stopPropagation();select({type:"country",k},true)}})
@@ -1149,15 +1179,16 @@ function countryAt(lon,lat){
   return null;
 }
 function drawBase(){
-  gBase.selectAll("*").remove();
+  gBase.selectAll("*").remove(); lodCache.clear(); lodLvl=-1;
   if(TILES){const a=proj([-180,85.05]),b=proj([180,-85.05]);gBase.append("rect").attr("class","sphere").attr("x",a[0]).attr("y",a[1]).attr("width",b[0]-a[0]).attr("height",b[1]-a[1])}
   else gBase.append("path").attr("class","sphere").attr("d",path({type:"Sphere"}));
   gBase.append("path").attr("class","grat").attr("d",path(d3.geoGraticule10()));
   gCountries.selectAll("path").data(TILES?S.countries.filter(f=>f.properties.k!=="AQ"):S.countries,d=>d.properties.k).join("path")
-    .attr("class","country").attr("d",path)
+    .attr("class","country")
     .on("click",(e,d)=>{if(S.pickCb)return;e.stopPropagation();select({type:"country",k:d.properties.k},true)})
     .on("mousemove",(e,d)=>showTip(e,d.properties.k))
     .on("mouseleave",hideTip);
+  setLod(lodFor(T.k));
   // territories whose real control differs from the claim: hatched, and the line of control drawn on top
   const dfs=S.countries.filter(f=>DEFACTO.has(f.properties.k));
   gDF.selectAll("path.df-hatch").data(dfs,d=>d.properties.k).join("path").attr("class","df-hatch").attr("d",path);
@@ -1199,12 +1230,12 @@ function areaStats(id){
 }
 function paint(){
   const home=false; // no continent picker: the world map is always live
-  const flyingNow=!!svg.node().__transition&&Object.keys(svg.node().__transition).length>0;
+  const flyingNow=!!zt.node().__transition&&Object.keys(zt.node().__transition).length>0;
   if(home&&flyingNow){gAreas.interrupt().style("opacity",0).style("display","none");pendingAreas=true}
   else gAreas.interrupt().style("display",null).transition().duration(REDUCED?0:400).style("opacity",home?1:0).on("end",function(){if(!home)d3.select(this).style("display","none")});
   gCountries.style("pointer-events",home?"none":null);
   $("#legend").classList.toggle("off",home);
-  const flying=!!svg.node().__transition&&Object.keys(svg.node().__transition).length>0;
+  const flying=!!zt.node().__transition&&Object.keys(zt.node().__transition).length>0;
   gCountries.selectAll("path").transition().duration(REDUCED||flying?0:500).ease(d3.easeCubicInOut).attr("fill",d=>colorFor(d.properties.k)).selection()
     .classed("sel",d=>S.sel.k===d.properties.k);
   drawLegend();
@@ -1244,11 +1275,13 @@ function setupZoom(){
   zoom=d3.zoom().scaleExtent([kMin(),TILES?60000:900]);
   if(TILES) zoom.constrain(t=>clampT(t)); else zoom.translateExtent([[-W*0.2,-H*0.2],[W*1.2,H*1.2]]);
   zoom
-    .on("start",()=>{clearTimeout(moveEndT);svg.classed("moving",true);world.classed("moving",true);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
-    .on("zoom",e=>{shiftT0(T,e.transform);T=e.transform;root.attr("transform",T);updateCopies();if(blurEl)killBlur();moveOverlay();hideTip()})
-    .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){svg.property("__zoom",c);shiftT0(T,c);T=c;root.attr("transform",T);updateCopies();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
-  svg.call(zoom).on("dblclick.zoom",null);
-  if(TILES){const c=clampT(T);if(c!==T){svg.property("__zoom",c);T=c;root.attr("transform",T)}}
+    .on("start",()=>{clearTimeout(moveEndT);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
+    .on("zoom",e=>{const wrap=TILES&&Math.round((viewC(T)-viewC(e.transform))/mercW())!==0;shiftT0(T,e.transform);T=e.transform;if(wrap)renderAt();else svgMove();if(blurEl)killBlur();moveOverlay();hideTip()})
+    .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAt();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
+  zoom.filter(e=>(!e.ctrlKey||e.type==="wheel")&&!e.button&&!!e.target.closest&&!!e.target.closest("#map,#ov,#tileLayer"));
+  zt.call(zoom).on("dblclick.zoom",null);
+  if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);T=c}}
+  renderAt();
   svg.on("click",e=>{
     if(S.pickCb){const [x,y]=T.invert(d3.pointer(e));const ll=proj.invert([x,y]);if(ll){const cb=S.pickCb;endPick();cb(ll[1],normLon(ll[0]))}}
   });
@@ -1260,7 +1293,7 @@ function fly(t){
   killBlur();
   if(TILES) t=nearCopy(clampT(t));
   if(TILES){prefetchTiles(t);tileZFix=Math.min(tileZFor(T.k),tileZFor(t.k))}
-  svg.interrupt().transition().duration(dur).ease(d3.easeCubicInOut).call(zoom.transform,t);
+  zt.interrupt().transition().duration(dur).ease(d3.easeCubicInOut).call(zoom.transform,t);
 }
 let movePending=false, moveEndT=null;
 /* ---------- focus: dim + blur everything outside the current area/country/region/city ---------- */
@@ -1291,7 +1324,7 @@ function updateFocus(){
   const d=g?worldRect()+simplePath(g,focusZoomFor(S.sel)):null;
   gFocus.selectAll("path").data(d?[d]:[]).join(e=>e.append("path").attr("opacity",0).call(e=>e.transition().duration(REDUCED?0:450).attr("opacity",1)),u=>u,ex=>ex.transition().duration(REDUCED?0:300).attr("opacity",0).remove())
     .attr("d",d=>d);
-  if(TILES&&document.body.classList.contains("tilesmode")&&!(svg.node().__transition&&Object.keys(svg.node().__transition).length)) drawPaneFocus();
+  if(TILES&&document.body.classList.contains("tilesmode")&&!(zt.node().__transition&&Object.keys(zt.node().__transition).length)) drawPaneFocus();
   updateFocusBlur();
 }
 function focusZoomFor(sel){return sel.type==="area"?3:sel.type==="country"||sel.type==="list"?12:sel.type==="region"?40:400}
@@ -1334,13 +1367,13 @@ let blurEl=null, pendingAreas=false;
 function killBlur(){const el=$("#focusBlur");if(el)el.remove();blurEl=null}
 function updateFocusBlur(){
   killBlur(); return; // backdrop blur dropped: too costly for smooth animation; the mask below is feathered instead
-  const animating=!!svg.node().__transition&&Object.keys(svg.node().__transition).length>0;
-  if(!focusGeo||REDUCED||svg.classed("moving")||animating) return;
+  const animating=!!zt.node().__transition&&Object.keys(zt.node().__transition).length>0;
+  if(!focusGeo||REDUCED||document.body.classList.contains("moving")||animating) return;
   const hole=simplePath(focusGeo,1,screenProj(T));
   const el=document.createElement("div"); el.id="focusBlur"; el.setAttribute("aria-hidden","true");
   el.style.clipPath=el.style.webkitClipPath=`path(evenodd, "M-50,-50H${W+50}V${H+50}H-50Z ${hole}")`;
   $("#mapwrap").insertBefore(el,$("#ov")); blurEl=el;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(el.isConnected&&!svg.classed("moving"))el.classList.add("on")}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(el.isConnected&&!document.body.classList.contains("moving"))el.classList.add("on")}));
 }
 
 /* ---------- topographic tiles (standalone only) ---------- */
@@ -2762,8 +2795,8 @@ $("#q").addEventListener("focus",e=>{ensureAdm();resArr=searchAll(e.target.value
 document.addEventListener("keydown",e=>{if((e.key==="/"&&!/input|textarea/i.test(document.activeElement?.tagName))||((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k")){e.preventDefault();$("#q").focus()}});
 $("#q").addEventListener("keydown",e=>{if(e.key==="ArrowDown"){resSel=Math.min(resSel+1,resArr.length-1);renderResults();e.preventDefault()}else if(e.key==="ArrowUp"){resSel=Math.max(resSel-1,0);renderResults();e.preventDefault()}else if(e.key==="Enter"){pick(resSel<0?0:resSel)}else if(e.key==="Escape"){resArr=[];renderResults()}});
 $("#q").addEventListener("blur",()=>setTimeout(()=>{resArr=[];renderResults()},150));
-$("#zin").onclick=()=>svg.transition().duration(450).ease(d3.easeCubicOut).call(zoom.scaleBy,1.8);
-$("#zout").onclick=()=>svg.transition().duration(450).ease(d3.easeCubicOut).call(zoom.scaleBy,1/1.8);
+$("#zin").onclick=()=>zt.transition().duration(450).ease(d3.easeCubicOut).call(zoom.scaleBy,1.8);
+$("#zout").onclick=()=>zt.transition().duration(450).ease(d3.easeCubicOut).call(zoom.scaleBy,1/1.8);
 $("#zhome").onclick=()=>select({type:"home"},false);
 $("#brand").onclick=()=>select({type:"home"},false);
 // logo: flags of the countries we collect places in; one of them changes now and then
@@ -2803,7 +2836,7 @@ $("#lbX").onclick=closeLB; $("#lbP").onclick=()=>openLB(lbI-1); $("#lbN").onclic
 $("#lb").addEventListener("click",e=>{if(e.target.id==="lb")closeLB()});
 document.addEventListener("keydown",e=>{if($("#lb").classList.contains("on")){if(e.key==="ArrowLeft")openLB(lbI-1);if(e.key==="ArrowRight")openLB(lbI+1)}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeLB();if(S.pickCb)endPick();$("#addModal").classList.remove("on");$("#impModal").classList.remove("on")}});
-let rt; window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{size();setupProjection();setupZoom();drawBase();S.admShown=null;showAdmin(S.sel.k||null);markAdm();svg.call(zoom.transform,clampT(d3.zoomIdentity));scheduleOverlay();updateFocus()},200)});
+let rt; window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{size();setupProjection();setupZoom();drawBase();S.admShown=null;showAdmin(S.sel.k||null);markAdm();zt.call(zoom.transform,clampT(d3.zoomIdentity));scheduleOverlay();updateFocus()},200)});
 
 boot().catch(e=>{$("#pbody").innerHTML=`<p class="err">Карта не загрузилась. Обнови страницу.</p>`;console.error(e)});
 </script>
