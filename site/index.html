@@ -1046,7 +1046,7 @@ const cgMem=new Map();
 const wstrip=h=>String(h||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim();
 async function cityGallery(c){
   const ck=cityKey(c); if(cgMem.has(ck)) return cgMem.get(ck);
-  const key="atlas-cg2:"+ck;
+  const key="atlas-cg3:"+ck;
   try{const x=JSON.parse(localStorage.getItem(key)||"null");if(x&&Date.now()-x.at<1000*3600*24*60){cgMem.set(ck,x.ph);return x.ph}}catch(e){}
   const e0=wqErr; let out=[];
   // photos in the order the article shows them (the infobox collage first), Russian article first
@@ -1054,8 +1054,8 @@ async function cityGallery(c){
     if(!c[col]) continue;
     try{let r;try{r=await fetch(`https://${L}.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(c[col].replace(/ /g,"_"))}?redirect=true`)}catch(e){wqErr++;throw e}
       if(!r.ok) continue; const j=await r.json();
-      const bad=/тэц|гэс|аэс|завод|фабрик|комбинат|труб|пожар|дым|авари|разруш|наводнен|депо|трамва|троллейб|автобус|маршрут|электрич|станци|подстанц|котельн|мусор|свалк|очистн|стадион|трибун|матч|улиц[аы] в час пик|пробк/i;
-      const old=/гравюр|картин|кисти|портрет|рисун|карта|схема|спутник|герб|флаг|климат|\b1[0-8]\d\d\b|\b19[0-4]\d\b|век[ае]?\b/i;
+      const bad=/тэц|гэс|аэс|завод|фабрик|комбинат|труб|пожар|дым|авари|разруш|наводнен|депо|трамва|троллейб|автобус|маршрут|электрич|станци|подстанц|котельн|мусор|свалк|очистн|стадион|трибун|матч|пробк|магистрал|шоссе|трасс|развязк|больниц|клиник|поликлин|реконструкц|план |план,|почтов|марка|по адресу|памятная монета/i;
+      const old=/гравюр|картин|кисти|портрет|рисун|карта|схема|спутник|герб|флаг|климат|1[0-8]\d\d|19[0-4]\d|\s(I|V|X)[IVX]*\s?век|век[ае]?(?![а-яё])/i;
       const items=(j.items||[]).filter(x=>x.type==="image"&&x.showInGallery!==false&&/\.(jpe?g|webp)$/i.test(x.title)
         &&!/map|karte|flag|coat|wappen|logo|seal|locator|emblem|climate|nasa|satellite|portrait|collage|1[0-8]\d\d|19[0-4]\d/i.test(x.title)
         &&!old.test(x.caption?.text||"")&&!bad.test(x.caption?.text||"")&&!/thermal|power.?(plant|station)|factory|chimney|tram|trolley|bus\b/i.test(x.title));
