@@ -528,6 +528,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 @supports (transition-timing-function:linear(0,1)){:root{
   --spring:linear(0,.006,.025 2.8%,.101 6.1%,.539 18.9%,.721 25.3%,.849 31.5%,.937 38.1%,.968 41.8%,.991 45.7%,1.006 50.1%,1.015 55%,1.017 63.9%,1.001 85.9%,1);
   --spring-soft:linear(0,.009,.037 1.7%,.153 3.6%,.776 10.3%,1.001,1.142 16%,1.185,1.209 19%,1.205 20.4%,1.178 22%,1.042 27.4%,.982 30.9%,.958 33.9%,.957 36.1%,.973 40.6%,1.008 49.4%,1.012 54.6%,1.002 69.6%,1)}}
+.gd-modal{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(6,11,20,.72)}
 .gd-modal .abox{width:min(440px,100%);padding:22px 22px 18px;overflow:hidden;animation:gdBoxIn .5s var(--spring) both}
 @keyframes gdBoxIn{from{transform:translateY(28px) scale(.97);opacity:0}}
 .gd{position:relative}
@@ -544,11 +545,12 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .gd-k{margin:0;font:700 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gd h2{margin:0;font:800 20px/1.25 var(--display);text-wrap:balance}
 .gd h2.gd-hello{font-size:23px}
-.gd-m{margin:0;font-size:15px;line-height:1.55;color:#d3dbe8;min-height:5.2em}
-.gd-dots{display:flex;gap:6px;justify-content:center;margin-top:2px}
-.gd-dots i{width:6px;height:6px;border-radius:3px;background:#33445f;transition:width .35s var(--spring),background-color .2s ease}
-.gd-dots i.on{width:20px;background:var(--accent)}
-.gd-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+.gd-m{margin:0;font-size:15px;line-height:1.55;color:#d3dbe8;min-height:6.2em}
+.gd-dots{position:relative;display:flex;gap:8px;justify-content:center;margin:12px auto 0;width:max-content;transition:opacity .25s ease}
+.gd-dots.off{opacity:0;height:0;margin:0;overflow:hidden}
+.gd-dots i{width:7px;height:7px;border-radius:4px;background:#33445f}
+.gd-dots .lq{top:0;bottom:0;border-radius:4px;background:var(--accent);margin:0 -0px;transition-duration:.55s}
+.gd-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px}
 .gd-foot .btn{min-height:46px;padding:10px 18px;transition:transform .25s var(--spring-soft)}
 .gd-foot .btn:active{transform:scale(.95)}
 .gd-foot .btn.primary{margin-left:auto}
@@ -556,14 +558,41 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 @keyframes gdSheetIn{from{transform:translateY(100%)}}
 /* pictures */
 .ga{position:absolute;inset:0}
-.ga-grid{position:absolute;left:50%;top:22px;width:248px;margin-left:-124px;display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
-.ga-c{display:block;height:34px;border-radius:9px 12px 8px 11px;background:var(--st-visa);animation:gaPop .6s var(--spring-soft) both,gaCol 7s steps(1) infinite;animation-delay:calc(var(--i)*45ms),calc(var(--i)*-0.55s)}
-.ga-c:nth-child(3n){border-radius:14px 7px 12px 6px}.ga-c:nth-child(4n+1){border-radius:6px 13px 9px 14px}
+.ga-q{container-type:size}
+.ga-wait{position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%) 0 0/200% 100%;animation:gaShim 1.2s linear infinite}
+@keyframes gaShim{to{background-position:-200% 0}}
 @keyframes gaPop{from{transform:scale(.4);opacity:0}}
-@keyframes gaCol{0%{background:var(--st-free)}20%{background:var(--st-arrival)}40%{background:var(--st-evisa)}60%{background:var(--st-visa)}80%{background:var(--st-banned)}}
-.ga-leg{position:absolute;left:10px;right:10px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 10px;font:600 11.5px var(--body)}
-.ga-leg span{display:inline-flex;align-items:center;gap:5px;animation:gaPop .6s var(--spring-soft) both;animation-delay:calc(.35s + var(--i)*70ms)}
-.ga-leg i{width:11px;height:11px;border-radius:3px}
+.ga-map{position:absolute;inset:0;width:100%;height:100%;animation:gaFade .5s ease both}
+.ga-map path{stroke:#101c30;stroke-width:.25;transition:filter .3s ease,stroke .3s ease}
+.ga-map path.hl{stroke:#fff;stroke-width:.6;filter:brightness(1.25)}
+@keyframes gaFade{from{opacity:0}}
+.ga-finger{position:absolute;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);
+  transform:translate(50cqw,120cqh);transition:transform .6s var(--spring-soft);will-change:transform}
+.ga-finger.press{animation:gaPress .45s var(--spring-soft)}
+.ga-finger::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #fff;opacity:0}
+.ga-finger.press::after{animation:gaRing .7s ease-out}
+@keyframes gaPress{40%{scale:.72}}
+@keyframes gaRing{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(2.3)}}
+.ga-tip{position:absolute;left:0;top:0;max-width:62cqw;padding:7px 10px;border-radius:12px;background:#16263f;border:1px solid #2c4062;box-shadow:0 8px 20px rgba(0,0,0,.4);
+  display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center;font-size:12px;opacity:0;scale:.85;transform-origin:0 100%;transition:opacity .2s ease,scale .45s var(--spring-soft);pointer-events:none}
+.ga-tip.on{opacity:1;scale:1}
+.ga-tip .fimg{width:18px;height:18px;border-radius:50%;grid-row:span 2}
+.ga-tip b{font:800 13px/1.2 var(--display)}
+.ga-tip span{display:flex;align-items:center;gap:5px;color:#d3dbe8;white-space:nowrap}
+.ga-tip span i{width:8px;height:8px;border-radius:50%}
+.ga-sheet{position:absolute;left:8%;right:8%;bottom:8px;padding:10px 12px 11px;border-radius:14px;background:rgba(22,38,63,.97);border:1px solid #2c4062;box-shadow:0 -6px 22px rgba(0,0,0,.4);
+  display:flex;flex-direction:column;gap:5px;transform:translateY(130%);transition:transform .55s var(--spring)}
+.ga-sheet.on{transform:none}
+.ga-h{display:flex;align-items:center;gap:7px;font:800 14px var(--display)}.ga-h .fimg{width:18px;height:18px;border-radius:50%}
+.ga-row{display:flex;align-items:center;gap:7px;font:600 11.5px var(--body);color:#d3dbe8;opacity:0;transform:translateX(-10px);transition:opacity .25s ease,transform .45s var(--spring-soft);transition-delay:calc(.15s + var(--i)*80ms)}
+.ga-sheet.on .ga-row{opacity:1;transform:none}
+.ga-row i{width:9px;height:9px;border-radius:50%;flex:none}
+.ga-top{opacity:0;transition:opacity .6s ease;animation:none}
+.ga-top.on{opacity:1}
+.ga-seg2{position:absolute;left:50%;top:10px;width:212px;margin-left:-106px;height:32px;border-radius:10px;background:rgba(13,24,40,.92);border:1px solid var(--line);display:flex;align-items:center;font:700 12px var(--body);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.ga-seg2 .lq{top:3px;bottom:3px;border-radius:8px;background:var(--ink)}
+.ga-seg2 span:not(.lq){flex:1;text-align:center;position:relative;z-index:1;color:var(--muted);transition:color .3s ease}
+.ga-seg2 span.act{color:var(--ocean)}
 .ga-pass{display:grid;place-items:center}
 .ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFan 4.2s var(--spring) infinite}
 .ga-pp:nth-child(2){background:linear-gradient(160deg,#20456e,#14263f);--x:0px;--r:0deg}.ga-pp:nth-child(3){background:linear-gradient(160deg,#1d6b5c,#123d35);--x:62px;--r:11deg}
@@ -573,40 +602,32 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 @keyframes gaFan{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(var(--x)) rotate(var(--r)) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
 .ga-res{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);white-space:nowrap;background:var(--st-visa);color:#fff;font:700 12px var(--body);padding:5px 11px;border-radius:999px;animation:gaRes 4.2s var(--spring-soft) infinite}
 @keyframes gaRes{0%,30%{transform:translateX(-50%) scale(.5);opacity:0}42%,72%{transform:translateX(-50%) scale(1);opacity:1}84%,100%{transform:translateX(-50%) scale(.5);opacity:0}}
-.ga-card::before{content:"";position:absolute;left:18%;top:16%;width:36%;height:44%;border-radius:40% 55% 45% 60%;background:var(--st-free);opacity:.85}
-.ga-tap{position:absolute;left:33%;top:33%;width:30px;height:30px;margin:-15px;border-radius:50%;border:2px solid #fff;animation:gaTap 4.4s ease-out infinite}
-@keyframes gaTap{0%{transform:scale(.3);opacity:0}6%{opacity:1}22%,100%{transform:scale(1.6);opacity:0}}
-.ga-sheet{position:absolute;left:12%;right:12%;bottom:-6px;padding:12px 14px 16px;border-radius:14px 14px 0 0;background:#1a2a44;box-shadow:0 -8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:6px;animation:gaSheet 4.4s var(--spring) infinite}
-.ga-h{display:flex;align-items:center;gap:7px;font:800 14px var(--display)}.ga-h .fimg{width:18px;height:18px;border-radius:50%}
-.ga-row{display:flex;align-items:center;gap:7px;font:600 11.5px var(--body);color:#d3dbe8;animation:gaRow 4.4s var(--spring-soft) infinite;animation-delay:calc(var(--i)*90ms)}
-.ga-row i{width:9px;height:9px;border-radius:50%;flex:none}
-@keyframes gaSheet{0%,14%{transform:translateY(105%)}30%,84%{transform:translateY(0)}100%{transform:translateY(105%)}}
-@keyframes gaRow{0%,30%{transform:translateX(-14px);opacity:0}42%,84%{transform:none;opacity:1}100%{opacity:0}}
-.ga-seg{position:absolute;left:50%;top:16px;width:210px;margin-left:-105px;height:32px;border-radius:10px;background:#0d1828;border:1px solid var(--line);display:flex;align-items:center;font:700 12px var(--body)}
-.ga-seg span{flex:1;text-align:center;position:relative;color:var(--muted);animation:gaSegT 5s steps(1) infinite}
-.ga-seg span+span{animation-delay:-2.5s}
-.ga-seg i{position:absolute;left:3px;top:3px;width:calc(50% - 3px);height:24px;border-radius:8px;background:var(--ink);animation:gaSeg 5s var(--spring) infinite}
-@keyframes gaSeg{0%,40%{transform:translateX(0)}50%,90%{transform:translateX(100%)}100%{transform:translateX(0)}}
-@keyframes gaSegT{0%,45%{color:var(--ocean)}50%,100%{color:var(--muted)}}
-.ga-safe .ga-grid{top:64px}.ga-safe .ga-c{height:26px;position:relative;animation:gaPop .6s var(--spring-soft) both;animation-delay:calc(var(--i)*45ms);background:var(--st-free)}
-.ga-safe .ga-c:nth-child(3n){background:var(--st-visa)}.ga-safe .ga-c:nth-child(5n){background:var(--st-evisa)}
-.ga-safe .ga-c::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#5fb97f;opacity:0;animation:gaSafe 5s ease infinite}
-.ga-safe .ga-c:nth-child(4n)::after{background:#e2c14b}.ga-safe .ga-c:nth-child(7n)::after{background:#d2463c}.ga-safe .ga-c:nth-child(5n+2)::after{background:#e8893a}
-@keyframes gaSafe{0%,42%{opacity:0}52%,90%{opacity:1}100%{opacity:0}}
-.ga-land{position:absolute;left:14%;right:14%;top:22%;bottom:14%;border-radius:42% 58% 48% 52%/52% 44% 56% 48%;background:linear-gradient(140deg,#3f8f73,#2c6b57)}
-.ga-pin{position:absolute;color:var(--c);margin:-26px 0 0 -13px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));animation:gaDrop 4.6s var(--spring-soft) infinite;animation-delay:calc(var(--i)*.22s)}
-.ga-pin svg{fill:currentColor;stroke:#0c1626}
-@keyframes gaDrop{0%{transform:translateY(-60px);opacity:0}12%,80%{transform:none;opacity:1}92%,100%{transform:translateY(-12px);opacity:0}}
+/* globe: a world strip slides behind a round window; shading makes it read as a sphere */
+.ga-globe{position:relative;width:var(--s);height:var(--s);border-radius:50%;overflow:hidden;background:#1b3a5f;box-shadow:0 12px 34px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.06);isolation:isolate}
+.ga-strip{position:absolute;top:0;left:0;height:100%;width:calc(var(--s)*4);animation:gaRoll 22s linear infinite;will-change:transform}
+.ga-strip svg{width:100%;height:100%;display:block}
+.ga-strip path{stroke:#1b3a5f;stroke-width:.4}
+@keyframes gaRoll{to{transform:translateX(-50%)}}
+.ga-shade{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.28),rgba(255,255,255,0) 38%),radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 52%,rgba(4,10,22,.75) 100%)}
+.ga-hi{display:grid;place-items:center;perspective:700px}
+.ga-stage{position:relative;display:grid;place-items:center;transform-style:preserve-3d;animation:gaPop .7s var(--spring-soft) both}
+.ga-stage>.ga-globe{transform:translateZ(0)}
+.ga-orbit{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;animation:gaOrb 9s linear infinite}
+.ga-orbit span{position:absolute;left:0;top:0;transform-style:preserve-3d;transform:rotateZ(var(--a)) translateX(92px) rotateZ(calc(-1*var(--a)))}
+.ga-orbit b{display:block;width:28px;height:28px;margin:-14px;border-radius:50%;overflow:hidden;background:#2a3d5c;box-shadow:0 0 0 2px #101c30,0 6px 14px rgba(0,0,0,.35);animation:gaBill 9s linear infinite}
+.ga-orbit b .fimg{width:100%;height:100%;object-fit:cover;display:block}
+@keyframes gaOrb{from{transform:rotateX(68deg) rotateZ(0)}to{transform:rotateX(68deg) rotateZ(360deg)}}
+@keyframes gaBill{from{transform:rotateZ(0) rotateX(-68deg)}to{transform:rotateZ(-360deg) rotateX(-68deg)}}
+/* pins dropping on the globe */
+.ga-pl{display:grid;place-items:center}
+.ga-pl .ga-strip{animation-duration:60s}
+.ga-pin2{position:absolute;left:50%;top:50%;width:26px;height:37px;margin:-37px 0 0 -13px;translate:var(--x) var(--y);opacity:0;filter:drop-shadow(0 4px 5px rgba(0,0,0,.45))}
+.ga-pin2 svg{position:absolute;inset:0;width:100%;height:100%;fill:var(--c);stroke:#0c1626;stroke-width:1.2}
+.ga-pin2 .fimg{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:50%;object-fit:cover}
+.ga-pin2.on{animation:gaDrop2 .75s var(--spring-soft) forwards}
+@keyframes gaDrop2{0%{opacity:0;transform:translateY(-70px) scale(.7)}35%{opacity:1}100%{opacity:1;transform:none}}
 .ga-plus{position:absolute;right:16px;bottom:14px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(255,138,92,.4);animation:gaPulse 2.3s var(--spring-soft) infinite}
 @keyframes gaPulse{0%,60%,100%{transform:scale(1)}70%{transform:scale(.86)}}
-.ga-hi{display:grid;place-items:center}
-.ga-orbit{position:absolute;left:50%;top:50%;width:0;height:0;animation:gaSpin 26s linear infinite}
-.ga-orbit span{position:absolute;left:0;top:0;transform:rotate(var(--a)) translateX(60px) rotate(calc(-1*var(--a)))}
-.ga-orbit b{display:block;width:30px;height:30px;margin:-15px;border-radius:50%;overflow:hidden;background:#2a3d5c;box-shadow:0 0 0 2px #101c30,0 6px 14px rgba(0,0,0,.35);animation:gaSpin 26s linear infinite reverse,gaPop .7s var(--spring-soft) both}
-.ga-orbit b .fimg{width:100%;height:100%;object-fit:cover;display:block}
-.ga-core{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#ffb08c,var(--accent));color:var(--accent-ink);box-shadow:0 10px 30px rgba(255,138,92,.45);animation:gaPop .7s var(--spring-soft) both,gaBob 3.2s ease-in-out .7s infinite}
-@keyframes gaSpin{to{transform:rotate(360deg)}}
-@keyframes gaBob{50%{transform:translateY(-6px)}}
 /* the tour over the real page */
 #tour{position:fixed;inset:0;z-index:80;opacity:0;transition:opacity .25s ease}
 #tour.on{opacity:1}
@@ -619,6 +640,38 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .tr-bub h3{margin:6px 0 4px;font:800 16px/1.25 var(--display)}
 .tr-bub p:not(.gd-k){margin:0;font-size:14px;line-height:1.5;color:#d3dbe8}
 .tr-bub .gd-foot .btn{min-height:42px;padding:8px 16px}
+/* liquid pill (Telegram-style) */
+.lq{position:absolute;left:0;right:100%;transition:left .5s var(--spring),right .5s var(--spring);pointer-events:none}
+.seg.has-lq{position:relative}
+.seg.has-lq button{position:relative;z-index:1;transition:color .25s ease}
+.seg.has-lq button[aria-pressed="true"]{background:none}
+.seg-pill{top:3px;bottom:3px;border-radius:9px;background:var(--ink)}
+.sumcard{display:none}
+@media (max-width:860px){
+  .tb-pill{top:5px;bottom:calc(5px + env(safe-area-inset-bottom,0px));border-radius:16px;background:#1f2f49;margin:0 4px}
+  .tabbar button[aria-current="page"] .tb-i{background:none}
+  .tabbar button{z-index:1}
+  aside#panel{left:6px;right:6px;border:1px solid #263854;border-bottom:0}
+  .sumcard{display:block;position:fixed;left:10px;right:10px;bottom:calc(var(--tabh) + 10px);z-index:10;min-height:64px;padding:10px 12px;border-radius:20px;
+    background:rgba(20,33,54,.97);border:1px solid #2a3d5c;box-shadow:0 12px 32px rgba(0,0,0,.45);cursor:pointer;touch-action:none;
+    transform:translateY(calc(130% + 10px));opacity:0;transition:transform .5s var(--spring),opacity .25s ease;-webkit-tap-highlight-color:transparent}
+  body.peek .sumcard{transform:translateY(calc(var(--pull,0) * -14px)) scale(calc(1 - var(--pull,0)*.03));opacity:calc(1 - var(--pull,0)*.6)}
+  .sumcard:active{transform:scale(.98)}
+  .sm-in{display:flex;align-items:center;gap:12px}
+  .sm-new{animation:smIn .45s var(--spring) both}
+  @keyframes smIn{from{transform:translateY(10px) scale(.98);opacity:0}}
+  .sm-l{flex:none;display:grid;place-items:center}
+  .sm-l .fimg{width:38px;height:38px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #2a3d5c}
+  .sm-ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#22324b;color:var(--ink)}
+  .sm-hi{background:rgba(255,138,92,.16);color:var(--accent)}
+  .sm-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .sm-t b{font:800 16px/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sm-t span{display:flex;align-items:center;gap:6px;font-size:13px;color:#c9d2e3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sm-t .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .sm-x{all:unset;flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+  .sm-x:active{background:#22324b}
+  .sm-up{flex:none;color:var(--muted);display:grid;place-items:center;width:20px}
+}
 .tabbar,.grab,.srchbtn,.srch-x{display:none}
 .iconbtn.srchbtn{pointer-events:auto;width:40px;height:40px;border-radius:12px;background:rgba(18,31,51,.92);border:1px solid var(--line);color:var(--ink);place-items:center}
 /* phone: the map fills the screen, the card is a sheet you pull up, sections live in a bottom bar */
@@ -713,7 +766,8 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <div class="status" id="status"></div>
   </div>
   <aside id="panel" aria-live="polite"><div class="grab" id="grab" aria-hidden="true"></div><button class="close" id="sheetToggle" aria-label="Свернуть карточку">▾</button><div class="p-inner" id="pbody"><p class="empty">Загружаю карту…</p></div></aside>
-  <nav class="tabbar" id="tabbar" aria-label="Разделы">
+  <div class="sumcard" id="sumCard" role="button" tabindex="0" aria-label="Открыть карточку"></div>
+  <nav class="tabbar" id="tabbar" aria-label="Разделы"><span class="lq tb-pill" aria-hidden="true"></span>
     <button type="button" data-tab="map"><span class="tb-i" data-ic="map"></span><span>Карта</span></button>
     <button type="button" data-tab="countries"><span class="tb-i" data-ic="globe"></span><span>Страны</span></button>
     <button type="button" data-tab="add" class="tb-add" aria-label="Добавить место"><span class="tb-plus" data-ic="plus"></span><span>Место</span></button>
@@ -1454,7 +1508,7 @@ function setupZoom(){
   zoom=d3.zoom().scaleExtent([kMin(),TILES?60000:900]);
   if(TILES) zoom.constrain(t=>clampT(t)); else zoom.translateExtent([[-W*0.2,-H*0.2],[W*1.2,H*1.2]]);
   zoom
-    .on("start",()=>{clearTimeout(moveEndT);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
+    .on("start",e=>{if(e.sourceEvent&&MOB()&&sheet.state!=="peek"&&e.sourceEvent.type!=="wheel")setSheet("peek");clearTimeout(moveEndT);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
     .on("zoom",e=>{const wrap=TILES&&Math.round((viewC(T)-viewC(e.transform))/mercW())!==0;shiftT0(T,e.transform);T=e.transform;if(wrap)renderAt();else svgMove();if(blurEl)killBlur();moveOverlay();hideTip()})
     .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAt();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
   zoom.filter(e=>(!e.ctrlKey||e.type==="wheel")&&!e.button&&!!e.target.closest&&!!e.target.closest("#map,#ov,#tileLayer"));
@@ -1644,22 +1698,70 @@ function moveOverlay(){
 }
 /* ---------- phone shell: the sheet (peek / half / full), the tab bar, the search toggle ---------- */
 const MOB=()=>window.innerWidth<=860;
-const PEEK=88;
-const sheet={state:"half"};
+/* On a phone the card has three states. «peek»: the sheet is tucked away and a small floating card above the
+   tab bar sums up what is selected (it updates as the selection changes). «half» and «full»: the sheet is pulled up. */
+const sheet={state:"peek"};
 function tabH(){return MOB()?($("#tabbar")?.offsetHeight||60):0}
+function sumH(){return $("#sumCard")?.offsetHeight||76}
 function sheetVis(st){const p=$("#panel"),full=p?p.offsetHeight:600;
-  return st==="full"?full:st==="peek"?PEEK:Math.min(full,Math.round((innerHeight-tabH())*0.48))}
-function sheetOff(st){return Math.max(0,($("#panel")?.offsetHeight||0)-sheetVis(st))}
+  return st==="full"?full:st==="peek"?0:Math.min(full,Math.round((innerHeight-tabH())*0.46))}
+function sheetOff(st){const h=$("#panel")?.offsetHeight||0;return st==="peek"?h+24:Math.max(0,h-sheetVis(st))}
 function setSheet(st){
   const p=$("#panel"); if(!p) return; sheet.state=st;
-  if(!MOB()){p.style.removeProperty("--off");p.style.removeProperty("--padb");updateTabs();return}
-  const off=sheetOff(st); p.style.setProperty("--off",off+"px"); p.style.setProperty("--padb",off+"px"); p.dataset.state=st;
+  if(!MOB()){p.style.removeProperty("--off");p.style.removeProperty("--padb");document.body.classList.remove("peek");updateTabs();return}
+  const off=sheetOff(st); p.style.setProperty("--off",off+"px"); p.style.setProperty("--padb",(st==="peek"?0:off)+"px"); p.dataset.state=st;
+  document.body.classList.toggle("peek",st==="peek"); $("#sumCard").style.removeProperty("--pull");
+  if(st!=="peek"&&document.activeElement===$("#sumCard")) p.focus?.({preventScroll:true});
   updateTabs();
+}
+/* the floating card: a one-glance summary of what is selected */
+let sumKey="";
+function renderSummary(){
+  const el=$("#sumCard"); if(!el||!S.countries) return;
+  const s=S.sel, t=S.tab||"countries"; let icon="",title="",sub="",sub2="",x=false;
+  const entryLine=k=>{const c=codeFor(k), lc=legendCode(c); if(c==="H")return `<i class="dot" style="background:${ST.H.c}"></i>Своя страна`;
+    const p=S.pass.find(p=>legendCode(entry(p,k).c)===lc), st=p?entry(p,k).s:"";
+    return `<i class="dot" style="background:${ST[lc]?.c||ST.U.c}"></i>${esc(ST[c]?.label||"Нет данных")}${st?` · ${esc(st)}`:""}`};
+  const safeLine=k=>{const l=safeOf(k)?.l;return l>=2?`<i class="dot" style="background:${SAFE[l].c}"></i>${esc(SAFE[l].label)}`:""};
+  if(t==="places"){icon=`<span class="sm-ic">${ic("pin",22)}</span>`;title="Мои места";const n=S.places.size;sub=n?`${n} ${ruPlural(n,"место","места","мест")}`:"Пока пусто"}
+  else if(t==="profile"){icon=`<span class="sm-ic">${ic("user",22)}</span>`;title="Профиль";sub=CLOUD&&S.acct?.user?esc(S.acct.user.email):"Вход, паспорта, подложка"}
+  else if(s.type==="country"||s.type==="region"||s.type==="city"){
+    const k=s.k; if(!k) return; const f=S.cByK.get(k); icon=flagImg(k)||`<span class="sm-ic">${ic("globe",22)}</span>`; x=true;
+    if(s.type==="country") title=f?.properties.ru||k;
+    else if(s.type==="region") title=admById(s.id)?.properties.ru||"Регион";
+    else title=cityByKey(s.key)?.[0]||"Город";
+    sub=entryLine(k); sub2=safeLine(k);
+    const n=placesIn(p=>p.k===k).length; if(!sub2&&n) sub2=`<i class="dot" style="background:var(--pin-want)"></i>${n} ${ruPlural(n,"наше место","наших места","наших мест")}`;
+    if(s.type!=="country"&&f) sub=`${esc(f.properties.ru)} · `+sub;
+  } else if(s.type==="place"){const p=S.places.get(s.id); x=true; if(p){icon=flagImg(p.k)||"";title=p.name;sub=`<i class="dot" style="background:${PIN[p.status]?.c}"></i>${esc(PIN[p.status]?.label||"")}${placeLoc(p).line?` · ${esc(placeLoc(p).line)}`:""}`}}
+  else if(s.type==="list"){x=true;icon=`<span class="sm-ic">${ic("pin",22)}</span>`;title=s.name;const n=placesIn(p=>p.list===s.name).length;sub=`${n} ${ruPlural(n,"место","места","мест")}`}
+  else {icon=`<span class="sm-ic sm-hi">${ic("globe",22)}</span>`;title="Куда поедем?";
+    const free=S.countries.filter(f=>{const c=codeFor(f.properties.k);return c!=="H"&&legendCode(c)==="F"}).length;
+    sub=`<i class="dot" style="background:var(--st-free)"></i>${free} ${ruPlural(free,"страна","страны","стран")} без визы · ${esc(S.pass.map(pName).join(" + "))}`}
+  const key=t+"|"+JSON.stringify(s);
+  el.innerHTML=`<div class="sm-in${key!==sumKey&&sumKey?" sm-new":""}"><div class="sm-l">${icon}</div><div class="sm-t"><b>${esc(title)}</b><span>${sub}</span>${sub2?`<span>${sub2}</span>`:""}</div>
+    ${x?`<button class="sm-x" id="smX" aria-label="Закрыть: ко всему миру">${ic("x",18)}</button>`:""}<span class="sm-up" aria-hidden="true">${ic("up",18)}</span></div>`;
+  sumKey=key; el.setAttribute("aria-label",`${title}. Открыть карточку`);
+  const xb=el.querySelector("#smX"); if(xb) xb.onclick=e=>{e.stopPropagation();select({type:"home"},true)};
 }
 function topH(){const tb=$(".topbar");if(!tb)return;document.documentElement.style.setProperty("--toph",Math.round(tb.getBoundingClientRect().bottom+8)+"px")}
 function updateTabs(){
   const cur=MOB()&&sheet.state==="peek"?"map":(S.tab||"countries");
-  document.querySelectorAll("#tabbar [data-tab]").forEach(b=>{if(b.dataset.tab==="add")return;b.dataset.tab===cur?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current")});
+  let on=null;
+  document.querySelectorAll("#tabbar [data-tab]").forEach(b=>{if(b.dataset.tab==="add")return;if(b.dataset.tab===cur){b.setAttribute("aria-current","page");on=b}else b.removeAttribute("aria-current")});
+  if(on&&MOB()) liquid($("#tabbar"),$("#tabbar .tb-pill"),on);
+  renderSummary();
+}
+/* Telegram-style selection: the pill flows to the new item — its leading edge sets off first and the trailing
+   edge catches up, so it stretches on the way and settles in place. Only two edges move, nothing re-lays out. */
+function liquid(box,pill,target){
+  if(!box||!pill||!target) return;
+  const c=box.getBoundingClientRect(), r=target.getBoundingClientRect(); if(!r.width) return;
+  const L=r.left-c.left, R=c.right-r.right, prev=pill._L;
+  if(prev==null||REDUCED){pill.style.transition="none";pill.style.left=L+"px";pill.style.right=R+"px";pill._L=L;void pill.offsetWidth;pill.style.transition="";return}
+  const dir=Math.sign(L-prev);
+  pill.style.transitionDelay=dir>0?".08s,0s":dir<0?"0s,.08s":"0s,0s";
+  pill.style.left=L+"px"; pill.style.right=R+"px"; pill._L=L;
 }
 function showSel(){const s=S.sel;
   if(s.type==="country")renderCountry(s.k);else if(s.type==="region"){const f=admById(s.id);f?renderRegion(f):renderHome()}
@@ -1676,6 +1778,7 @@ function openTab(t){
   $("#panel").scrollTop=0;
   if(MOB()&&sheet.state==="peek")setSheet("half");else updateTabs();
 }
+function openSheetFromCard(){if(sheet.state==="peek")setSheet("half")}
 function bindShell(){
   document.querySelectorAll("[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic,e.classList.contains("tb-plus")?24:22));
   $("#srchBtn").innerHTML=ic("search",20);
@@ -1706,8 +1809,24 @@ function bindShell(){
   // a tap on the handle opens a peeking sheet, or tucks it away; a mouse can drag it too
   $("#grab").addEventListener("click",()=>setSheet(sheet.state==="peek"?"half":"peek"));
   addEventListener("resize",()=>{topH();setSheet(sheet.state)});
-  topH(); setSheet(MOB()?"half":sheet.state);
+  // the floating card: tap or pull it up to open the sheet
+  const sc=$("#sumCard");
+  sc.addEventListener("click",openSheetFromCard);
+  sc.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openSheetFromCard()}});
+  let cy0=null,cdrag=false;
+  sc.addEventListener("touchstart",e=>{cy0=e.touches[0].clientY;cdrag=false;off0=sheetOff("peek");p.classList.add("dragging")},{passive:true});
+  sc.addEventListener("touchmove",e=>{if(cy0==null)return;const dy=e.touches[0].clientY-cy0;if(!cdrag&&Math.abs(dy)<6)return;cdrag=true;e.preventDefault();
+    const hv=sheetOff("half"), off=Math.max(0,off0+Math.min(0,dy)*1.6+Math.max(0,dy)*.2);p.style.setProperty("--off",off+"px");
+    sc.style.setProperty("--pull",Math.min(1,Math.max(0,-dy/90)).toFixed(3))},{passive:false});
+  sc.addEventListener("touchend",e=>{if(cy0==null)return;const dy=e.changedTouches[0].clientY-cy0;cy0=null;p.classList.remove("dragging");
+    if(cdrag){e.preventDefault();setSheet(dy<-140?"full":dy<-24?"half":"peek")}});
+  sc.addEventListener("touchcancel",()=>{cy0=null;p.classList.remove("dragging");setSheet(sheet.state)});
+  topH(); setSheet(MOB()?"peek":sheet.state);
+  liquidSeg(); addEventListener("resize",()=>{liquidSeg();updateTabs()});
 }
+function liquidSeg(){const sg=document.querySelector('.seg[aria-label="Что показывать на карте"]');if(!sg)return;
+  let pl=sg.querySelector(".lq");if(!pl){pl=document.createElement("span");pl.className="lq seg-pill";pl.setAttribute("aria-hidden","true");sg.prepend(pl);sg.classList.add("has-lq")}
+  liquid(sg,pl,sg.querySelector('[aria-pressed="true"]'))}
 function closeSearch(){const tb=$(".topbar");if(!tb?.classList.contains("searching"))return;tb.classList.remove("searching");$("#q").value="";$("#q").dispatchEvent(new Event("input"));topH()}
 /* ---------- «Мои места»: every place, grouped by country ---------- */
 // on a computer there is no tab bar, so the section leads back to the map card it replaced
@@ -1762,27 +1881,97 @@ function renderProfile(){
    in TOUR with since: GUIDE_VER+1, then raise GUIDE_VER. People who already saw the guide get only what is new.
    Cards: t title, m text, mob text for phones (if it differs), art() the animated picture.
    Tour stops: sel {m: phone selector, d: computer selector}, t title, m text. A stop whose button isn't on screen is skipped. */
-const GUIDE_VER=2;
+/* ---- pictures for the guide, drawn from the real country outlines (simplified once, then reused) ---- */
+let gaGeo=null;
+function gaWorld(){
+  if(gaGeo||!S.countries?.length||!S.visa) return gaGeo;
+  const pj=d3.geoEquirectangular().scale(360/(2*Math.PI)).translate([180,90]);
+  const pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.35))});
+  gaGeo={pj,list:S.countries.filter(f=>f.properties.k!=="AQ").map(f=>({k:f.properties.k,f,d:pth(f)})).filter(x=>x.d)};
+  return gaGeo;
+}
+const gaEntryC=k=>{const c=codeFor(k);return c==="H"?ST.H.c:(ST[legendCode(c)]?.c||ST.U.c)};
+const gaSafeC=k=>{const l=safeOf(k)?.l;return l?SAFE[l].c:SAFE_NONE};
+// a flat map of one part of the world; vb = [lon0, lat1, lon1, lat0]
+function gaMap(vb,fill,cls=""){
+  const g=gaWorld(); if(!g) return `<div class="ga-wait"></div>`;
+  const [x0,y1,x1,y0]=vb, X=x0+180, Y=90-y1, Wd=x1-x0, Hd=y1-y0;
+  return `<svg class="ga-map ${cls}" viewBox="${X} ${Y} ${Wd} ${Hd}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${g.list.map(c=>`<path data-k="${c.k}" d="${c.d}" style="fill:${fill(c.k)}"/>`).join("")}</svg>`;
+}
+const gaPt=(lon,lat,vb)=>{const [x0,y1,x1,y0]=vb;return [(lon-x0)/(x1-x0)*100,(y1-lat)/(y1-y0)*100]};
+// a spinning globe: the world strip slides behind a round window with sphere shading
+function gaGlobe(size){
+  const g=gaWorld(); if(!g) return `<div class="ga-globe" style="--s:${size}px"><div class="ga-wait"></div></div>`;
+  const strip=`<svg viewBox="0 0 720 180" preserveAspectRatio="none" aria-hidden="true"><g>${g.list.map(c=>`<path d="${c.d}" style="fill:${gaEntryC(c.k)}"/>`).join("")}</g><g transform="translate(360 0)">${g.list.map(c=>`<path d="${c.d}" style="fill:${gaEntryC(c.k)}"/>`).join("")}</g></svg>`;
+  return `<div class="ga-globe" style="--s:${size}px"><div class="ga-strip">${strip}</div><i class="ga-shade"></i></div>`;
+}
+// timers for the little scripted scenes; cleared whenever the page turns or the guide closes
+let gaT=[]; function gaClear(){gaT.forEach(t=>{clearTimeout(t);clearInterval(t)});gaT=[]}
+const gaLater=(f,ms)=>gaT.push(setTimeout(f,ms));
+// scene: a finger taps a country, it lights up, its entry rule pops up next to it
+function gaTapScene(root,vb,list,withCard){
+  const svg=root.querySelector(".ga-map"); if(!svg) return;
+  const tap=root.querySelector(".ga-finger"), tip=root.querySelector(".ga-tip"), card=root.querySelector(".ga-sheet");
+  let i=0;
+  const step=()=>{
+    const k=list[i%list.length]; i++;
+    const f=S.cByK.get(k); if(!f){gaLater(step,50);return}
+    const [lon,lat]=d3.geoCentroid(f), [x,y]=gaPt(lon,lat,vb);
+    svg.querySelectorAll(".hl").forEach(p=>p.classList.remove("hl"));
+    tip?.classList.remove("on"); card?.classList.remove("on");
+    tap.style.transform=`translate(${x}cqw,${y}cqh)`;
+    gaLater(()=>{tap.classList.remove("press");void tap.offsetWidth;tap.classList.add("press");svg.querySelector(`[data-k="${k}"]`)?.classList.add("hl");
+      const c=codeFor(k), lc=legendCode(c), p=S.pass.find(p=>legendCode(entry(p,k).c)===lc), st=p?entry(p,k).s:"";
+      const row=`<i style="background:${gaEntryC(k)}"></i>${esc(ST[c]?.label||"")}${st?` · ${esc(st)}`:""}`;
+      if(tip){tip.innerHTML=`${flagImg(k)}<b>${esc(f.properties.ru)}</b><span>${row}</span>`;const bw=root.clientWidth||1, tw=tip.offsetWidth/bw*100, th=tip.offsetHeight/(root.clientHeight||1)*100;tip.style.transform=`translate(${Math.max(2,Math.min(x-tw/2,98-tw))}cqw,${y-th-14<2?y+12:y-th-14}cqh)`;tip.classList.add("on")}
+      if(card){const l=safeOf(k)?.l, n=placesIn(q=>q.k===k).length;
+        card.innerHTML=`<b class="ga-h">${flagImg(k)}${esc(f.properties.ru)}</b><span class="ga-row" style="--i:0">${row}</span>${l?`<span class="ga-row" style="--i:1"><i style="background:${SAFE[l].c}"></i>${esc(SAFE[l].label)}</span>`:""}<span class="ga-row" style="--i:2"><i style="background:var(--pin-want)"></i>${n?`${n} ${ruPlural(n,"ваше место","ваших места","ваших мест")}`:"Ваши места появятся здесь"}</span>`;
+        gaLater(()=>card.classList.add("on"),180)}
+    },650);
+    gaLater(step,withCard?3600:2600);
+  };
+  step();
+}
+// scene: the layer switch flips and the same map repaints by safety
+function gaSafeScene(root){
+  const seg=root.querySelector(".ga-seg2"), pill=seg?.querySelector(".lq"), btns=seg?.querySelectorAll("span:not(.lq)"), top=root.querySelector(".ga-map.ga-top");
+  if(!seg||!top) return; let on=false;
+  const flip=()=>{on=!on;top.classList.toggle("on",on);btns.forEach((b,j)=>b.classList.toggle("act",(j===1)===on));liquid(seg,pill,btns[on?1:0]);gaLater(flip,2400)};
+  btns.forEach((b,j)=>b.classList.toggle("act",j===0)); liquid(seg,pill,btns[0]); gaLater(flip,1400);
+}
+// scene: pins with flags drop onto the globe
+function gaPinScene(root){
+  const pins=[...root.querySelectorAll(".ga-pin2")]; let i=0;
+  const drop=()=>{const p=pins[i%pins.length];p.classList.remove("on");void p.offsetWidth;p.classList.add("on");i++;
+    if(i%pins.length===0)gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,700)},2200);else gaLater(drop,520)};
+  gaLater(drop,350);
+}
+const GUIDE_VER=3;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
+const GUIDE_VB={col:[-12,62,62,22],card:[24,46,52,30],safe:[-12,64,72,22]};
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
-    m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт.",
-    art:()=>`<div class="ga ga-col"><div class="ga-grid">${gdBlobs(12,"ga-c")}</div><div class="ga-leg">${[["--st-free","Без визы"],["--st-arrival","По прилёте"],["--st-evisa","Электронная"],["--st-visa","Виза"],["--st-banned","Закрыто"]].map(([c,l],i)=>`<span style="--i:${i}"><i style="background:var(${c})"></i>${l}</span>`).join("")}</div></div>`},
+    m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
+    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}<i class="ga-finger"></i><div class="ga-tip"></div></div>`,
+    run:r=>gaTapScene(r,GUIDE_VB.col,["TR","EG","GE","IT","AE","EE","IL","IR"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
     mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
     art:()=>`<div class="ga ga-pass">${["RU","BY","KZ"].map((k,i)=>`<div class="ga-pp" style="--i:${i}">${flagImg(k)||""}<b></b><b></b></div>`).join("")}<div class="ga-res">Самое строгое правило</div></div>`},
   {since:1, t:"Страна открывается касанием",
-    m:"Нажмите на страну на карте или найдите её в списке справа. В карточке — условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
-    mob:"Нажмите на страну на карте или найдите её в разделе «Страны». В карточке — условия въезда, срок пребывания, опасные районы и ваши места.",
-    art:()=>`<div class="ga ga-card"><i class="ga-tap"></i><div class="ga-sheet"><b class="ga-h">${flagImg("TR")||""}Турция</b><span class="ga-row" style="--i:0"><i style="background:var(--st-free)"></i>Без визы · 60 дней</span><span class="ga-row" style="--i:1"><i style="background:${SAFE[2].c}"></i>У границы с Сирией — не ехать</span><span class="ga-row" style="--i:2"><i style="background:var(--pin-want)"></i>3 ваших места</span></div></div>`},
+    m:"Нажмите на страну на карте или найдите её в списке справа. Выедет карточка: условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
+    mob:"Нажмите на страну на карте или найдите её в разделе «Страны». Внизу появится карточка: условия въезда, срок, опасные районы и ваши места. Потяните её вверх, чтобы прочитать всё.",
+    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}<i class="ga-finger"></i><div class="ga-sheet"></div></div>`,
+    run:r=>gaTapScene(r,GUIDE_VB.card,["TR","GE","AM","AZ","CY","IQ"],true)},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
-    art:()=>`<div class="ga ga-safe"><div class="ga-seg"><i></i><span>Въезд</span><span>Безопасность</span></div><div class="ga-grid">${gdBlobs(12,"ga-c ga-s")}</div></div>`},
+    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.safe,gaEntryC)}${gaMap(GUIDE_VB.safe,gaSafeC,"ga-top")}<div class="ga-seg2"><span class="lq"></span><span>Въезд</span><span>Безопасность</span></div></div>`,
+    run:r=>gaSafeScene(r)},
   {since:1, t:"Ваши места и общая карта",
-    m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
-    mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Все места собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах, ей можно поделиться.",
-    art:()=>`<div class="ga ga-pins"><div class="ga-land"></div>${[["--pin-want",28,38],["--pin-been",58,26],["--pin-love",44,58],["--pin-home",72,52]].map(([c,x,y],i)=>`<i class="ga-pin" style="--i:${i};left:${x}%;top:${y}%;--c:var(${c})">${ic("pin",26)}</i>`).join("")}<i class="ga-plus">${ic("plus",22)}</i></div>`},
+    m:"Кнопка «+ Место» добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны. Войдите в аккаунт, и карта сохранится на всех устройствах. Ей можно поделиться с тем, с кем едете.",
+    mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны, все они собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах.",
+    art:()=>`<div class="ga ga-pl">${gaGlobe(150)}${[["TR",-18,-30,"want"],["IT",-44,-6,"been"],["GE",14,-20,"love"],["AE",10,8,"want"],["EG",-22,14,"been"],["TH",44,18,"want"]].map(([k,x,y,st],i)=>`<i class="ga-pin2" style="--x:${x}px;--y:${y}px;--c:${PIN[st].c}"><svg viewBox="-13 -36 26 37"><path d="${PIN_PATH}"/></svg>${flagImg(k)}</i>`).join("")}<i class="ga-plus">${ic("plus",22)}</i></div>`,
+    run:r=>gaPinScene(r)},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -1791,7 +1980,7 @@ const TOUR=[
   {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
   {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим», «Были», «Любимое»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
-  {since:2, sel:{m:"#grab",d:null}, t:"Карточку можно двигать", m:"Потяните её вверх, чтобы читать, или вниз, чтобы видеть карту."},
+  {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
 ];
 function guideSeen(){try{return +localStorage.getItem("atlas-guide")||0}catch(e){return 0}}
 function guideDone(){try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}catch(e){}}
@@ -1799,9 +1988,12 @@ function guideDone(){try{localStorage.setItem("atlas-guide",String(GUIDE_VER))}c
 function openGuide(start=0,steps=GUIDE,done,opts={}){
   let i=opts.welcome?-1:start, busy=false;
   const tour=opts.tour??TOUR;
-  const {el,close}=modal("guideBox",`<div class="gd" id="gdBody"></div>`,{labelledby:"gdTitle"});
+  const {el,close}=modal("guideBox",`<div class="gd" id="gdBody"></div>${steps.length>1?`<div class="gd-dots" aria-hidden="true"><span class="lq"></span>${steps.map(()=>"<i></i>").join("")}</div>`:""}`,{labelledby:"gdTitle"});
   el.classList.add("gd-modal");
-  const end=(toTour)=>{guideDone();close();if(toTour&&tour.length)setTimeout(()=>runTour(tour,done),REDUCED?0:260);else done?.()};
+  el.querySelector(".abox").insertAdjacentHTML("beforeend",`<div class="gd-foot" id="gdFoot"></div>`);
+  el.querySelector(".gd-dots")&&el.querySelector("#gdFoot").before(el.querySelector(".gd-dots"));
+  const dots=el.querySelector(".gd-dots"), foot=el.querySelector("#gdFoot");
+  const end=(toTour)=>{gaClear();guideDone();close();if(toTour&&tour.length)setTimeout(()=>runTour(tour,done),REDUCED?0:260);else done?.()};
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=()=>end(false));
   el.addEventListener("click",e=>{if(e.target===el){e.stopImmediatePropagation();end(false)}},true);
   el.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopImmediatePropagation();end(false)}else if(e.key==="ArrowRight")go(i+1,1);else if(e.key==="ArrowLeft"&&i>0)go(i-1,-1)},true);
@@ -1809,26 +2001,32 @@ function openGuide(start=0,steps=GUIDE,done,opts={}){
   const pane=()=>{
     if(i<0) return `<div class="gd-pane"><div class="gd-art">${welcomeArt()}</div>
       <h2 id="gdTitle" class="gd-hello">Привет! Это «Наш атлас»</h2>
-      <p class="gd-m">Карта, на которой сразу видно, куда можно поехать по вашему паспорту и где спокойно. Сюда же собираются ваши места: где были, куда хотите и что советуют друзья.</p>
-      <div class="gd-foot"><button class="linkbtn" id="gdSkip">Разберусь сам</button><button class="btn primary" id="gdNext">Показать, как всё устроено</button></div></div>`;
+      <p class="gd-m">Карта, на которой сразу видно, куда можно поехать по вашему паспорту и где спокойно. Сюда же собираются ваши места: где были, куда хотите и что советуют друзья.</p></div>`;
     const st=steps[i], last=i===steps.length-1;
     return `<div class="gd-pane"><div class="gd-art">${st.art()}</div>
       <p class="gd-k">${opts.news?"Что нового":`${i+1} из ${steps.length}`}</p>
-      <h2 id="gdTitle">${esc(st.t)}</h2><p class="gd-m">${esc(MOB()&&st.mob?st.mob:st.m)}</p>
-      <div class="gd-dots" aria-hidden="true">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>
-      <div class="gd-foot">${i?`<button class="btn" id="gdPrev">Назад</button>`:`<button class="linkbtn" id="gdSkip">Пропустить</button>`}<button class="btn primary" id="gdNext">${last?(tour.length?"Показать на сайте":"Готово"):"Дальше"}</button></div></div>`;
+      <h2 id="gdTitle">${esc(st.t)}</h2><p class="gd-m">${esc(MOB()&&st.mob?st.mob:st.m)}</p></div>`;
   };
+  const footHTML=()=>i<0?`<button class="linkbtn" id="gdSkip">Разберусь сам</button><button class="btn primary" id="gdNext">Показать, как всё устроено</button>`
+    :`${i?`<button class="btn" id="gdPrev">Назад</button>`:`<button class="linkbtn" id="gdSkip">Пропустить</button>`}<button class="btn primary" id="gdNext">${i===steps.length-1?(tour.length?"Показать на сайте":"Готово"):"Дальше"}</button>`;
   const draw=(dir=0)=>{
     const old=body.querySelector(".gd-pane");
     body.insertAdjacentHTML("beforeend",pane());
     const nw=body.lastElementChild;
     if(old&&!REDUCED){busy=true;old.classList.add(dir<0?"gd-out-r":"gd-out-l");nw.classList.add(dir<0?"gd-in-l":"gd-in-r");
       setTimeout(()=>{old.remove();busy=false},300)}else old?.remove();
-    const pv=nw.querySelector("#gdPrev"); if(pv) pv.onclick=()=>go(i-1,-1);
-    const sk=nw.querySelector("#gdSkip"); if(sk) sk.onclick=()=>end(false);
-    nw.querySelector("#gdNext").onclick=()=>i===steps.length-1?end(true):go(i+1,1);
-    nw.querySelector("#gdNext").focus({preventScroll:true});
-    if(i<0&&!S.flags){let n=0;const t=setInterval(()=>{if(S.flags||++n>20){clearInterval(t);const a=nw.querySelector(".gd-art");if(S.flags&&a&&a.isConnected)a.innerHTML=welcomeArt()}},250)}
+    foot.innerHTML=footHTML();
+    const pv=foot.querySelector("#gdPrev"); if(pv) pv.onclick=()=>go(i-1,-1);
+    const sk=foot.querySelector("#gdSkip"); if(sk) sk.onclick=()=>end(false);
+    foot.querySelector("#gdNext").onclick=()=>i===steps.length-1?end(true):go(i+1,1);
+    foot.querySelector("#gdNext").focus({preventScroll:true});
+    // the dots: hidden on the greeting, the pill flows to the current one
+    if(dots){dots.classList.toggle("off",i<0);if(i>=0)liquid(dots,dots.querySelector(".lq"),dots.querySelectorAll("i")[i])}
+    // play the little scene; if the map or the flags are still loading, draw it again once they arrive
+    gaClear();
+    const art=()=>i<0?welcomeArt():steps[i].art(), run=()=>{if(i>=0)steps[i].run?.(nw.querySelector(".gd-art"))};
+    if(gaWorld()&&S.flags) run();
+    else{let n=0;const t=setInterval(()=>{if((gaWorld()&&S.flags)||++n>40){clearInterval(t);const a=nw.querySelector(".gd-art");if(a?.isConnected&&gaWorld()){a.innerHTML=art();run()}}},250);gaT.push(t)}
   };
   const go=(j,dir)=>{if(busy||j<-1||j>=steps.length||(j<0&&!opts.welcome))return;i=j;draw(dir)};
   // swipe left or right to turn the page
@@ -1838,7 +2036,7 @@ function openGuide(start=0,steps=GUIDE,done,opts={}){
 }
 function welcomeArt(){
   const ks=["TR","GE","TH","AE","IT","JP","EG","ID"];
-  return `<div class="ga ga-hi"><div class="ga-orbit">${ks.map((k,j)=>`<span style="--a:${j*45}deg"><b>${flagImg(k)||""}</b></span>`).join("")}</div><i class="ga-core">${ic("globe",38)}</i></div>`;
+  return `<div class="ga ga-hi"><div class="ga-stage">${gaGlobe(104)}<div class="ga-orbit">${ks.map((k,j)=>`<span style="--a:${j*45}deg"><b>${flagImg(k)||""}</b></span>`).join("")}</div></div></div>`;
 }
 /* the tour: dims the page and lights up one real control at a time */
 function runTour(all,done){
@@ -1883,7 +2081,8 @@ function startIntro(){
 function viewArea(){
   if(!MOB()) return [40,H];
   const top=Math.round(($(".topbar")?.getBoundingClientRect().bottom||100)-$("#mapwrap").getBoundingClientRect().top+8);
-  return [top,Math.max(top+120,H-tabH()-sheetVis("half")-8)];
+  const cover=sheet.state==="peek"?sumH()+18:sheetVis(sheet.state==="full"?"half":sheet.state);
+  return [top,Math.max(top+120,H-tabH()-cover-8)];
 }
 function zoomToFeature(f,pad=0.85,max=60){
   let [[x0,y0],[x1,y1]]=path.bounds(f);
@@ -2208,7 +2407,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Escape"||e.defaultPrevented)
 function select(sel,zoomIt){
   rememberView(S.sel,sel);
   S.sel=sel; const body=$("#pbody"); $("#panel").classList.remove("min"); hotArea(null);
-  S.tab="countries"; if(MOB()&&zoomIt&&sel.type!=="home"&&sheet.state!=="half") setSheet("half"); else updateTabs();
+  S.tab="countries"; updateTabs();
   S.area="world";
   if(sel.type==="area"){ sel=S.sel={type:"home"} }
   if(sel.type==="area"){
@@ -2239,7 +2438,7 @@ function select(sel,zoomIt){
     if(zoomIt&&pts.length){const f={type:"MultiPoint",coordinates:pts.map(p=>[p.lng,p.lat])};zoomToFeature(f,0.8,120)}
     renderList(L,pts);
   } else { S.sel={type:"home"}; showAdmin(null); renderHome(); }
-  paint(); scheduleOverlay(); updateFocus(); $("#panel").scrollTop=0;
+  paint(); scheduleOverlay(); updateFocus(); $("#panel").scrollTop=0; renderSummary();
 }
 const AREA_BOX={europe:[-24,35,42,71],rusca:[28,36,178,76],mideast:[25,12,63,43],africa:[-18,-35,52,37],southasia:[44,5,98,40],eastasia:[73,18,146,54],sea:[92,-11,141,28],oceania:[110,-48,180,0],namerica:[-168,14,-52,72],camerica:[-118,7,-59,33],samerica:[-82,-56,-34,13]};
 function zoomToArea(id){
@@ -3161,8 +3360,8 @@ async function initClaude(){
 
 /* ---------- events ---------- */
 document.querySelectorAll(".seg button[data-layer]").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.layer===S.layer);b.onclick=()=>{S.layer=b.dataset.layer;try{localStorage.setItem("atlas-layer",S.layer)}catch(e){}
-  document.querySelectorAll(".seg button[data-layer]").forEach(x=>x.setAttribute("aria-pressed",x===b));paint();drawZones();scheduleOverlay();if(S.sel.type==="home")renderHome();else if(S.sel.type==="country")renderCountry(S.sel.k)}});
-function flagImg(p){const src=S.flags?.[p.toUpperCase()];return src?`<img class="fimg" src="${src}" alt="">`:""}
+  document.querySelectorAll(".seg button[data-layer]").forEach(x=>x.setAttribute("aria-pressed",x===b));liquidSeg();paint();drawZones();scheduleOverlay();if(S.sel.type==="home")renderHome();else if(S.sel.type==="country")renderCountry(S.sel.k)}});
+function flagImg(p){if(!p)return "";const src=S.flags?.[p.toUpperCase()];return src?`<img class="fimg" src="${src}" alt="">`:""}
 function setPass(arr){S.pass=arr;try{localStorage.setItem("atlas-pass",JSON.stringify(arr))}catch(e){}
   renderPassBtn();SIX=null;paint();drawLegend&&drawLegend();
   if(S.sel.type==="home")renderHome();else if(S.sel.type==="country"&&S.cByK.get(S.sel.k))renderCountry(S.sel.k);else if(S.sel.type==="area")renderArea(S.sel.id)}
