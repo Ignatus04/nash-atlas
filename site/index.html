@@ -1542,10 +1542,11 @@ async function captchaToken(){
   else sc.reset(scId);
   return new Promise((ok,no)=>{scWait={ok,no};sc.execute(scId);setTimeout(()=>{if(scWait){scWait.no(new Error("timeout"));scWait=null}},120000)})}
 async function captchaPass(email){
-  let t;try{t=await captchaToken()}catch(e){return e.message==="closed"?"Чтобы получить код, пройдите проверку «я не робот».":"Не загрузилась проверка «я не робот». Проверьте интернет и попробуйте снова."}
+  // the real gate is the Supabase Send Email hook: if the captcha or our function is unreachable, go on and let the hook decide
+  let t;try{t=await captchaToken()}catch(e){if(e.message==="closed")return "Чтобы получить код, пройдите проверку «я не робот».";if(!navigator.onLine)return "Нет интернета. Подключитесь и попробуйте снова.";return true}
   try{const r=await fetch(`${CFG.supabaseUrl}/functions/v1/auth-mail?captcha`,{method:"POST",headers:{apikey:CFG.supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({email,token:t})});
-    if(r.ok)return true; return r.status===403?"Проверка «я не робот» не пройдена. Попробуйте ещё раз.":"Сервер входа не ответил. Попробуйте через минуту."}
-  catch(e){return navigator.onLine?"Сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова."}}
+    return r.status===403?"Проверка «я не робот» не пройдена. Попробуйте ещё раз.":true}
+  catch(e){return navigator.onLine?true:"Нет интернета. Подключитесь и попробуйте снова."}}
 const avatar=(email,cls="")=>`<span class="av ${cls}" aria-hidden="true">${esc((email||"?")[0].toUpperCase())}</span>`;
 const roleName=r=>r==="owner"?"владелец":r==="editor"?"может править":"только смотрит";
 
@@ -1632,7 +1633,7 @@ function openLogin(){
     if(CFG.captchaKey){const c=await captchaPass(v);if(c!==true){b.disabled=false;b.textContent="Получить код";busy=false;setMsg(msg1,c);return false}}
     const {error}=await sb.auth.signInWithOtp({email:v,options:{emailRedirectTo:redirect,shouldCreateUser:true}});
     b.disabled=false; b.textContent="Получить код"; busy=false;
-    if(error){setMsg(msg1,/rate|seconds|limit/i.test(error.message)?"Письмо уже отправляли только что. Подождите минуту и попробуйте снова.":navigator.onLine?"Письмо не отправилось: сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова.");return false}
+    if(error){setMsg(msg1,/робот/i.test(error.message)?"Не получилось подтвердить, что вы не робот. Обновите страницу и попробуйте снова.":/rate|seconds|limit/i.test(error.message)?"Письмо уже отправляли только что. Подождите минуту и попробуйте снова.":navigator.onLine?"Письмо не отправилось: сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова.");return false}
     try{localStorage.setItem("atlas-last-email",v)}catch(e){}
     el.querySelector("#lgSent").innerHTML=`Отправили на <b>${esc(v)}</b>. Если письма нет, загляните в «Спам».`;
     el.querySelector("#lgS1").hidden=true; el.querySelector("#lgS2").hidden=false; otp.value=""; setMsg(msg2,"");
