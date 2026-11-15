@@ -13,7 +13,7 @@
   --ocean:#0c1626; --ocean-2:#101e33; --ink:#eef1f6; --muted:#9aa7bb; --line:#22324b; --panel:#121f33; --panel-2:#18283f;
   --accent:#ff8a5c; --accent-ink:#1a0d06;
   --st-free:#4fbf94; --st-eta:#a8cf5c; --st-arrival:#e6c553; --st-evisa:#e8994d; --st-visa:#7d6b8f; --st-banned:#c84a55; --st-unknown:#3d4a60; --st-home:#e9e3d6;
-  --pin-want:#ff8a5c; --pin-been:#5fd0ff; --pin-none:#93a0b4; --pin-home:#ffffff;
+  --pin-want:#ff8a5c; --pin-been:#5fd0ff; --pin-none:#93a0b4;
   --display:"Unbounded", "Manrope", system-ui, sans-serif;
   --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme:dark;
@@ -203,7 +203,8 @@ body.hastiles .c-dot{fill:#fff;stroke:#14213a}
 .actions{margin-left:auto;display:flex;gap:8px}
 /* two tidy rows on a computer: brand, search, passports, account; then the layer switch and the buttons */
 .tb-br{flex-basis:100%;height:0}
-@media (min-width:1750px){.tb-br{display:none}}.actions .ibtn{display:grid;place-items:center;width:44px;padding:0}
+@media (min-width:1750px){.tb-br{display:none}}
+@media (min-width:861px) and (max-width:1749px){.topbar .search{max-width:none;flex:1 1 220px}.topbar .seg[aria-label="Что показывать на карте"]{order:0}}.actions .ibtn{display:grid;place-items:center;width:44px;padding:0}
 a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
 .btn{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:600}
 .btn:hover{border-color:#3a4f70}
@@ -894,7 +895,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <div class="row2"><button type="button" class="btn small" id="addPick">Указать точку на карте</button><span id="addCoords" class="hint"></span></div>
     <label class="f" for="addName">Название<input class="txt" id="addName" required></label>
     <label class="f" for="addStatus">Статус
-      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="been">Были</option><option value="">Без отметки</option><option value="home">Дом</option></select>
+      <select class="txt" id="addStatus"><option value="want">Хотим</option><option value="been">Были</option><option value="">Без отметки</option></select>
     </label>
     <label class="f" for="addTags">Вайб и метки через запятую<input class="txt" id="addTags" placeholder="кофе, вид, романтика"></label>
     <label class="f" for="addNote">Заметка<textarea class="note" id="addNote"></textarea></label>
@@ -937,8 +938,8 @@ const SAFE_NONE="#5b6579";
 const SRC={us:"Госдеп США",uk:"МИД Великобритании",au:"МИД Австралии",fr:"МИД Франции",ca:"МИД Канады",ru:"режимы, введённые в регионах РФ"};
 const SRC_WHY={us:"США — ближайший партнёр стран Америки и разбирает их по штатам",uk:"у британского МИД самая подробная разбивка по районам для Европы, Ближнего Востока, Южной Азии и Африки",au:"Австралия теснее всех связана с Юго-Восточной Азией и Океанией",fr:"Франция лучше всех знает франкоязычную Африку и Магриб",ru:"для России — официальные режимы по регионам: КТО, ЧС и уровни реагирования"};
 function safeOf(k){return S.safety?.c?.[k]||null}
-const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},been:{label:"Были",c:"var(--pin-been)"},home:{label:"Дом",c:"var(--pin-home)"}};
-// a place without a mark (the old «Любимое» reads as no mark; stored data is left as it was)
+const PIN = {want:{label:"Хотим",c:"var(--pin-want)"},been:{label:"Были",c:"var(--pin-been)"}};
+// a place without a mark (the old «Любимое» and «Дом» read as no mark; stored data is left as it was)
 const NOPIN = {label:"Без отметки",c:"var(--pin-none)"};
 const pinOf = st => PIN[st]||NOPIN;
 const stOf = st => PIN[st]?st:"";
@@ -2545,7 +2546,7 @@ const GUIDE=[
     m:"В «Моих местах» и в Профиле — «Поделиться картой»: соберётся картинка для сторис с картой, числом стран и флагами, вместе со ссылкой на вашу карту. «Пригласить друзей» отправляет ссылку, по которой друг войдёт и будет отмечать места вместе с вами. В карточке места кнопка «Я тоже хочу» показывает, кто ещё хочет туда поехать. ",
     art:()=>`<div class="ga ga-sh"><div class="ga-story"><b>Хочу побывать</b><em>23</em><i></i><span>nash-atlas.ru</span></div><div class="ga-fans">${["И","М","А"].map((x,i)=>`<span class="av" style="--i:${i}">${x}</span>`).join("")}<b>Я тоже хочу</b></div></div>`},
   {since:8, t:"Где вы уже были",
-    m:"У мест три отметки: «Хотим», «Были» и «Дом». Побывали — нажмите на «Хотим» у места в списке, и оно станет «✓ Были». На картинке для сторис появится «Был в N странах, хочу ещё в M».",
+    m:"У мест две отметки: «Хотим» и «Были». Побывали — нажмите на «Хотим» у места в списке, и оно станет «✓ Были». На картинке для сторис появится «Был в N странах, хочу ещё в M».",
     art:()=>`<div class="ga ga-bn"><span class="ga-b1">Хотим</span><span class="ga-ar">→</span><span class="ga-b2">✓ Были</span></div>`},
 ];
 const TOUR=[
@@ -2553,7 +2554,7 @@ const TOUR=[
   {since:2, sel:{m:"#srchBtn",d:"#q"}, t:"Поиск", m:"Страны, города, регионы и аэропорты. По городу или аэропорту откроется его страна."},
   {since:2, sel:{m:'#tabbar [data-tab="countries"]',d:"#cfq"}, t:"Страны", m:"Список стран с фильтрами: без визы, по прилёте, только безопасные."},
   {since:2, sel:{m:'#tabbar [data-tab="add"]',d:"#addBtn"}, t:"Добавить место", m:"По ссылке из Google Карт или точкой на карте."},
-  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим», «Были» и «Дом»."},
+  {since:2, sel:{m:'#tabbar [data-tab="places"]',d:"#placesBtn"}, t:"Мои места", m:"Все ваши места по странам, с фильтром «Хотим» и «Были»."},
   {since:2, sel:{m:'#tabbar [data-tab="profile"]',d:"#passBtn"}, t:"Профиль", mob:"Вход в аккаунт, паспорта, подложка с рельефом и эта инструкция.", m:"Здесь выбираются паспорта, по которым раскрашена карта."},
   {since:3, sel:{m:"#sumCard",d:null}, t:"Карточка выбранного", m:"Здесь коротко о том, что вы выбрали на карте. Нажмите или потяните вверх, чтобы открыть всё. Когда двигаете карту, карточка сама уходит вниз."},
   {since:7, sel:{m:"#shareBtn",d:"#shareTop"}, t:"Поделиться", m:"Картинка для сторис с вашей картой и приглашение для друзей, чтобы отмечать места вместе."},
@@ -3644,7 +3645,7 @@ const ALIAS={US:["сша","америка","штаты"],GB:["британия",
 const AREA_WORDS=[["европ",["europe"]],["африк",["africa"]],["азия",["southasia","eastasia","sea","rusca"]],["азии",["southasia","eastasia","sea","rusca"]],["юго восточн",["sea"]],["восточная азия",["eastasia"]],["южная азия",["southasia"]],["ближний восток",["mideast"]],["кавказ",["mideast"]],["средняя азия",["rusca"]],["центральная азия",["rusca"]],["океани",["oceania"]],["латинск",["camerica","samerica"]],["южная америк",["samerica"]],["северная америк",["namerica"]],["центральная америк",["camerica"]],["кариб",["camerica"]],["америк",["namerica","camerica","samerica"]]];
 const ENTRY_WORDS=[["без виз",["F"]],["безвиз",["F"]],["виза не нужна",["F"]],["по прилет",["A"]],["на границе",["A"]],["электронн",["E","V"]],["e visa",["V"]],["евиз",["V"]],["онлайн",["E","V"]],["нужна виза",["R"]],["визов",["R"]],["закрыт",["X"]],["легкий въезд",["F","E","A"]],["просто въехать",["F","E","A"]]];
 const SAFE_WORDS=[["безопасн",[1]],["спокойн",[1]],["осторожн",[2]],["опасн",[3,4]],["не ехать",[4]],["воюет",[4]],["война",[4]]];
-const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["были",["been"]],["был",["been"]],["дом",["home"]]];
+const STATUS_WORDS=[["хотим",["want"]],["хочу",["want"]],["были",["been"]],["был",["been"]]];
 let SIX=null;
 const SYN={пляж:["beach","playa","praia","plage","plaj","strand","spiaggia"],музей:["museum","muzesi","musee","museo"],храм:["temple","wat","church","pagoda"],водопад:["waterfall","falls","selale"],озеро:["lake","lago","golu","gol"],гора:["mount","mountain","dag","peak"],парк:["park","parque"],рынок:["market","bazaar","bazar","mercado","pazar"],кофе:["coffee","cafe","kahve"],кафе:["cafe","coffee"],замок:["castle","kale","castillo","schloss"],собор:["cathedral","catedral"],мечеть:["mosque","camii","masjid"],остров:["island","isla","koh","ada"],пещера:["cave","cueva","magara"],каньон:["canyon","kanyon"],вулкан:["volcano","volcan"],дворец:["palace","palacio","saray"],монастырь:["monastery","monastir"],мост:["bridge","kopru","puente"],ресторан:["restaurant"],бар:["bar","pub"],смотровая:["viewpoint","mirador"],крепость:["fortress","fort","kalesi"],сад:["garden","bahce"],пустыня:["desert"],заповедник:["reserve","national park"]};
 const synOf=t=>{const out=[t];for(const [k,v] of Object.entries(SYN))if(t.startsWith(k.slice(0,Math.max(4,k.length-1)))||k.startsWith(t)&&t.length>=4)out.push(k,...v);return [...new Set(out)]};
