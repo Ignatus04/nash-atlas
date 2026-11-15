@@ -155,3 +155,9 @@ begin
 end $$;
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- CAPTCHA pass for login emails (supabase/functions/auth-mail): a person passed Yandex SmartCaptcha for this address,
+-- so one login code may be sent to it in the next 10 minutes. Only the function (service key) reads and writes it.
+create table if not exists public.captcha_pass (email text primary key, until timestamptz not null);
+alter table public.captcha_pass enable row level security;
+revoke all on public.captcha_pass from anon, authenticated;

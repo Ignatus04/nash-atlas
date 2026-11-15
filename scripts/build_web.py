@@ -54,13 +54,14 @@ html=html.replace('<title>Наш атлас</title>','<title>Наш атлас</
 # Yandex Metrika / ads). A missed escape somewhere then cannot run injected code. New outside hosts go here.
 import hashlib,base64
 hashes=' '.join("'sha256-%s'"%base64.b64encode(hashlib.sha256(b.encode()).digest()).decode() for b in re.findall(r'<script>([\s\S]*?)</script>',html))
+SC='https://smartcaptcha.yandexcloud.net https://smartcaptcha.cloud.yandex.ru'
 YA='https://yandex.ru https://*.yandex.ru https://*.yandex.net https://yastatic.net https://*.yandexadexchange.net https://yandexadexchange.net'
 CSP=("default-src 'self'; "
-  f"script-src 'self' {hashes} https://mc.yandex.ru {YA} https://accounts.google.com/gsi/client; "
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; "
+  f"script-src 'self' {hashes} https://mc.yandex.ru {YA} {SC} https://accounts.google.com/gsi/client; "
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style https://smartcaptcha.yandexcloud.net; "
   "img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' data: blob:; "
-  f"connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.wikipedia.org https://commons.wikimedia.org https://nominatim.openstreetmap.org https://mc.yandex.ru {YA} https://accounts.google.com; "
-  f"frame-src {YA} https://accounts.google.com; worker-src 'self' blob:; manifest-src 'self'; "
+  f"connect-src 'self' {SC} https://*.supabase.co wss://*.supabase.co https://*.wikipedia.org https://commons.wikimedia.org https://nominatim.openstreetmap.org https://mc.yandex.ru {YA} https://accounts.google.com; "
+  f"frame-src {YA} {SC} https://accounts.google.com; worker-src 'self' blob:; manifest-src 'self'; "
   "object-src 'none'; base-uri 'self'; form-action 'self'")
 html=html.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="%s">'%CSP,1)
 open(OUT+'index.html','w',encoding='utf-8').write(html)

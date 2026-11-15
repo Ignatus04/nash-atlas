@@ -13,6 +13,9 @@ window.ATLAS_CFG = {
   ads: { country: "", places: "" },
   // iPhone shortcut that sends a shared map link to nash-atlas.ru/?add=… (iCloud link). Empty: the help shows copy-and-paste instead.
   iosShortcut: "",
+  // Yandex SmartCaptcha client key (public). Set it only after the auth-mail function is deployed: then a login code is
+  // requested only after the captcha. Empty: no captcha (and the Send Email hook in Supabase must stay off).
+  captchaKey: "",
   // Google sign-in runs on our own page (shows nash-atlas.ru, not the Supabase address); same client as in Supabase
   googleClientId: "444988932037-ve1fbt66uu4vlmi6qkhmrjaq2761e594.apps.googleusercontent.com"
 };

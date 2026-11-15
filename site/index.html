@@ -1528,6 +1528,24 @@ const IC={
   layers:'<path d="m12 4 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4M4 16l8 4 8-4"/>',
   import:'<path d="M12 4v10m0 0-4-4m4 4 4-4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>'};
 const ic=(n,s=18)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+// Yandex SmartCaptcha before a login code is sent (invisible: a person usually sees nothing, a suspicious visitor gets a
+// puzzle). The token goes to our auth-mail function, which lets one code go to this address; see supabase/functions/auth-mail.
+let scLoad=null,scId=null,scWait=null;
+function loadCaptcha(){return scLoad||=new Promise((ok,no)=>{window.__scReady=()=>ok();const s=document.createElement("script");
+  s.src="https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=__scReady";s.defer=true;s.onerror=()=>{scLoad=null;no(new Error("load"))};document.head.appendChild(s)})}
+async function captchaToken(){
+  await loadCaptcha(); const sc=window.smartCaptcha;
+  if(scId==null){const box=document.createElement("div");box.id="scBox";document.body.appendChild(box);
+    scId=sc.render(box,{sitekey:CFG.captchaKey,invisible:true,hl:"ru",shieldPosition:"bottom-left",callback:t=>{scWait?.ok(t);scWait=null}});
+    sc.subscribe(scId,"challenge-hidden",()=>{scWait?.no(new Error("closed"));scWait=null});
+    sc.subscribe(scId,"network-error",()=>{scWait?.no(new Error("network"));scWait=null})}
+  else sc.reset(scId);
+  return new Promise((ok,no)=>{scWait={ok,no};sc.execute(scId);setTimeout(()=>{if(scWait){scWait.no(new Error("timeout"));scWait=null}},120000)})}
+async function captchaPass(email){
+  let t;try{t=await captchaToken()}catch(e){return e.message==="closed"?"Чтобы получить код, пройдите проверку «я не робот».":"Не загрузилась проверка «я не робот». Проверьте интернет и попробуйте снова."}
+  try{const r=await fetch(`${CFG.supabaseUrl}/functions/v1/auth-mail?captcha`,{method:"POST",headers:{apikey:CFG.supabaseKey,"Content-Type":"application/json"},body:JSON.stringify({email,token:t})});
+    if(r.ok)return true; return r.status===403?"Проверка «я не робот» не пройдена. Попробуйте ещё раз.":"Сервер входа не ответил. Попробуйте через минуту."}
+  catch(e){return navigator.onLine?"Сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова."}}
 const avatar=(email,cls="")=>`<span class="av ${cls}" aria-hidden="true">${esc((email||"?")[0].toUpperCase())}</span>`;
 const roleName=r=>r==="owner"?"владелец":r==="editor"?"может править":"только смотрит";
 
@@ -1611,6 +1629,7 @@ function openLogin(){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){setMsg(msg1,"Проверьте почту: в адресе нужны @ и домен, например you@example.com.");em.focus();return false}
     setMsg(msg1,""); busy=true; const b=el.querySelector("#lgGo"); b.disabled=true; b.textContent="Отправляем…";
     const redirect=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
+    if(CFG.captchaKey){const c=await captchaPass(v);if(c!==true){b.disabled=false;b.textContent="Получить код";busy=false;setMsg(msg1,c);return false}}
     const {error}=await sb.auth.signInWithOtp({email:v,options:{emailRedirectTo:redirect,shouldCreateUser:true}});
     b.disabled=false; b.textContent="Получить код"; busy=false;
     if(error){setMsg(msg1,/rate|seconds|limit/i.test(error.message)?"Письмо уже отправляли только что. Подождите минуту и попробуйте снова.":navigator.onLine?"Письмо не отправилось: сервер входа не ответил. Попробуйте через минуту.":"Нет интернета. Подключитесь и попробуйте снова.");return false}
