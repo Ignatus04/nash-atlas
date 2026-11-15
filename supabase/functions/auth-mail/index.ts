@@ -15,6 +15,7 @@ import { Webhook } from "npm:standardwebhooks@1.0.0";
 const URL_ = Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL")!;
 const FROM = "=?UTF-8?B?" + btoa(String.fromCharCode(...new TextEncoder().encode("Наш атлас"))) + "?= <noreply@nash-atlas.ru>";
 const SUBJECT = "Код для входа в «Наш атлас»";
+const CAPTCHA_ON = Boolean(Deno.env.get("SMARTCAPTCHA_SERVER_KEY"));
 const CORS = {
   "Access-Control-Allow-Origin": "https://nash-atlas.ru",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -35,6 +36,8 @@ async function captcha(req: Request) {
   try { body = await req.json(); } catch { /* empty */ }
   const email = norm(body.email ?? ""), token = String(body.token ?? "");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 254 || !token) return json({ ok: false, error: "bad request" }, 400, CORS);
+  // no captcha key on this server: the captcha is off, every request passes (the hook then needs no pass either)
+  if (!CAPTCHA_ON) return json({ ok: true, captcha: false }, 200, CORS);
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
   const r = await fetch("https://smartcaptcha.cloud.yandex.ru/validate", {
     method: "POST",
@@ -117,7 +120,7 @@ async function hook(req: Request) {
   const e = data?.email_data ?? {};
   const type = String(e.email_action_type ?? "");
   // a login code (first or next login) needs a passed captcha; other emails come only from signed-in actions
-  if ((type === "magiclink" || type === "signup") && !(await takePass(email))) {
+  if (CAPTCHA_ON && (type === "magiclink" || type === "signup") && !(await takePass(email))) {
     console.warn("no captcha pass for this address, email not sent");
     return json({ error: { http_code: 429, message: "Пройдите проверку «я не робот» на сайте и запросите код снова." } }, 429);
   }

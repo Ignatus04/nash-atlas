@@ -16,6 +16,10 @@ services:
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
       # custom OAuth providers (Yandex ID) are created through the admin API by yandex.sh
       GOTRUE_CUSTOM_OAUTH_ENABLED: "true"
+      # login emails through our auth-mail function and the Postbox HTTPS API (the hosting blocks SMTP ports)
+      GOTRUE_HOOK_SEND_EMAIL_ENABLED: ${SEND_EMAIL_HOOK_ENABLED:-false}
+      GOTRUE_HOOK_SEND_EMAIL_URI: https://api.nash-atlas.ru/functions/v1/auth-mail
+      GOTRUE_HOOK_SEND_EMAIL_SECRETS: ${SEND_EMAIL_HOOK_SECRET:-}
 
   functions:
     environment:
