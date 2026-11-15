@@ -7,7 +7,8 @@ const SHORT = [
   /^https:\/\/goo\.gl\/maps\/[\w-]+/i,
   /^https:\/\/(?:www\.)?yandex\.(?:ru|com|by|kz)\/maps\/-\/[\w-]+/i,
 ];
-const FULL = /^https:\/\/(?:(?:www\.|maps\.)?google\.[a-z.]+\/maps|(?:www\.)?yandex\.(?:ru|com|by|kz)\/maps)/i;
+// Google's app links now lead to maps.google.com/?q=Name,+address&ftid=… (no /maps in the path, often no coordinates)
+const FULL = /^https:\/\/(?:(?:www\.)?google\.[a-z.]+\/maps|maps\.google\.[a-z.]+\/|(?:www\.)?yandex\.(?:ru|com|by|kz)\/maps)/i;
 const CORS = {
   "Access-Control-Allow-Origin": "https://nash-atlas.ru",
   "Access-Control-Allow-Methods": "GET, OPTIONS",

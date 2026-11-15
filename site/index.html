@@ -3603,12 +3603,17 @@ function parseGoogle(s){
   if(!m) m=s.match(/^\s*(-?\d{1,2}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)\s*$/);
   if(m){lat=+m[1];lng=+m[2]; if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}
   const n=s.match(/\/place\/([^/@?]+)/); if(n){try{name=decodeURIComponent(n[1].replace(/\+/g," "))}catch(e){name=n[1].replace(/\+/g," ")}}
-  if(!name){const q=s.match(/[?&](?:q|query)=([^&]+)/);if(q&&!/^-?\d/.test(q[1])){try{name=decodeURIComponent(q[1].replace(/\+/g," "))}catch(e){}}}
+  let addr="";
+  if(!name){const q=s.match(/[?&](?:q|query|text)=([^&]+)/);if(q&&!/^-?\d/.test(q[1])){try{addr=decodeURIComponent(q[1].replace(/\+/g," ")).trim()}catch(e){}
+    // Google's app links: q=«Название, улица, город, индекс, страна»
+    if(addr&&/google\./i.test(s)&&addr.includes(",")) name=addr.split(",")[0].trim(); else name=addr}}
   // Yandex Maps: coordinates go longitude first (ll=, pt=, whatshere[point]=)
   if(lat==null&&/yandex\.[a-z]+\/maps/i.test(s)){let y=null;try{y=decodeURIComponent(s)}catch(e){y=s}
     const ym=y.match(/whatshere\[point\]=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||y.match(/[?&]pt=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||y.match(/[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
-    if(ym){lng=+ym[1];lat=+ym[2];if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}}
-  return {lat,lng,name,short:/goo\.gl|maps\.app|yandex\.[a-z]+\/maps\/-\//i.test(s)};
+    if(ym){lng=+ym[1];lat=+ym[2];if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}
+    // except a search by coordinates (text=55.87,37.25), which goes latitude first
+    if(lat==null){const yt=y.match(/[?&]text=(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)(?:&|$)/);if(yt){lat=+yt[1];lng=+yt[2];if(Math.abs(lat)>90||Math.abs(lng)>180){lat=lng=null}}}}
+  return {lat,lng,name,addr,short:/goo\.gl|maps\.app|yandex\.[a-z]+\/maps\/-\//i.test(s)};
 }
 // what the phone's share sheet sends is often «Название\nhttps://maps.app.goo.gl/…»: the link, and a name if there is one
 function splitShared(t){t=String(t||"").trim();const m=t.match(/https?:\/\/\S+/);if(!m)return {url:t,name:""};
@@ -3616,6 +3621,10 @@ function splitShared(t){t=String(t||"").trim();const m=t.match(/https?:\/\/\S+/)
 // a short Google or Yandex Maps link → the full one, through our server function (supabase/functions/expand-link)
 async function expandLink(u){const cfg=window.ATLAS_CFG||{};if(!cfg.supabaseUrl)return null;
   try{const r=await fetch(`${cfg.supabaseUrl}/functions/v1/expand-link?u=${encodeURIComponent(u)}`,{headers:{apikey:cfg.supabaseKey}});if(!r.ok)return null;return (await r.json()).url||null}catch(e){return null}}
+// no coordinates behind the link, only «Название, адрес»: find the address on OpenStreetMap (Nominatim)
+async function geocodeAddr(a){const tries=[a];const parts=a.split(",").map(x=>x.trim()).filter(Boolean);if(parts.length>2)tries.push(parts.slice(1).join(", "));
+  for(const q of tries){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&q=${encodeURIComponent(q)}`);if(!r.ok)continue;const j=await r.json();
+    if(j[0]){const lat=+j[0].lat,lng=+j[0].lon;if(isFinite(lat)&&isFinite(lng))return {lat,lng}}}catch(e){}}return null}
 let addLL=null;
 function openAdd(){
   const wm=writableMaps();
@@ -4031,8 +4040,11 @@ $("#addUrl").addEventListener("input",async e=>{const sp=splitShared(e.target.va
   let g=parseGoogle(e.target.value);
   if(g.lat==null&&g.short){const my=++addExp;$("#addParse").className="hint";$("#addParse").textContent="Определяю место по ссылке…";
     const full=await expandLink(e.target.value.trim()); if(my!==addExp) return;
-    if(full){const g2=parseGoogle(full);if(g2.lat!=null)g={...g2,short:false};else if(g2.name)g={...g,name:g2.name}}}
-  if(g.lat!=null){setAddLL(g.lat,g.lng);$("#addParse").className="ok";$("#addParse").textContent="Координаты нашлись в ссылке"}
+    if(full){const g2=parseGoogle(full);if(g2.lat!=null)g={...g2,short:false};else g={...g,name:g2.name||g.name,addr:g2.addr}}}
+  let byAddr=false;
+  if(g.lat==null&&g.addr&&/\d|,/.test(g.addr)){const my=++addExp;$("#addParse").className="hint";$("#addParse").textContent="Ищу точку по адресу…";
+    const ll=await geocodeAddr(g.addr); if(my!==addExp) return; if(ll){g={...g,...ll};byAddr=true}}
+  if(g.lat!=null){setAddLL(g.lat,g.lng);$("#addParse").className="ok";$("#addParse").textContent=byAddr?"Точка найдена по адресу из ссылки. Если она неточная, поправь кнопкой «Указать точку на карте»":"Координаты нашлись в ссылке"}
   else if(e.target.value.trim()){ $("#addParse").className=g.short?"err":"hint"; $("#addParse").textContent=g.short?"По этой ссылке не получилось найти точку. Укажите её на карте кнопкой ниже.":"Координат в ссылке нет. Укажи точку на карте."}
   if(g.name&&!$("#addName").value) $("#addName").value=g.name;});
 $("#addPick").onclick=()=>{$("#addModal").classList.remove("on");S.pickFromAdd=true;startPick((lat,lng)=>{S.pickFromAdd=false;setAddLL(lat,lng);$("#addModal").classList.add("on")})};
