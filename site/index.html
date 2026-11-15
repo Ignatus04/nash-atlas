@@ -566,16 +566,27 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-map path{stroke:#101c30;stroke-width:.25;transition:filter .3s ease,stroke .3s ease}
 .ga-map path.hl{stroke:#fff;stroke-width:.6;filter:brightness(1.25)}
 @keyframes gaFade{from{opacity:0}}
-.ga-finger{position:absolute;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);
-  transform:translate(50%,200%);transition:transform .72s cubic-bezier(.45,0,.2,1);will-change:transform}
-.ga-finger.press{animation:gaPress .45s var(--spring-soft)}
-.ga-finger::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #fff;opacity:0}
-.ga-finger.press::after{animation:gaRing .7s ease-out}
-@keyframes gaPress{40%{scale:.72}}
+/* the pointer that taps: a finger on phones, a mouse cursor on computers. The outer element only moves;
+   the press squeezes the inner one, so the squeeze never shifts the position. */
+.ga-finger{position:absolute;left:0;top:0;width:0;height:0;transform:translate(50%,200%);transition:transform .62s var(--spring-soft);will-change:transform;pointer-events:none}
+.ga-finger>b{position:absolute;left:-17px;top:-17px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.ga-finger>b::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid #fff;opacity:0}
+.ga-finger.press>b{animation:gaPress .45s var(--spring-soft)}
+.ga-finger.press>b::after{animation:gaRing .7s ease-out}
+@keyframes gaPress{40%{transform:scale(.72)}}
 @keyframes gaRing{from{opacity:.9;transform:scale(1)}to{opacity:0;transform:scale(2.3)}}
-.ga-tip{position:absolute;left:0;top:0;max-width:62cqw;padding:7px 10px;border-radius:12px;background:#16263f;border:1px solid #2c4062;box-shadow:0 8px 20px rgba(0,0,0,.4);
-  display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center;font-size:12px;opacity:0;scale:.85;transform-origin:0 100%;transition:opacity .2s ease,scale .45s var(--spring-soft);pointer-events:none}
-.ga-tip.on{opacity:1;scale:1}
+.ga-finger.cur{transition:transform .9s cubic-bezier(.55,0,.15,1)}
+.ga-finger.cur>b{left:-3px;top:-2px;width:22px;height:26px;border:0;border-radius:0;background:none;box-shadow:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));transform-origin:3px 2px}
+.ga-finger.cur>b svg{display:block;width:22px;height:26px}
+.ga-finger.cur>b::after{display:none}
+.ga-finger.cur>i{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;opacity:0}
+.ga-finger.cur.press>b{animation:gaClick .3s ease}
+.ga-finger.cur.press>i{animation:gaRing .6s ease-out}
+@keyframes gaClick{45%{transform:scale(.86)}}
+.ga-tip{position:absolute;left:0;top:0;max-width:62cqw;pointer-events:none}
+.ga-tip>div{padding:7px 10px;border-radius:12px;background:#16263f;border:1px solid #2c4062;box-shadow:0 8px 20px rgba(0,0,0,.4);
+  display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center;font-size:12px;opacity:0;transform:scale(.85);transform-origin:50% 100%;transition:opacity .2s ease,transform .45s var(--spring-soft)}
+.ga-tip.on>div{opacity:1;transform:none}
 .ga-tip .fimg{width:18px;height:18px;border-radius:50%;grid-row:span 2}
 .ga-tip b{font:800 13px/1.2 var(--display)}
 .ga-tip span{display:flex;align-items:center;gap:5px;color:#d3dbe8;white-space:nowrap}
@@ -600,6 +611,11 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-pp:nth-child(1){--x:-62px;--r:-11deg}
 .ga-pp .fimg{width:26px;height:26px;border-radius:50%}
 .ga-pp b{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}.ga-pp b+b{width:28px}
+@media (max-width:860px){
+  .ga-pass .ga-pp{animation:none}
+  .ga-pass .ga-pp:nth-child(1){transform:translateX(-62px) rotate(-11deg)}.ga-pass .ga-pp:nth-child(2){transform:translateY(-4px)}.ga-pass .ga-pp:nth-child(3){transform:translateX(62px) rotate(11deg)}
+  .ga-pass .ga-res{animation:none;transform:translateX(-50%);opacity:1}
+}
 @keyframes gaFanL{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(-62px) rotate(-11deg) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
 @keyframes gaFanC{0%,8%{transform:translateY(0) scale(.92)}28%,70%{transform:translateY(-4px) scale(1)}90%,100%{transform:translateY(0) scale(.92)}}
 @keyframes gaFanR{0%,8%{transform:translateX(0) rotate(0) scale(.92)}28%,70%{transform:translateX(62px) rotate(11deg) scale(1)}90%,100%{transform:translateX(0) rotate(0) scale(.92)}}
@@ -1913,6 +1929,7 @@ function gaGlobe(size){
 // timers for the little scripted scenes; cleared whenever the page turns or the guide closes
 let gaT=[]; function gaClear(){gaT.forEach(t=>{clearTimeout(t);clearInterval(t)});gaT=[]}
 const gaLater=(f,ms)=>gaT.push(setTimeout(f,ms));
+const gaPointer=()=>MOB()?`<i class="ga-finger"><b></b></i>`:`<i class="ga-finger cur"><i></i><b><svg viewBox="0 0 22 26"><path d="M2 1.5v19.2l5-4.6 3.3 7.6 3.6-1.6-3.3-7.4h6.9Z" fill="#fff" stroke="#0c1626" stroke-width="1.6" stroke-linejoin="round"/></svg></b></i>`;
 // where a lon/lat lands inside the picture, in px (the map is cropped to fill the box, so ask the SVG itself)
 function gaXY(svg,root,lon,lat){const [X,Y]=gaWorld().pj([lon,lat]);const m=svg.getScreenCTM(),r=root.getBoundingClientRect();if(!m)return null;
   return [m.a*X+m.c*Y+m.e-r.left,m.b*X+m.d*Y+m.f-r.top]}
@@ -1938,7 +1955,7 @@ function gaTapScene(root,vb,list,withCard){
     gaLater(()=>{tap.classList.remove("press");void tap.offsetWidth;tap.classList.add("press");svg.querySelector(`[data-k="${k}"]`)?.classList.add("hl");
       const c=codeFor(k), lc=legendCode(c), p=S.pass.find(p=>legendCode(entry(p,k).c)===lc), st=p?entry(p,k).s:"";
       const row=`<i style="background:${gaEntryC(k)}"></i>${esc(ST[c]?.label||"")}${st?` · ${esc(st)}`:""}`;
-      if(tip){tip.innerHTML=`${flagImg(k)}<b>${esc(f.properties.ru)}</b><span>${row}</span>`;
+      if(tip){tip.innerHTML=`<div>${flagImg(k)}<b>${esc(f.properties.ru)}</b><span>${row}</span></div>`;
         const tw=tip.offsetWidth,th=tip.offsetHeight, tx=Math.max(6,Math.min(x-tw/2,W-tw-6)), ty=y-th-22<6?y+20:y-th-22;
         tip.style.transform=`translate(${tx}px,${ty}px)`;tip.classList.add("on")}
       if(card){const l=safeOf(k)?.l, n=placesIn(q=>q.k===k).length;
@@ -1979,7 +1996,7 @@ const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
-    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}<i class="ga-finger"></i><div class="ga-tip"></div></div>`,
+    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
     run:r=>gaTapScene(r,GUIDE_VB.col,["IT","TN","FR","PT","AT","HU","PL","JO","NL"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
@@ -1988,7 +2005,7 @@ const GUIDE=[
   {since:1, t:"Страна открывается касанием",
     m:"Нажмите на страну на карте или найдите её в списке справа. Выедет карточка: условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
     mob:"Нажмите на страну на карте или найдите её в разделе «Страны». Внизу появится карточка: условия въезда, срок, опасные районы и ваши места. Потяните её вверх, чтобы прочитать всё.",
-    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}<i class="ga-finger"></i><div class="ga-sheet"></div></div>`,
+    art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}${gaPointer()}<div class="ga-sheet"></div></div>`,
     run:r=>gaTapScene(r,GUIDE_VB.card,["IT","FR","AT","CZ","PL","HU"],true)},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
