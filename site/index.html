@@ -934,7 +934,7 @@ async function googleButton(box,done){
       done(error?(navigator.onLine?"Не получилось войти через Google. Попробуйте ещё раз или войдите по почте.":"Нет интернета. Подключитесь и попробуйте снова."):null)}});
   const w=Math.max(200,Math.min(400,Math.round(box.getBoundingClientRect().width)||320));
   box.innerHTML="";
-  google.accounts.id.renderButton(box,{type:"standard",theme:"outline",size:"large",text:"signin_with",shape:"rectangular",logo_alignment:"center",width:w,locale:"ru"});
+  google.accounts.id.renderButton(box,{type:"standard",theme:"filled_black",size:"large",text:"signin_with",shape:"rectangular",logo_alignment:"center",width:w,locale:"ru"});
 }
 
 /* sign in: e-mail, then the code from the letter (works on any device); the button in the letter also works in the same browser */
