@@ -190,9 +190,13 @@ for c in json.load(open(R + 'site/data/cities.json')):
     q = min(places, key=lambda f: math.hypot(f['properties']['LATITUDE'] - c[2], f['properties']['LONGITUDE'] - c[3]))['properties']
     if math.hypot(q['LATITUDE'] - c[2], q['LONGITUDE'] - c[3]) < 0.1 and q.get('NAME_UK'): cityUk[c[1]] = q['NAME_UK']
 # region names as the owner calls them, by region id without the "-XU" suffix
+# names of areas that belong to another country in a view, for the safety notes in that country's card
+partNames = {'all': {'XK': 'Косово', 'TW': 'Тайвань', 'XU': 'Территории Украины под контролем России'},
+             'RU': {'XU': 'Республика Крым, Севастополь, ДНР, ЛНР, Запорожская и Херсонская области',
+                    '~UA-claim': 'Часть ДНР, Запорожской и Херсонской областей вне контроля российских властей'}}
 regionNames = {'RU': {'UKR-327': 'Донецкая Народная Республика', 'UKR-329': 'Луганская Народная Республика',
                       'RUS-283': 'Республика Крым', 'RUS-5482': 'Севастополь'}}
-json.dump({'intl': INTL, 'views': views, 'cityUk': cityUk, 'regionNames': regionNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
+json.dump({'intl': INTL, 'views': views, 'cityUk': cityUk, 'regionNames': regionNames, 'partNames': partNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
           open(R + 'site/data/worldviews.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print('pieces', [(k, h, round(g.area * KM2)) for k, g, h, _ in pieces])
 print('views', len(views), 'RU', views['RU'], 'BY', views['BY'], 'US', views['US'])
