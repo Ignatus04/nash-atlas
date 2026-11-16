@@ -16,11 +16,14 @@ const CORS: Record<string, string> = {
 // both layouts: DB-IP's own file ({country:{iso_code}}) and the ip-location-db copy ({country_code})
 // deno-lint-ignore no-explicit-any
 let reader: Reader<any> | null = null;
-try {
-  reader = new Reader(Buffer.from(await Deno.readFile(new URL("./country.mmdb", import.meta.url))));
-} catch (err) {
-  console.error("geo: no database", String(err));
+// the edge runtime may bundle this file, so import.meta.url is not always its folder on disk: try the mounted folder too
+const PATHS = [new URL("./country.mmdb", import.meta.url), "/home/deno/functions/geo/country.mmdb", "./geo/country.mmdb", "./country.mmdb"];
+const errors: string[] = [];
+for (const p of PATHS) {
+  try { reader = new Reader(Buffer.from(await Deno.readFile(p))); break; }
+  catch (err) { errors.push(`${p}: ${String(err).slice(0, 120)}`); }
 }
+if (!reader) console.error("geo: no database", errors.join(" | "));
 
 Deno.serve((req) => {
   { const o = req.headers.get("origin") ?? ""; CORS["Access-Control-Allow-Origin"] = ORIGINS.includes(o) ? o : ORIGINS[0]; }
@@ -29,8 +32,9 @@ Deno.serve((req) => {
   const ip = (req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "").split(",")[0].trim();
   let c: string | null = null;
   try { const r = ip ? reader?.get(ip) : null; c = r?.country?.iso_code || r?.country_code || null; } catch { c = null; }
-  // db: false means server/geo.sh has not put the database next to this file yet
-  return new Response(JSON.stringify({ c, db: Boolean(reader) }), {
+  // ?debug: what the function sees (the caller's own address only), to check the server setup
+  const body = new URL(req.url).searchParams.has("debug") ? { c, ip, db: Boolean(reader), errors, cwd: Deno.cwd(), url: import.meta.url } : { c };
+  return new Response(JSON.stringify(body), {
     headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "private, no-store" },
   });
 });
