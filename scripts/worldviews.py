@@ -35,9 +35,14 @@ def cut(host, geom, key, ru):
 
 # Ukraine: Russia's claim is the full Donetsk, Luhansk, Zaporizhzhia, Kherson regions + Crimea and Sevastopol.
 ua = {f['properties']['id']: shape(f['geometry']).buffer(0) for f in topo2geo(R + 'site/data/admin1.json', ['UA', 'XU'])['features']}
-free_claim = unary_union([ua['UKR-327'], ua['UKR-4827'], ua['UKR-331']]).buffer(0.003)
+# the whole claimed area, occupied parts included: the de facto Ukraine has slivers along the occupied regions' edges, and they must go with the claim
+free_claim = unary_union([ua[i] for i in ua if i.split('-')[1] in ('327', '4827', '331', '329', '283', '5482')]).buffer(0.01)
 cut('UA', free_claim, '~UA-claim', 'Подконтрольная Украине часть Донецкой, Запорожской и Херсонской областей')
 cut('XU', ua['UKR-328-XU'].buffer(0.003), '~UA-kharkiv', 'Занятая часть Харьковской области')
+# Russian islets off Crimea (Tuzla in the Kerch Strait) belong with Crimea
+ri, xi = idx('RU'), idx('XU'); crimea = ua['RUS-283'].buffer(0.1)
+isl = [q for q in G[ri].geoms if q.area < 0.02 and crimea.contains(q.representative_point())]
+if isl: G[ri] = unary_union([q for q in G[ri].geoms if q not in isl]); G[xi] = unary_union([G[xi], *isl]); print('islets to Crimea', len(isl))
 
 # Natural Earth disputed areas that some country assigns to a different country
 ne = json.load(open(R + 'data/ne_10m_admin_0_countries.geojson'))['features']
@@ -92,6 +97,32 @@ for v in VIEWER.values():
 views['RU'].update({'XU': 'RU', '~UA-claim': 'RU', '~UA-kharkiv': 'UA', 'XA': 'XA', 'XO': 'XO'})   # Russia recognizes Abkhazia and South Ossetia
 views['BY'] = {**{k: v for k, v in views['RU'].items() if k not in ('XU', '~UA-claim', '~UA-kharkiv')}, 'XA': 'GE', 'XO': 'GE'}
 for v in ('RS',): views[v] = {**INTL, 'XK': 'RS'}
+# Slivers: the source map has small bits of one country lying along another's border (Russian bits in Crimea,
+# Ukrainian bits along the occupied areas). Under the fill of the neighbour they were invisible; once areas merge they show.
+# A small part whose outline mostly runs along one neighbour joins that neighbour; real islands along a coast stay.
+from shapely.strtree import STRtree
+units = [(('f', i), G[i]) for i in G if not G[i].is_empty and not base[i]['properties'].get('small')] + [(('p', n), pieces[n][1]) for n in range(len(pieces))]
+tree = STRtree([g for _, g in units])
+moved = 0
+for ui, (uid, g) in enumerate(units):
+    parts = list(getattr(g, 'geoms', [g]))
+    if len(parts) < 2: continue
+    keep = []
+    for q in parts:
+        if q.area > 0.02 or q.area == max(x.area for x in parts): keep.append(q); continue
+        ring = q.exterior; best, bl = None, 0
+        for j in tree.query(q.buffer(0.003)):
+            if j == ui: continue
+            l = ring.intersection(units[j][1].buffer(0.003)).length
+            if l > bl: best, bl = j, l
+        if best is not None and bl > 0.5 * ring.length:
+            units[best] = (units[best][0], unary_union([units[best][1], q.buffer(0.0005)]).buffer(0)); moved += 1
+        else: keep.append(q)
+    units[ui] = (uid, unary_union(keep))
+for (kind, n), g in units:
+    if kind == 'f': G[n] = g
+    else: pieces[n] = (pieces[n][0], g, pieces[n][2], pieces[n][3])
+print('slivers moved', moved)
 # write the map. d3 draws on a sphere and reads a counter-clockwise ring as "everything except this", so every outer ring goes clockwise
 def cw(g): return MultiPolygon([orient(q, -1.0) for q in getattr(g, 'geoms', [g]) if q.geom_type == 'Polygon']) if g.geom_type == 'MultiPolygon' else orient(g, -1.0)
 G = {i: (cw(g) if not g.is_empty else g) for i, g in G.items()}
@@ -107,7 +138,18 @@ json.dump({'type': 'FeatureCollection', 'features': feats}, open('/tmp/wv.geojso
 # otherwise a merged country keeps a hairline where the piece was
 subprocess.run([BUILD + 'node_modules/.bin/mapshaper', '-i', '/tmp/wv.geojson', 'snap', 'snap-interval=0.002', '-clean', 'gap-fill-area=20km2', 'allow-overlaps',
                 '-rename-layers', 'c10b', '-o', R + 'site/data/countries.json', 'format=topojson', 'quantization=1000000', 'force'], check=True)
-json.dump({'intl': INTL, 'views': views, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
+# Ukrainian names for cities in the occupied areas (Natural Earth NAME_UK): shown when the city is in Ukraine in this view
+import math
+places = json.load(open(R + 'data/ne_10m_populated_places.geojson'))['features']
+cityUk = {}
+for c in json.load(open(R + 'site/data/cities.json')):
+    if c[4] != 'XU': continue
+    q = min(places, key=lambda f: math.hypot(f['properties']['LATITUDE'] - c[2], f['properties']['LONGITUDE'] - c[3]))['properties']
+    if math.hypot(q['LATITUDE'] - c[2], q['LONGITUDE'] - c[3]) < 0.1 and q.get('NAME_UK'): cityUk[c[1]] = q['NAME_UK']
+# region names as the owner calls them, by region id without the "-XU" suffix
+regionNames = {'RU': {'UKR-327': 'Донецкая Народная Республика', 'UKR-329': 'Луганская Народная Республика',
+                      'RUS-283': 'Республика Крым', 'RUS-5482': 'Севастополь'}}
+json.dump({'intl': INTL, 'views': views, 'cityUk': cityUk, 'regionNames': regionNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
           open(R + 'site/data/worldviews.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print('pieces', [(k, h, round(g.area * KM2)) for k, g, h, _ in pieces])
 print('views', len(views), 'RU', views['RU'])

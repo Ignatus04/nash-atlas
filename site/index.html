@@ -3358,7 +3358,11 @@ function hfApplyMap(){
 function bindFinder(){
   const q=$("#cfq"); if(!q) return;
   // names of regions and airports load only when someone starts searching
-  const lazy=()=>{if(!S.admNames&&!S._anL){S._anL=1;getData("admnames").then(a=>{S.admNames=a;if(S.hf.q)renderDrop()}).catch(()=>{})}
+  const lazy=()=>{if(!S.admNames&&!S._anL){S._anL=1;getData("admnames").then(a=>{
+    // regions in this view: owner and name as the owner has them; the two halves of a region split by the front are one entry
+    if(S.contested?.length){const rn=S.wv?.regionNames?.[S.view?.id]||{},seen=new Set();
+      a=a.map(x=>{const k=viewK(x[3],x[5],x[4]),id=String(x[0]).replace(/-XU$/,"");return [x[0],rn[id]||x[1],x[2],k,x[4],x[5]]}).filter(x=>{const key=x[3]+"|"+String(x[0]).replace(/-XU$/,"");if(seen.has(key))return false;seen.add(key);return true})}
+    S.admNames=a;if(S.hf.q)renderDrop()}).catch(()=>{})}
     if(!S.airports&&!S._apL){S._apL=1;getData("airports").then(a=>{S.airports=a;if(S.hf.q)renderDrop()}).catch(()=>{})}};
   q.oninput=()=>{lazy();S.hf.q=q.value;hfSel=0;renderDrop()};
   q.onfocus=()=>{lazy();if(S.hf.q.trim())renderDrop()};
@@ -4008,8 +4012,8 @@ function ensureAdm(){
     const groups=new Map();
     for(const o of Object.values(t.objects))for(const g of o.geometries){const c=d3.geoCentroid(topojson.feature(t,g)),k=viewK(g.properties.k,c[0],c[1]);
       const key=k+"|"+String(g.properties.id).replace(/-XU$/,"");(groups.get(key)||groups.set(key,[]).get(key)).push({g,k})}
-    S.adm=[];
-    for(const gs of groups.values()){const main=gs.find(x=>!/-XU$/.test(x.g.properties.id))||gs[0],props={...main.g.properties,k:main.k};
+    S.adm=[];const rn=S.wv?.regionNames?.[S.view?.id]||{};
+    for(const gs of groups.values()){const main=gs.find(x=>!/-XU$/.test(x.g.properties.id))||gs[0],props={...main.g.properties,k:main.k},nm=rn[String(props.id).replace(/-XU$/,"")];if(nm)props.ru=nm;
       S.adm.push(gs.length>1?{type:"Feature",properties:props,geometry:topojson.merge(t,gs.map(x=>x.g))}:{...topojson.feature(t,main.g),properties:props})}
   }).catch(()=>{});
   return admPromise;
@@ -4033,7 +4037,7 @@ function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZon
 function applyWorldview(ct,wv,cc){
   const o=ct.objects[Object.keys(ct.objects)[0]];
   const map=(wv&&(wv.views[cc]||(cc?wv.intl:wv.intl)))||{};
-  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};
+  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};S.wv=wv;
   const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
   // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
   const contested=new Set([...Object.keys(wv?.intl||{}),...Object.values(wv?.views||{}).flatMap(Object.keys)]);
@@ -4080,7 +4084,8 @@ async function boot(){
   for(const a of AREAS) S.areaGeo.set(a.id,topojson.merge(ct,geoms.filter(g=>areaOf(g.properties.k)===a.id)));
   S.baseLists=lists||[]; applySeed(S.baseLists,true);
   rebuildPlaces();
-  if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k}}
+  // a city that changes country in this view: its local name is the new owner's (Ukrainian names for Ukraine, none for Russian-speaking owners)
+  if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k;c[9]=k==="UA"?(S.wv?.cityUk?.[c[1]]||c[9]||""):""}}
   S.cities=cities; S.citiesByIso=d3.group(cities,c=>c[4]); S.cityIdx=new Map(cities.map(c=>[cityKey(c),c])); S.meta=meta; S.visa=visa;
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){
