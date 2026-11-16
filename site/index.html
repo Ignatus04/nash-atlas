@@ -535,6 +535,7 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .hint{font-size:12.5px;color:var(--muted)}
 .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .entry-part{font-size:14px;font-weight:600;margin:14px 0 8px}
+.lg-ok{display:flex;align-items:flex-start;gap:10px;margin:4px 0 2px;font-size:14px;line-height:1.4;cursor:pointer}.lg-ok input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--accent)}
 .cc-box{position:relative}.cc-box .txt{padding-left:40px}.cc-flag{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex}.cc-flag .fimg{width:20px;height:20px}
 .cc-list{list-style:none;margin:8px 0 0;padding:4px;max-height:min(260px,40vh);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .cc-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;min-height:40px}
@@ -1508,6 +1509,7 @@ async function openCloud(){
   const {data:{session}}=await sb.auth.getSession();
   S.acct.user=session?.user||null;
   homeCountryCheck(S.acct.user);
+  recordConsent(S.acct.user);
   sb.auth.onAuthStateChange((ev,s)=>{const was=S.acct.user?.id||null,now=s?.user?.id||null;if(ev==="SIGNED_OUT"||(ev==="SIGNED_IN"&&was!==now))setTimeout(()=>location.reload(),50)});
   const tok=shareTokenFromUrl();
   if(tok&&S.acct.user){ // joining a shared map
@@ -1633,12 +1635,14 @@ function openLogin(){
   const share=S.acct.share;
   const {el,close}=modal("loginBox",`<div class="lg-step" id="lgS1"><h2 id="lgTitle">Вход</h2>
       <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите. `:""}${oauthList().length?"Пароль не нужен.":"Пришлём на почту код, пароль не нужен."}</p>
+      <label class="lg-ok"><input type="checkbox" id="lgOk" aria-describedby="lgOkMsg"><span>Даю <a href="/consent.html" target="_blank" rel="noopener">согласие на обработку персональных данных</a></span></label>
+      <p class="lg-msg" id="lgOkMsg" aria-live="polite"></p>
       ${oauthList().length?`<div class="lg-oauth">${oauthList().map(p=>p.id==="google"&&CFG.googleClientId?`<div class="lg-gsi" id="lgGsi"><button type="button" class="btn lg-prov" data-prov="google">${p.label}</button></div>`:`<button type="button" class="btn lg-prov" data-prov="${p.id}">${p.label}</button>`).join("")}</div><div class="lg-or"><span>или по почте</span></div>`:""}
       <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
         <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
         <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
         <button class="btn primary lg-go" id="lgGo">Получить код</button></form>
-      <p class="lg-note">Входя, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a> и даёте согласие на обработку персональных данных на условиях <a href="/privacy.html" target="_blank" rel="noopener">Политики</a>.</p></div>
+      <p class="lg-note">Входя, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a>. Как мы храним данные — в <a href="/privacy.html" target="_blank" rel="noopener">Политике</a>.</p></div>
     <div class="lg-step" id="lgS2" hidden><h2>Введите код</h2>
       <p class="lg-lead" id="lgSent"></p>
       <form id="lgCode" novalidate><label class="f" for="lgOtp">Код из письма</label>
@@ -1648,7 +1652,13 @@ function openLogin(){
       <div class="lg-more"><button class="linkbtn" id="lgAgain"></button><button class="linkbtn" id="lgBack">Другая почта</button></div>
       <p class="lg-note">В письме есть и кнопка входа. Она сработает, если открыть письмо в этом же браузере.</p></div>`,{labelledby:"lgTitle"});
   const em=el.querySelector("#lgEmail"), otp=el.querySelector("#lgOtp"), msg1=el.querySelector("#lgEmailMsg"), msg2=el.querySelector("#lgOtpMsg");
+  // consent to personal data processing is a separate tick (152-FZ art. 9 since 1 Sept 2025); remembered for the account after sign-in
+  const ok=el.querySelector("#lgOk"), okMsg=el.querySelector("#lgOkMsg");
+  const consented=()=>{if(ok.checked){okMsg.textContent="";okMsg.classList.remove("err");ok.removeAttribute("aria-invalid");try{sessionStorage.setItem("atlas-consent",JSON.stringify({v:CONSENT_VER,at:new Date().toISOString()}))}catch(e){}return true}
+    okMsg.textContent="Отметьте согласие на обработку персональных данных: без него войти нельзя.";okMsg.classList.add("err");ok.setAttribute("aria-invalid","true");ok.focus();return false};
+  ok.addEventListener("change",()=>{if(ok.checked)consented()});
   el.querySelectorAll("[data-prov]").forEach(b=>b.onclick=async()=>{
+    if(!consented()) return;
     b.disabled=true; const label=b.textContent; b.textContent="Открываем…";
     const redirectTo=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
     const {error}=await sb.auth.signInWithOAuth({provider:b.dataset.prov,options:{redirectTo}});
@@ -1662,6 +1672,7 @@ function openLogin(){
   const send=async()=>{
     const v=em.value.trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){setMsg(msg1,"Проверьте почту: в адресе нужны @ и домен, например you@example.com.");em.focus();return false}
+    if(!consented()) return false;
     setMsg(msg1,""); busy=true; const b=el.querySelector("#lgGo"); b.disabled=true; b.textContent="Отправляем…";
     const redirect=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
     if(CFG.captchaKey){const c=await captchaPass(v);if(c!==true){b.disabled=false;b.textContent="Получить код";busy=false;setMsg(msg1,c);return false}}
@@ -4098,6 +4109,11 @@ async function geoCountry(){
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
     const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal,cache:"no-store"});clearTimeout(t);
     return (r.ok?(await r.json()).c:null)||tzCountry()}catch(e){return tzCountry()}}
+// the tick from the sign-in form, kept with the account: which version of the consent and when
+const CONSENT_VER="2026-11-16";
+async function recordConsent(u){if(!u)return;let c=null;try{c=JSON.parse(sessionStorage.getItem("atlas-consent")||"null")}catch(e){}
+  if(!c||u.user_metadata?.consent_v===c.v)return;
+  const {data,error}=await sb.auth.updateUser({data:{consent_v:c.v,consent_at:c.at}});if(!error){if(data?.user)S.acct.user=data.user;try{sessionStorage.removeItem("atlas-consent")}catch(e){}}}
 function ccName(k){return k?(S.meta?.[k]?.ru||S.ccNames?.get(k)||""):""}
 function homeSaved(){try{const h=JSON.parse(localStorage.getItem("atlas-home")||"null");return h&&h.c?h:null}catch(e){return null}}
 function homeSet(h){try{h?localStorage.setItem("atlas-home",JSON.stringify(h)):localStorage.removeItem("atlas-home")}catch(e){}}
