@@ -691,6 +691,30 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+/* scene «Несколько карт»: the map switcher in «Мои места» opens the list, a new map is added, another map is opened */
+.ga-mp{display:flex;justify-content:center}
+.ga-mp-p{position:relative;width:min(250px,86%);margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.ga-mp-sw{position:relative;height:32px;border-radius:10px;background:var(--panel-2);border:1px solid #2c4062;display:flex;align-items:center;gap:7px;padding:0 10px;font:600 12px var(--body);overflow:hidden}
+.ga-mp-sw small{color:var(--muted);font-size:11px}
+.ga-mp-nm{position:relative;flex:1;height:16px}
+.ga-mp-nm b{position:absolute;left:0;top:0;white-space:nowrap;font-weight:800;transition:opacity .25s ease,transform .5s var(--spring-soft)}
+.ga-mp-nm b+b{opacity:0;transform:translateY(12px)}
+.ga-mp.sw2 .ga-mp-nm b:first-child{opacity:0;transform:translateY(-12px)}.ga-mp.sw2 .ga-mp-nm b+b{opacity:1;transform:none}
+.ga-mp-sw i{color:var(--muted);font-style:normal}
+.ga-mp-r{height:26px;border-radius:9px;background:#16263f;display:flex;align-items:center;gap:8px;padding:0 9px;transition:opacity .3s ease,transform .5s var(--spring-soft)}
+.ga-mp-r i{width:10px;height:10px;border-radius:50%;background:var(--pin-want);flex:none}.ga-mp-r b{height:6px;border-radius:3px;background:#3a4f70;width:var(--w)}
+.ga-mp-r:nth-child(even) i{background:var(--pin-been)}
+.ga-mp.sw2 .ga-mp-r{animation:gaMpRow .6s var(--spring-soft) both}
+.ga-mp.sw2 .ga-mp-r:nth-of-type(2){animation-delay:.08s}.ga-mp.sw2 .ga-mp-r:nth-of-type(3){animation-delay:.16s}
+@keyframes gaMpRow{from{opacity:0;transform:translateY(10px)}}
+.ga-mp-s{position:absolute;left:50%;bottom:0;width:min(270px,92%);margin-left:max(-135px,-46%);padding:7px 7px 8px;border-radius:14px 14px 0 0;background:rgba(22,38,63,.98);border:1px solid #2c4062;border-bottom:0;box-shadow:0 -8px 24px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:3px;transform:translateY(105%);transition:transform .5s var(--spring)}
+.ga-mp.open .ga-mp-s{transform:none}
+.ga-mp-o{height:22px;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 8px;font:600 11.5px var(--body);color:#d3dbe8;transition:background-color .25s ease}
+.ga-mp-o small{margin-left:auto;color:var(--muted);font-size:10.5px}
+.ga-mp-o.on{background:#24385a}
+.ga-mp-o.nw{opacity:0;transform:translateX(-10px);transition:opacity .25s ease,transform .45s var(--spring-soft),background-color .25s ease}
+.ga-mp.added .ga-mp-o.nw{opacity:1;transform:none}
+.ga-mp-a{height:22px;border-radius:7px;display:flex;align-items:center;gap:6px;padding:0 8px;font:700 11.5px var(--body);color:var(--accent)}
 .ga-bn{display:flex;align-items:center;justify-content:center;gap:14px}
 .ga-bn span{opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards}
 .ga-b1,.ga-b2{font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px;color:#10151f}
@@ -2593,6 +2617,27 @@ function gaTapScene(root,vb,list,withCard){
   };
   gaLater(step,250);
 }
+// scene: open «Мои места», tap the map name, add a new map, then open another one
+function gaMapsScene(root){
+  const g=root.querySelector(".ga-mp"); if(!g) return;
+  const tap=g.querySelector(".ga-finger"), W=root.clientWidth, H=root.clientHeight;
+  const at=sel=>{const e=g.querySelector(sel),r=e.getBoundingClientRect(),o=root.getBoundingClientRect();return [r.left-o.left+Math.min(r.width*.35,70),r.top-o.top+r.height/2]};
+  const go=([x,y])=>{tap.style.transform=`translate(${x}px,${y}px)`};
+  const press=()=>{tap.classList.remove("press");void tap.offsetWidth;tap.classList.add("press")};
+  const cycle=()=>{
+    g.classList.remove("open","added","sw2");g.querySelectorAll(".ga-mp-o").forEach((o,i)=>o.classList.toggle("on",i===0));
+    tap.style.transition="none";go([W/2,H+30]);void tap.offsetWidth;tap.style.transition="";
+    gaLater(()=>go(at(".ga-mp-sw")),250);
+    gaLater(()=>{press();g.classList.add("open")},1000);
+    gaLater(()=>go(at(".ga-mp-a")),1900);
+    gaLater(()=>{press();g.classList.add("added")},2650);
+    gaLater(()=>go(at(".ga-mp-o.two")),3500);
+    gaLater(()=>{press();g.querySelectorAll(".ga-mp-o").forEach(o=>o.classList.toggle("on",o.classList.contains("two")))},4250);
+    gaLater(()=>{g.classList.remove("open");g.classList.add("sw2");go([W*.82,H+30])},4900);
+    gaLater(cycle,7600);
+  };
+  cycle();
+}
 // scene: the layer switch flips and the same map repaints by safety
 function gaSafeScene(root){
   const seg=root.querySelector(".ga-seg2"), pill=seg?.querySelector(".lq"), btns=seg?.querySelectorAll("span:not(.lq)"), top=root.querySelector(".ga-map.ga-top");
@@ -2648,7 +2693,13 @@ const GUIDE=[
     art:()=>`<div class="ga ga-sh"><div class="ga-story"><b>Хочу побывать</b><em>23</em><i></i><span>nash-atlas.ru</span></div><div class="ga-fans">${["И","М","А"].map((x,i)=>`<span class="av" style="--i:${i}">${x}</span>`).join("")}<b>Я тоже хочу</b></div></div>`},
   {since:13, t:"Несколько карт",
     m:"Места можно разложить по разным картам, например «Мой атлас» и «Отпуск вдвоём». Откройте «Мои места» и нажмите на название карты наверху: там все ваши карты и кнопка «Новая карта». Когда добавляете место, выберите, в какую карту его положить. Переименовать открытую карту можно в меню аккаунта. Общая карта, в которую вас позвали, появится в том же списке, а ваша останется на месте.",
-    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Мой атлас</span><span class="ga-ar">⇄</span><span class="ga-b2" style="background:#ffd166">Отпуск вдвоём</span></div>`},
+    art:()=>`<div class="ga ga-mp"><div class="ga-mp-p">
+      <div class="ga-mp-sw"><small>Карта</small><span class="ga-mp-nm"><b>Мой атлас</b><b>Отпуск вдвоём</b></span><i>▾</i></div>
+      <div class="ga-mp-r"><i></i><b style="--w:62%"></b></div><div class="ga-mp-r"><i></i><b style="--w:45%"></b></div><div class="ga-mp-r"><i></i><b style="--w:70%"></b></div></div>
+      <div class="ga-mp-s"><div class="ga-mp-o on">${ic("map",14)}Мой атлас<small>ваша</small></div><div class="ga-mp-o two">${ic("user",14)}Отпуск вдвоём<small>общая</small></div>
+        <div class="ga-mp-o nw">${ic("map",14)}Новая карта<small>ваша</small></div><div class="ga-mp-a">${ic("plus",14)}Новая карта</div></div>
+      ${gaPointer()}</div>`,
+    run:r=>gaMapsScene(r)},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
