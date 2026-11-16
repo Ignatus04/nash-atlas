@@ -4164,7 +4164,9 @@ function applyWorldview(ct,wv,cc){
   // safety never follows the drawn border: every area that joins another country here keeps its own safety rating
   // (de facto holder: a piece's host, otherwise the territory itself); drawn over the owner and listed in its card
   const pn={...(wv?.partNames?.all||{}),...(wv?.partNames?.[S.view.id]||{})};
-  S.safeParts=o.geometries.filter(g=>!g.properties.small&&own(g)!==(g.properties.k[0]==="~"?g.properties.host:g.properties.k)).map(g=>{
+  // («small» marks tiny countries such as Northern Cyprus or Kosovo: still real areas; a key drawn twice is kept once)
+  const seenP=new Set();
+  S.safeParts=o.geometries.filter(g=>own(g)!==(g.properties.k[0]==="~"?g.properties.host:g.properties.k)&&!seenP.has(g.properties.k)&&seenP.add(g.properties.k)).map(g=>{
     const k=g.properties.k,dk=k[0]==="~"?g.properties.host:k,f=topojson.feature(ct,g);
     return {k,dk,ow:own(g),f,b:d3.geoBounds(f),name:pn[k]||g.properties.ru||k}});
   const groups=new Map();

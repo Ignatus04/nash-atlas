@@ -195,7 +195,8 @@ for c in json.load(open(R + 'site/data/cities.json')):
     if math.hypot(q['LATITUDE'] - c[2], q['LONGITUDE'] - c[3]) < 0.1 and q.get('NAME_UK'): cityUk[c[1]] = q['NAME_UK']
 # region names as the owner calls them, by region id without the "-XU" suffix
 # names of areas that belong to another country in a view, for the safety notes in that country's card
-partNames = {'all': {'XK': 'Косово', 'TW': 'Тайвань', 'XU': 'Территории Украины под контролем России'},
+partNames = {'all': {'XK': 'Косово', 'TW': 'Тайвань', 'XU': 'Территории Украины под контролем России', 'XN': 'Северный Кипр',
+                     'XA': 'Абхазия', 'XO': 'Южная Осетия', 'XT': 'Приднестровье', 'XS': 'Сомалиленд', 'EH': 'Западная Сахара'},
              'RU': {'XU': 'Республика Крым, Севастополь, ДНР, ЛНР, Запорожская и Херсонская области',
                     '~UA-claim': 'Часть ДНР, Запорожской и Херсонской областей вне контроля российских властей'}}
 regionNames = {'RU': {'UKR-327': 'Донецкая Народная Республика', 'UKR-329': 'Луганская Народная Республика',
