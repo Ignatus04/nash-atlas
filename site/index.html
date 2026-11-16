@@ -1372,6 +1372,7 @@ function rebuildPlaces(){
   for(const [id,p] of S.seed){const o=S.dbPlaces.get(id);if(o&&o.deleted)continue;if(S.areaIds?.[id]&&!o)continue;/* a saved city or region itself: its places are what matters */m.set(id,o?{...p,...o,id,seed:true}:p)}
   for(const [id,p] of S.dbPlaces){if(!S.seed.has(id)&&!p.deleted)m.set(id,p)}
   for(const [id,p] of m) if(p.status&&!PIN[p.status]) m.set(id,{...p,status:""});
+  if(S.contested?.length) for(const [id,p] of m){const k=viewK(p.k,+p.lng,+p.lat);if(k&&k!==p.k)m.set(id,{...m.get(id),k})}
   S.places=m;
 }
 // RU and BY: our own checked rules (with notes); any other passport: Passport Index matrix
@@ -3057,7 +3058,7 @@ function showAdmin(k){
 function markAdm(){gAdm.selectAll("path.adm1").classed("sel",d=>S.sel.type==="region"&&S.sel.id===d.properties.id)}
 
 /* ---------- data lookups ---------- */
-function cityKey(c){return c[4]+"|"+c[1]}
+function cityKey(c){return (c.k0||c[4])+"|"+c[1]}  // k0: the de facto country the city was filed under; keeps saved keys stable across border views
 function cityByKey(key){return S.cityIdx.get(key)}
 function countryOf(lat,lng){const f=S.countries.find(f=>d3.geoContains(f,[lng,lat]));return f?f.properties.k:null}
 function capitalRu(k){const c=S.cities.find(c=>c[4]===k&&c[8]);return c?c[0]:(S.meta[k]?.cap||[])[0]||""}
@@ -3397,7 +3398,7 @@ function renderCountry(k){
     ${adSlotHTML("country")}
     ${k==="XK"||k==="RS"?`<section class="blk"><div class="warn-box"><span class="wi">!</span><div><b>Важно для маршрута: Косово → Сербия</b><p>${esc(WARN[0].text)}</p></div></div></section>`:""}
     ${m.status?`<section class="blk"><h2>Статус территории</h2><p class="status-note">${esc(m.status)}</p></section>`:""}
-    ${m.disputes?`<section class="blk"><h2>Спорные территории</h2><p class="status-note">${esc(m.disputes)}</p></section>`:""}
+    ${(()=>{const t=S.viewChanged?.has(k)?viewNote():m.disputes;return t?`<section class="blk"><h2>Спорные территории</h2><p class="status-note">${esc(t)}</p></section>`:""})()}
     ${factsBlock(k)}
     ${notesBlock("country",k,f.properties.ru)}
     ${placesBlock(pl)}
@@ -4001,12 +4002,73 @@ function renderFilter(){
 let admPromise=null;
 function ensureAdm(){
   if(S.adm) return Promise.resolve();
-  if(!admPromise) admPromise=getData("admin1").then(t=>{S.admTopo=t;S.adm=Object.values(t.objects).flatMap(o=>topojson.feature(t,o).features)}).catch(()=>{});
+  if(!admPromise) admPromise=getData("admin1").then(t=>{S.admTopo=t;
+    if(!S.contested?.length){S.adm=Object.values(t.objects).flatMap(o=>topojson.feature(t,o).features);return}
+    // a region split by the front line ("…-XU" is the occupied part) is one region again once both parts have one owner
+    const groups=new Map();
+    for(const o of Object.values(t.objects))for(const g of o.geometries){const c=d3.geoCentroid(topojson.feature(t,g)),k=viewK(g.properties.k,c[0],c[1]);
+      const key=k+"|"+String(g.properties.id).replace(/-XU$/,"");(groups.get(key)||groups.set(key,[]).get(key)).push({g,k})}
+    S.adm=[];
+    for(const gs of groups.values()){const main=gs.find(x=>!/-XU$/.test(x.g.properties.id))||gs[0],props={...main.g.properties,k:main.k};
+      S.adm.push(gs.length>1?{type:"Feature",properties:props,geometry:topojson.merge(t,gs.map(x=>x.g))}:{...topojson.feature(t,main.g),properties:props})}
+  }).catch(()=>{});
   return admPromise;
 }
+// ---- borders as the visitor's country sees them ----
+// countries.json has disputed areas cut out as pieces ("~…", with the de facto holder in .host); worldviews.json says,
+// for each viewer country, which pieces and breakaway territories belong to which state. We merge them at load, so the
+// rest of the site only ever sees ordinary countries. The country comes from our own server (function geo, DB-IP Lite);
+// if it cannot be found, the international (UN) view is used. Belarus sees the de facto map (Ukraine's de facto line).
+async function viewerCountry(){
+  if(!CFG.supabaseUrl) return "RU";   // offline copy without our server
+  try{const q=new URLSearchParams(location.search).get("view");if(q)return q.toUpperCase()}catch(e){}
+  try{const c=sessionStorage.getItem("atlas-cc");if(c)return c==="-"?tzCountry():c}catch(e){}
+  try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
+    const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal});clearTimeout(t);
+    const c=r.ok?(await r.json()).c:null;try{sessionStorage.setItem("atlas-cc",c||"-")}catch(e){}return c||tzCountry()}catch(e){return tzCountry()}}
+// the server did not answer: a Russian or Belarusian time zone is a good enough sign of where the visitor is
+function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+  if(z==="Europe/Minsk")return "BY";
+  if(/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/.test(z))return "RU"}catch(e){}return null}
+function applyWorldview(ct,wv,cc){
+  const o=ct.objects[Object.keys(ct.objects)[0]];
+  const map=(wv&&(wv.views[cc]||(cc?wv.intl:wv.intl)))||{};
+  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};
+  const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
+  // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
+  const contested=new Set([...Object.keys(wv?.intl||{}),...Object.values(wv?.views||{}).flatMap(Object.keys)]);
+  S.contested=o.geometries.filter(g=>contested.has(g.properties.k)&&!g.properties.small).map(g=>{const f=topojson.feature(ct,g);return {f,b:d3.geoBounds(f),ow:own(g)}});
+  // countries whose shape differs from the de facto map: their written dispute note describes the de facto map, so it gives way to a note about the view
+  S.viewChanged=new Set();for(const g of o.geometries){const k=g.properties.k,d=k[0]==="~"?g.properties.host:k,ow=own(g);if(ow!==d){S.viewChanged.add(ow);S.viewChanged.add(d)}}
+  const groups=new Map();
+  for(const g of o.geometries){const ow=own(g);if(!groups.has(ow))groups.set(ow,[]);groups.get(ow).push(g)}
+  const out=[];S.absorbed=new Map();
+  for(const [ow,gs] of groups){
+    const main=gs.find(g=>g.properties.k===ow&&!g.properties.small)||gs.find(g=>g.properties.k===ow);
+    if(!main){out.push(...gs);continue}           // owner not on the map: keep pieces with their holders
+    const join=gs.filter(g=>g!==main&&!(g.properties.k===ow&&g.properties.small));
+    gs.filter(g=>g!==main&&g.properties.k===ow&&g.properties.small).forEach(g=>out.push(g));
+    for(const g of join) S.absorbed.set(g.properties.k,ow);
+    if(!join.length){out.push(main);continue}
+    const m=topojson.mergeArcs(ct,[main,...join]);m.properties=main.properties;if(main.id!=null)m.id=main.id;
+    // the two sources draw a shared border slightly differently; the tiny gaps left between them would show as holes
+    const tiny=r=>4*Math.PI-d3.geoArea(topojson.feature(ct,{type:"Polygon",arcs:[r]}))<2e-6;
+    m.arcs=m.arcs.map(poly=>[poly[0],...poly.slice(1).filter(r=>!tiny(r))]);out.push(m);
+  }
+  o.geometries=out;
+}
+function viewNote(){const v=S.view;
+  if(v?.id&&v.id!=="intl"){const n=S.cByK?.get(v.id)?.properties.ru||S.meta?.[v.id]?.ru;if(n)return `Границы этой страны показаны по официальной позиции страны, из которой вы открыли карту (${n}). В других странах карта может выглядеть иначе.`}
+  return "Границы этой страны показаны по позиции ООН. В отдельных странах карта может выглядеть иначе."}
+// a place or city stored under a de facto holder → the country it belongs to in this view
+function viewK(k,lng,lat){
+  if(lng!=null&&S.contested)for(const a of S.contested){const b=a.b;if(lat>=b[0][1]&&lat<=b[1][1]&&(b[0][0]<=b[1][0]?lng>=b[0][0]&&lng<=b[1][0]:lng>=b[0][0]||lng<=b[1][0])&&d3.geoContains(a.f,[lng,lat]))return a.ow}
+  return S.absorbed?.get(k)||k}
 async function boot(){
   size(); consentApply(); setTimeout(consentBar,1200);
+  const ccP=viewerCountry(), wvP=getData("worldviews").catch(()=>null);
   const [ct,cities,meta,visa,lists,va,ap]=await Promise.all(["countries","cities","meta","visa","lists","visa_all","areaplaces"].map(n=>n==="lists"?(window.ATLAS_VER?Promise.resolve([]):getData(n).catch(()=>[])):getData(n))); // the website keeps personal lists in the account
+  applyWorldview(ct,await wvP,await ccP);
   S.areaIds=ap||{};
   S.vm={p:va.p,d:va.d,idx:new Map(va.dest.map((k,i)=>[k,i]))};
   S.countries=topojson.feature(ct,ct.objects[Object.keys(ct.objects)[0]]).features;
@@ -4018,6 +4080,7 @@ async function boot(){
   for(const a of AREAS) S.areaGeo.set(a.id,topojson.merge(ct,geoms.filter(g=>areaOf(g.properties.k)===a.id)));
   S.baseLists=lists||[]; applySeed(S.baseLists,true);
   rebuildPlaces();
+  if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k}}
   S.cities=cities; S.citiesByIso=d3.group(cities,c=>c[4]); S.cityIdx=new Map(cities.map(c=>[cityKey(c),c])); S.meta=meta; S.visa=visa;
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){

@@ -91,7 +91,7 @@ json.dump({"name":"Наш атлас","short_name":"Атлас","description":"�
   open(OUT+'manifest.webmanifest','w',encoding='utf-8'),ensure_ascii=False,indent=1)
 
 core=['./','index.html',f'app.js?v={ver}',f'app.css?v={ver}','manifest.webmanifest']+['vendor/'+n for _,n in libs.values()]+\
-     [f'data/{n}.json?v={ver}' for n in ['countries','cities','meta','visa','visa_all','areaplaces','flags','safety','safezones','urban']]+['vendor/supabase.js']+\
+     [f'data/{n}.json?v={ver}' for n in ['countries','worldviews','cities','meta','visa','visa_all','areaplaces','flags','safety','safezones','urban']]+['vendor/supabase.js']+\
      ['fonts/'+f for f in sorted(os.listdir(OUT+'fonts'))]+['icons/icon-192.png','icons/icon.svg']
 sw=open(SRC+'sw.js',encoding='utf-8').read().replace('__VER__',ver).replace('__CORE__',json.dumps(core))
 open(OUT+'sw.js','w',encoding='utf-8').write(sw)
