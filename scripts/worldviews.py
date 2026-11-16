@@ -85,18 +85,53 @@ for f in da:
         if not cut(hk, g, key, RU_NAMES[name]): continue
     owner.setdefault(key, {}).update({v: k for v, k in o.items()})
 
-# viewers: Natural Earth's 31, plus our own rules
-# the international view (UN positions): occupied or breakaway areas go back to the recognized state
-INTL = {'XU': 'UA', '~UA-kharkiv': 'UA', 'XA': 'GE', 'XO': 'GE', 'XT': 'MD', 'XN': 'CY', 'XS': 'SO', '~Golan Heights': 'SY', '~W. Sahara': 'EH'}
+# ---- who sees what ----
+# 1. The UN view: the default, and the base of every country's view. Occupied and breakaway areas belong to the recognized
+#    state; Kosovo inside Serbia (UN SC resolution 1244); Taiwan inside China (UN GA resolution 2758);
+#    Western Sahara a separate non-self-governing territory; Kashmir along the line of control.
+INTL = {'XU': 'UA', '~UA-claim': 'UA', '~UA-kharkiv': 'UA', 'XA': 'GE', 'XO': 'GE', 'XT': 'MD', 'XN': 'CY', 'XS': 'SO',
+        '~Golan Heights': 'SY', '~W. Sahara': 'EH', 'EH': 'EH', 'XK': 'RS', 'TW': 'CN'}
+# 2. Official positions, dispute by dispute (scripts/src/positions.md lists the sources). A country listed here sees the
+#    area this way; everyone else keeps the UN view for it.
+POS = {
+  # recognize Crimea, Sevastopol and the Donetsk, Luhansk, Zaporizhzhia, Kherson regions as Russia
+  'ukraine': {'who': ['RU', 'KP', 'NI'], 'map': {'XU': 'RU', '~UA-claim': 'RU', '~UA-kharkiv': 'UA'}},
+  # recognize Abkhazia and South Ossetia (Nauru withdrew in July 2026)
+  'abkhazia': {'who': ['RU', 'NI', 'VE', 'SY'], 'map': {'XA': 'XA', 'XO': 'XO'}},
+  # recognize Kosovo (UN members; withdrawals reported by Serbia excluded)
+  'kosovo': {'who': """AF AL AD AG AU AT BH BD BB BE BZ BJ BN BF CA TD KM CI HR CZ DK DJ DO EG SV EE SZ FJ FI FR GA GM DE GD GN GW GY HT HN HU IS IE IL IT JP JO KE KI KW LV LS LR LY LI LT LU MY MV MW MT MH MR FM MC ME NL NZ NE MK NO OM PK PW PA PE PL PT QA KN LC WS SM SA SN SG SI SO KR CH SE TZ TH TL TO TR TV AE GB US VU YE CO CR SR SD SY""".split(),
+             'map': {'XK': 'XK'}},
+  # recognize the Republic of China (Taiwan)
+  'taiwan': {'who': ['BZ', 'GT', 'HT', 'PY', 'KN', 'LC', 'VC', 'MH', 'PW', 'TV', 'SZ', 'VA'], 'map': {'TW': 'TW'}},
+  # recognize Moroccan sovereignty over Western Sahara (statements or consulates in Laayoune / Dakhla)
+  'sahara': {'who': ['US', 'IL', 'FR', 'CO', 'PY', 'FM', 'PW', 'PG', 'AE', 'BH', 'JO', 'KM', 'GA', 'ST', 'CF', 'CI', 'BI', 'ZM', 'SZ', 'MW', 'TG', 'SN', 'MA'],
+             'map': {'EH': 'MA', '~W. Sahara': 'MA'}},
+  # recognize Israeli sovereignty over the Golan Heights
+  'golan': {'who': ['US', 'IL'], 'map': {'~Golan Heights': 'IL'}},
+  # recognize Somaliland
+  'somaliland': {'who': ['IL'], 'map': {'XS': 'XS'}},
+  # recognize Northern Cyprus
+  'ncyprus': {'who': ['TR'], 'map': {'XN': 'XN'}},
+}
+# 3. Kashmir, the Kurils and the smaller border disputes: Natural Earth's views of 31 countries (its data predate some
+#    recognitions above, so the lists above win). Everyone else sees these areas as Natural Earth's UN column does.
+NE_ONLY = [k for k in owner if k not in ('XK', 'TW', 'EH', '~W. Sahara', 'XA', 'XO', 'XN', 'XS', 'XT', '~Golan Heights')]
+countries = sorted({f['properties']['k'] for f in base if f['properties']['k'] and f['properties']['k'][0] != '~'})
 views = {}
-for v in VIEWER.values():
-    # start from the international view; Natural Earth says where this country differs (codes for "disputed" fall back)
-    m = {**INTL, **{k: o[v] for k, o in owner.items() if v in o}}
-    m.update({'XU': 'UA', '~UA-kharkiv': 'UA'})               # Ukraine's own borders for everyone but Russia
+for v in countries + ['VA']:
+    m = dict(INTL)
+    if v in VIEWER.values():
+        m.update({k: owner[k][v] for k in NE_ONLY if v in owner[k]})
+    for d in POS.values():
+        if v in d['who']: m.update(d['map'])
     views[v] = m
-views['RU'].update({'XU': 'RU', '~UA-claim': 'RU', '~UA-kharkiv': 'UA', 'XA': 'XA', 'XO': 'XO'})   # Russia recognizes Abkhazia and South Ossetia
-views['BY'] = {**{k: v for k, v in views['RU'].items() if k not in ('XU', '~UA-claim', '~UA-kharkiv')}, 'XA': 'GE', 'XO': 'GE'}
-for v in ('RS',): views[v] = {**INTL, 'XK': 'RS'}
+# the disputing sides themselves
+views['RS']['XK'] = 'RS'; views['CN']['TW'] = 'CN'; views['GE'].update({'XA': 'GE', 'XO': 'GE'})
+# Belarus (our rule): the de facto line in Ukraine; otherwise the UN view, which matches its recognitions
+views['BY'] = {**INTL, 'XU': 'XU', '~UA-claim': 'UA', '~UA-kharkiv': 'XU'}
+# store only what differs from the UN view
+HOST = {k: h for k, _, h, _ in pieces}
+views = {v: {k: o for k, o in m.items() if INTL.get(k, HOST.get(k, k)) != o} for v, m in views.items()}
 # Slivers: the source map has small bits of one country lying along another's border (Russian bits in Crimea,
 # Ukrainian bits along the occupied areas). Under the fill of the neighbour they were invisible; once areas merge they show.
 # A small part whose outline mostly runs along one neighbour joins that neighbour; real islands along a coast stay.
@@ -152,4 +187,4 @@ regionNames = {'RU': {'UKR-327': 'Донецкая Народная Респуб
 json.dump({'intl': INTL, 'views': views, 'cityUk': cityUk, 'regionNames': regionNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
           open(R + 'site/data/worldviews.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print('pieces', [(k, h, round(g.area * KM2)) for k, g, h, _ in pieces])
-print('views', len(views), 'RU', views['RU'])
+print('views', len(views), 'RU', views['RU'], 'BY', views['BY'], 'US', views['US'])

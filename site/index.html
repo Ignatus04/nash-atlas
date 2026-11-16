@@ -4036,7 +4036,8 @@ function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZon
   if(/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/.test(z))return "RU"}catch(e){}return null}
 function applyWorldview(ct,wv,cc){
   const o=ct.objects[Object.keys(ct.objects)[0]];
-  const map=(wv&&(wv.views[cc]||(cc?wv.intl:wv.intl)))||{};
+  // the UN view, plus where this country's official position differs from it
+  const map=wv?{...wv.intl,...(wv.views[cc]||{})}:{};
   S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};S.wv=wv;
   const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
   // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
