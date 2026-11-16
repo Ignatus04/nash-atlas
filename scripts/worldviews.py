@@ -104,7 +104,8 @@ POS = {
   # recognize the Republic of China (Taiwan)
   'taiwan': {'who': ['BZ', 'GT', 'HT', 'PY', 'KN', 'LC', 'VC', 'MH', 'PW', 'TV', 'SZ', 'VA'], 'map': {'TW': 'TW'}},
   # recognize Moroccan sovereignty over Western Sahara (statements or consulates in Laayoune / Dakhla)
-  'sahara': {'who': ['US', 'IL', 'FR', 'CO', 'PY', 'FM', 'PW', 'PG', 'AE', 'BH', 'JO', 'KM', 'GA', 'ST', 'CF', 'CI', 'BI', 'ZM', 'SZ', 'MW', 'TG', 'SN', 'MA'],
+  'sahara': {'who': ['US', 'IL', 'FR', 'CO', 'PY', 'FM', 'PW', 'PG', 'AE', 'BH', 'JO', 'KM', 'GA', 'ST', 'CF', 'CI', 'BI', 'ZM', 'SZ', 'MW', 'TG', 'SN', 'MA',
+                     'GM', 'GN', 'DJ', 'LR', 'BF', 'GW', 'GQ', 'HT', 'CD', 'SL', 'CV', 'TD', 'SR'],
              'map': {'EH': 'MA', '~W. Sahara': 'MA'}},
   # recognize Israeli sovereignty over the Golan Heights
   'golan': {'who': ['US', 'IL'], 'map': {'~Golan Heights': 'IL'}},
