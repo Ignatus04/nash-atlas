@@ -13,3 +13,6 @@
 Порядок: `install.sh` → `migrate.sh` → `yandex.sh` → новый `supabaseUrl` и `supabaseKey` в `web-src/config.js`.
 
 Обслуживание на сервере (`cd /opt/atlas/supabase`): `sh run.sh status`, `sh run.sh logs auth`, обновление — `sh update.sh && sh run.sh pull && sh run.sh recreate` (сначала копия базы). Пароли — `sh run.sh secrets`, в чат и в git не передаются.
+
+## Бета-версия сайта
+`beta.sh` поднимает https://beta.nash-atlas.ru: сервер сам собирает ветку `beta` каждые 2 минуты, если в ней что-то изменилось (`/opt/atlas/beta/update.sh`, журнал `/opt/atlas/beta/update.log`). Перед запуском нужна запись A `beta` → IP сервера в reg.ru.

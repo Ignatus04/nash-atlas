@@ -17,8 +17,10 @@ const URL_ = Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL")
 const FROM = "=?UTF-8?B?" + btoa(String.fromCharCode(...new TextEncoder().encode("Наш атлас"))) + "?= <noreply@nash-atlas.ru>";
 const SUBJECT = "Код для входа в «Наш атлас»";
 const CAPTCHA_ON = Boolean(Deno.env.get("SMARTCAPTCHA_SERVER_KEY"));
-const CORS = {
-  "Access-Control-Allow-Origin": "https://nash-atlas.ru",
+// our sites: the main one and the beta at beta.nash-atlas.ru (server/beta.sh)
+const ORIGINS = ["https://nash-atlas.ru", "https://beta.nash-atlas.ru"];
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://nash-atlas.ru",  // set per request: the site or its beta copy
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Vary": "Origin",
@@ -157,6 +159,7 @@ async function hook(req: Request) {
 }
 
 Deno.serve(async (req) => {
+  { const o = req.headers.get("origin") ?? ""; CORS["Access-Control-Allow-Origin"] = ORIGINS.includes(o) ? o : ORIGINS[0]; }
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return json({ error: "method" }, 405, CORS);
   if (new URL(req.url).searchParams.has("captcha")) return captcha(req);

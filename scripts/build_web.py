@@ -8,6 +8,8 @@ B=next(p for p in [ROOT+'node_modules/',ROOT+'build/node_modules/'] if os.path.i
 if os.path.exists(OUT): shutil.rmtree(OUT)
 for d in ['data','vendor','fonts','icons']: os.makedirs(OUT+d)
 html=open(S+'index.html',encoding='utf-8').read()
+# ATLAS_BETA=1: the test copy at beta.nash-atlas.ru (server/beta.sh). Hidden from search engines, marked «бета» on screen.
+BETA=os.environ.get('ATLAS_BETA')=='1'
 
 # libraries: from CDNs to local files
 libs={'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js':('d3/dist/d3.min.js','d3.min.js'),
@@ -34,7 +36,7 @@ assert gf; html=html.replace(gf.group(0),'')
 # styles and the app script out of the page
 st=re.search(r'<style>(.*?)</style>',html,re.S); css='\n'.join(faces)+'\n'+st.group(1)
 m=re.search(r'<script>\n"use strict";(.*?)</script>',html,re.S); js='"use strict";'+m.group(1)
-ver=hashlib.sha1((css+js+open(SRC+'config.js').read()+''.join(open(S+'data/'+f,'rb').read().hex()[:2000] for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
+ver=hashlib.sha1((css+js+open(SRC+'config.js').read()+''.join(hashlib.sha1(open(S+'data/'+f,'rb').read()).hexdigest() for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
 open(OUT+'app.css','w',encoding='utf-8').write(css)
 open(OUT+'app.js','w',encoding='utf-8').write(js)
 html=html.replace(st.group(0),f'<link rel="stylesheet" href="app.css?v={ver}">')
@@ -50,6 +52,11 @@ head='''<meta name="theme-color" content="#13213a">
 <link rel="preload" href="data/countries.json?v=%s" as="fetch" crossorigin>
 ''' % ver
 html=html.replace('<title>Наш атлас</title>','<title>Наш атлас</title>\n'+head)
+if BETA:
+    html=html.replace('<title>Наш атлас</title>','<title>Наш атлас · бета</title>\n<meta name="robots" content="noindex,nofollow">')
+    css+='\n.beta-badge{position:fixed;left:50%;top:2px;transform:translateX(-50%);z-index:9999;pointer-events:none;font:700 10px/1 Manrope,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#13213a;background:#ffb547;border-radius:0 0 6px 6px;padding:3px 8px}'
+    open(OUT+'app.css','w',encoding='utf-8').write(css)
+    html=html.replace('<body>','<body>\n<div class="beta-badge">бета</div>',1)
 # Content-Security-Policy: the browser runs only our own scripts (plus the hashed inline ones and, after consent,
 # Yandex Metrika / ads). A missed escape somewhere then cannot run injected code. New outside hosts go here.
 import hashlib,base64
@@ -75,7 +82,8 @@ for f in sorted(os.listdir(S+'data')):
     out=json.dumps(d,ensure_ascii=False,separators=(',',':'))
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
 
-shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
+if BETA: open(OUT+'robots.txt','w').write('User-agent: *\nDisallow: /\n')
+else: shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
 # the login email template: our own Supabase server fetches it from here (server/docker-compose.atlas.yml)
 os.makedirs(OUT+'email',exist_ok=True); shutil.copy(ROOT+'supabase/email/login.html',OUT+'email/login.html')
 for f in ('privacy.html','terms.html'):
@@ -83,7 +91,7 @@ for f in ('privacy.html','terms.html'):
   t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)
   open(OUT+f,'w',encoding='utf-8').write(t)
 for f in ['icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']: shutil.copy(SRC+f,OUT+'icons/'+f)
-json.dump({"name":"Наш атлас","short_name":"Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
+json.dump({"name":"Наш атлас"+(" · бета" if BETA else ""),"short_name":"Атлас β" if BETA else "Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
   "lang":"ru","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",
   "share_target":{"action":"./","method":"GET","params":{"title":"addtitle","text":"addtext","url":"add"}},
   "icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png"},
