@@ -120,7 +120,7 @@ async function hook(req: Request) {
   try {
     data = new Webhook(secret).verify(payload, Object.fromEntries(req.headers));
   } catch (err) {
-    console.error("hook signature", String(err));
+    console.error("hook signature", String(err), "headers:", [...req.headers.keys()].join(","));
     return json({ error: { http_code: 401, message: "bad signature" } }, 401);
   }
   const email = norm(data?.user?.email ?? data?.user?.new_email ?? "");
@@ -160,6 +160,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "POST") return json({ error: "method" }, 405, CORS);
   if (new URL(req.url).searchParams.has("captcha")) return captcha(req);
-  if (req.headers.get("webhook-signature")) return hook(req);
-  return json({ error: "not found" }, 404, CORS);
+  // everything else is the Send Email hook; its signature is checked inside (a wrong one is logged and refused)
+  return hook(req);
 });
