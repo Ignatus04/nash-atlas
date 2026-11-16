@@ -317,6 +317,7 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .ap-maps{display:flex;flex-direction:column;padding:2px 0 4px}
 .ap-list{display:flex;flex-direction:column;padding:2px 0}
 .ap-foot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+.ap-legal{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 12px 4px;font-size:12.5px}.ap-legal a,.ap-legal button{color:var(--muted);text-decoration:none;background:none;border:0;padding:4px 0;font:inherit;cursor:pointer}.ap-legal a:hover,.ap-legal button:hover{color:var(--ink);text-decoration:underline}
 .ap-item{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px;min-height:40px}
 .ap-item:hover{background:var(--panel-2)}
 .ap-item .ic{color:var(--muted);flex:none}
@@ -533,6 +534,11 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ai ul{margin:4px 0 0;padding-left:18px}
 .hint{font-size:12.5px;color:var(--muted)}
 .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.entry-part{font-size:14px;font-weight:600;margin:14px 0 8px}
+.cc-box{position:relative}.cc-box .txt{padding-left:40px}.cc-flag{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex}.cc-flag .fimg{width:20px;height:20px}
+.cc-list{list-style:none;margin:8px 0 0;padding:4px;max-height:min(260px,40vh);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.cc-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;min-height:40px}
+.cc-list li[aria-selected=true]{background:#24385a}.cc-list li:hover{background:#1f3150}.cc-list .fimg{width:20px;height:20px;flex:none}.cc-list .cc-none{color:var(--muted);cursor:default}
 input.txt,select.txt{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);font-weight:600}
 .err{color:#ffb0a0;font-size:13.5px}
@@ -678,27 +684,53 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-seg2 span.act{color:var(--ocean)}
 .ga-pass{display:grid;place-items:center}
 .ga-ph{display:flex;gap:10px;justify-content:center;padding-top:12px}
-.ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;opacity:0;transform:translateY(14px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;animation:gaIn .7s var(--spring-soft) both;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-cg i{display:block;height:50px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .ga-cg b{font-size:12px;color:var(--ink)}
-.ga-prow{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;opacity:0;animation:gaCg .7s var(--spring-soft) .6s forwards;transform:translateY(14px)}
+.ga-prow{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;animation:gaIn .7s var(--spring-soft) .6s both}
 .ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+/* pictures are visible on their own and only come in from hidden: with animations off (iOS «Уменьшение движения») they still show */
+@keyframes gaIn{from{opacity:0;transform:translateY(14px)}}@keyframes gaStoryIn{from{opacity:0;transform:translateY(14px) rotate(-4deg)}}
+/* scene «Несколько карт»: the map switcher in «Мои места» opens the list, a new map is added, another map is opened */
+.ga-mp{display:flex;justify-content:center}
+.ga-mp-p{position:relative;width:min(250px,86%);margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.ga-mp-sw{position:relative;height:32px;border-radius:10px;background:var(--panel-2);border:1px solid #2c4062;display:flex;align-items:center;gap:7px;padding:0 10px;font:600 12px var(--body);overflow:hidden}
+.ga-mp-sw small{color:var(--muted);font-size:11px}
+.ga-mp-nm{position:relative;flex:1;height:16px}
+.ga-mp-nm b{position:absolute;left:0;top:0;white-space:nowrap;font-weight:800;transition:opacity .25s ease,transform .5s var(--spring-soft)}
+.ga-mp-nm b+b{opacity:0;transform:translateY(12px)}
+.ga-mp.sw2 .ga-mp-nm b:first-child{opacity:0;transform:translateY(-12px)}.ga-mp.sw2 .ga-mp-nm b+b{opacity:1;transform:none}
+.ga-mp-sw i{color:var(--muted);font-style:normal}
+.ga-mp-r{height:26px;border-radius:9px;background:#16263f;display:flex;align-items:center;gap:8px;padding:0 9px;transition:opacity .3s ease,transform .5s var(--spring-soft)}
+.ga-mp-r i{width:10px;height:10px;border-radius:50%;background:var(--pin-want);flex:none}.ga-mp-r b{height:6px;border-radius:3px;background:#3a4f70;width:var(--w)}
+.ga-mp-r:nth-child(even) i{background:var(--pin-been)}
+.ga-mp.sw2 .ga-mp-r{animation:gaMpRow .6s var(--spring-soft) both}
+.ga-mp.sw2 .ga-mp-r:nth-of-type(2){animation-delay:.08s}.ga-mp.sw2 .ga-mp-r:nth-of-type(3){animation-delay:.16s}
+@keyframes gaMpRow{from{opacity:0;transform:translateY(10px)}}
+.ga-mp-s{position:absolute;left:50%;bottom:0;width:min(270px,92%);margin-left:max(-135px,-46%);padding:7px 7px 8px;border-radius:14px 14px 0 0;background:rgba(22,38,63,.98);border:1px solid #2c4062;border-bottom:0;box-shadow:0 -8px 24px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:3px;transform:translateY(105%);transition:transform .5s var(--spring)}
+.ga-mp.open .ga-mp-s{transform:none}
+.ga-mp-o{height:22px;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 8px;font:600 11.5px var(--body);color:#d3dbe8;transition:background-color .25s ease}
+.ga-mp-o small{margin-left:auto;color:var(--muted);font-size:10.5px}
+.ga-mp-o.on{background:#24385a}
+.ga-mp-o.nw{opacity:0;transform:translateX(-10px);transition:opacity .25s ease,transform .45s var(--spring-soft),background-color .25s ease}
+.ga-mp.added .ga-mp-o.nw{opacity:1;transform:none}
+.ga-mp-a{height:22px;border-radius:7px;display:flex;align-items:center;gap:6px;padding:0 8px;font:700 11.5px var(--body);color:var(--accent)}
 .ga-bn{display:flex;align-items:center;justify-content:center;gap:14px}
-.ga-bn span{opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards}
+.ga-bn span{animation:gaIn .7s var(--spring-soft) both}
 .ga-b1,.ga-b2{font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px;color:#10151f}
 .ga-b1{background:#ff8a5c;animation-delay:.15s!important}.ga-ar{color:var(--muted);font-size:20px;animation-delay:.35s!important}.ga-b2{background:#5fd0ff;animation-delay:.55s!important}
 .ga-sh{display:flex;align-items:center;justify-content:center;gap:22px}
-.ga-story{width:96px;height:170px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);opacity:0;transform:translateY(14px) rotate(-4deg);animation:gaCg .8s var(--spring-soft) .15s forwards}
+.ga-story{width:84px;height:138px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);animation:gaStoryIn .8s var(--spring-soft) .15s both}
 .ga-story b{font-size:8px;color:#9aa7bb}.ga-story em{font-style:normal;font-weight:800;font-size:30px;color:#ff8a5c;line-height:1}
 .ga-story i{flex:1;margin:6px 0;border-radius:8px;background:radial-gradient(circle at 40% 45%,#ff8a5c 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#ff8a5c 0 12%,transparent 13%),#22324c}
 .ga-story span{font-size:8px;color:#eef1f6;font-weight:700}
-.ga-fans{display:flex;align-items:center;opacity:0;transform:translateY(14px);animation:gaCg .8s var(--spring-soft) .45s forwards}
+.ga-fans{display:flex;align-items:center;animation:gaIn .8s var(--spring-soft) .45s both}
 .ga-fans .av{margin-left:-6px;box-shadow:0 0 0 2px var(--panel)}.ga-fans .av:first-child{margin-left:0}
 .ga-fans b{margin-left:10px;font-size:12px;background:var(--accent,#ff8a5c);color:#1a1206;padding:6px 10px;border-radius:10px}
 .ga-rg{display:flex;flex-direction:column;gap:8px;padding:14px 24px}
-.ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;animation:gaIn .7s var(--spring-soft) both;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-rgr b{font-size:12.5px;color:var(--ink)}.ga-rgr span{height:6px;width:80%;border-radius:3px;background:#3a4f70}.ga-rgr i{font-style:normal;font-size:11px;color:#cfe6ff}
 .ga-rgr em{position:absolute;right:10px;top:7px;font-style:normal;font-size:11px;color:var(--muted)}
 .ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFanL 4.2s var(--spring) infinite}
@@ -739,7 +771,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-pin2{position:absolute;left:50%;top:50%;width:26px;height:37px;margin:-37px 0 0 -13px;translate:var(--x) var(--y);opacity:0;filter:drop-shadow(0 4px 5px rgba(0,0,0,.45))}
 .ga-pin2 svg{position:absolute;inset:0;width:100%;height:100%;fill:var(--c);stroke:#0c1626;stroke-width:1.2}
 .ga-pin2 .fimg{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:50%;object-fit:cover}
-.ga-pin2.on{animation:gaDrop2 .75s var(--spring-soft) forwards}
+.ga-pin2.on{opacity:1;animation:gaDrop2 .75s var(--spring-soft) both}
 .ga-still svg{position:absolute;inset:0;width:100%;height:100%}
 @media (max-width:860px){.ga-pl .ga-pin2{opacity:1;animation:none}}
 .ga-still path{stroke:#1b3a5f;stroke-width:.5}
@@ -1475,6 +1507,7 @@ async function openCloud(){
   oauthErrorFromUrl();
   const {data:{session}}=await sb.auth.getSession();
   S.acct.user=session?.user||null;
+  homeCountryCheck(S.acct.user);
   sb.auth.onAuthStateChange((ev,s)=>{const was=S.acct.user?.id||null,now=s?.user?.id||null;if(ev==="SIGNED_OUT"||(ev==="SIGNED_IN"&&was!==now))setTimeout(()=>location.reload(),50)});
   const tok=shareTokenFromUrl();
   if(tok&&S.acct.user){ // joining a shared map
@@ -1691,7 +1724,7 @@ function openDeleteAccount(){
     const {error}=await sb.rpc("delete_my_account");
     if(error){go.disabled=false;go.textContent="Удалить навсегда";status("Не получилось удалить аккаунт. Попробуйте ещё раз или напишите на ignat.shubin0409@gmail.com",7000);return}
     try{["atlas-map","atlas-migrate-hide"].forEach(k=>localStorage.removeItem(k))}catch(e){}
-    await sb.auth.signOut().catch(()=>{}); close(); status("Аккаунт удалён",4000); setTimeout(()=>location.reload(),900)};
+    await sb.auth.signOut().catch(()=>{}); homeSet(null); close(); status("Аккаунт удалён",4000); setTimeout(()=>location.reload(),900)};
 }
 /* the account popover: who, which map, and a short list of actions */
 function mapStats(){const n=S.places?.size||0;const ks=new Set();S.places?.forEach(p=>p.k&&ks.add(p.k));
@@ -1715,6 +1748,7 @@ function acctMenuHTML(){
       ${item("apOut","down","Скачать копию карты")}
       ${!ro?item("apIn","up","Загрузить копию"):""}
       ${item("apNew","plus","Новая карта")}
+      ${CFG.supabaseUrl?item("apHome","globe","Ваша страна",`<span class="ap-r">${esc(ccName(a.user.user_metadata?.country)||"не указана")}</span>`):""}
     </div>
     <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}${item("apDel","x","Удалить аккаунт")}</div>`;
 }
@@ -1729,7 +1763,8 @@ function bindAcctMenu(p,close,rerender){
   on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
   on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
   on("apDel",()=>{close();openDeleteAccount()});
-  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map");localStorage.removeItem("atlas-home")}catch(e){}location.reload()});
+  on("apHome",()=>{close();askHomeCountry(true)});
   p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
   on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
     const f=box.querySelector("form"), i=box.querySelector("input"); i.focus(); i.select();
@@ -1742,7 +1777,8 @@ function bindAcctMenu(p,close,rerender){
 function openAcct(){
   closeAcct();
   const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
-  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>`;
+  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>
+    <div class="ap-legal"><a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a><a href="/privacy.html" target="_blank" rel="noopener">Политика обработки данных</a>${consentUsed()?`<button id="apCk">Настройки cookie</button>`:""}</div>`;
   document.body.appendChild(p);
   const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
   if(innerWidth>560){p.style.top=(r.bottom+8)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
@@ -1752,6 +1788,7 @@ function openAcct(){
   (p.querySelector(".ap-item")||p).focus?.();
   bindAcctMenu(p,closeAcct,openAcct);
   p.querySelector("#apGuide").onclick=()=>{closeAcct();openGuide(0)};
+  p.querySelector("#apCk")?.addEventListener("click",()=>{closeAcct();openCookieSettings()});
 }
 
 /* who sees the map: two links (to look, to edit) and the people who joined */
@@ -1891,6 +1928,7 @@ function drawCanvas(){
       // countries the data cuts at the date line are filled once more, so the cut doesn't show as a border
       cx.globalAlpha=op; for(const [f,pth] of lod) if(seamCountry(f)){const c=cols.get(f.properties.k)||"#22324c";cx.fillStyle=c;cx.fill(pth);cx.strokeStyle=c;cx.lineWidth=3*lw;cx.stroke(seamPath(f))} cx.globalAlpha=1}
     // zones (safety), disputed territories, lines of control
+    cx.globalAlpha=op;for(const x of cvShapes.parts||[]){const c=cols.get(x.dk);if(c&&c!==cols.get(x.ow)){cx.fillStyle=c;cx.fill(x.p)}}cx.globalAlpha=1;
     const zOp=tiles?Math.max(op,.35):1;
     for(const z of cvShapes.zones){cx.globalAlpha=zOp;cx.fillStyle=z.hatch?patAt(zoneHatch(z.l),k):z.c;cx.fill(z.p);
       cx.globalAlpha=.9;cx.strokeStyle=SAFE[z.l].c;cx.lineWidth=1.2*lw;cx.stroke(z.p)}
@@ -1928,6 +1966,7 @@ function cvCountries(){return TILES?S.countries.filter(f=>f.properties.k!=="AQ")
 // colours: fade from the old to the new over half a second when the layer or the selection changes
 function cvSetColors(animate){
   const next=new Map(cvCountries().map(f=>[f.properties.k,rc(colorFor(f.properties.k))]));
+  for(const x of S.safeParts||[]) if(!next.has(x.dk)) next.set(x.dk,rc(colorFor(x.dk)));
   if(!animate||REDUCED||!cvColors.size){cvColors=next;cvAnim=null;requestDraw();return}
   const from=cvColors, ks=[...next.keys()].filter(k=>from.get(k)!==next.get(k)); if(!ks.length){cvColors=next;requestDraw();return}
   const ip=new Map(ks.map(k=>[k,d3.interpolateRgb(from.get(k)||next.get(k),next.get(k))])), t0=performance.now(), me={};
@@ -2036,8 +2075,10 @@ function drawBase(){
   setLod(lodFor(T.k));
   // territories whose real control differs from the claim: hatched, and the line of control drawn on top
   cvShapes.df=S.countries.filter(f=>DEFACTO.has(f.properties.k)).map(f=>p2(path(f))).filter(Boolean);
+  // areas inside another country in this view keep their own entry rules and safety: their own colour wherever it differs
+  cvShapes.parts=(S.safeParts||[]).map(x=>({p:p2(path(x.f)),dk:x.dk,ow:x.ow})).filter(x=>x.p);
   cvShapes.front=S.front?p2(path(S.front)):null; cvShapes.ks=S.ksBorder?p2(path(S.ksBorder)):null;
-  if(S.zones) drawZones(); if(focusGeo) updateFocus();
+  drawZones(); if(focusGeo) updateFocus();
   cvSetColors(false); if(!bindCanvasPointer.done){bindCanvasPointer.done=1;bindCanvasPointer()}
   cvWarmLod();
   const ad=AREAS.filter(a=>S.areaGeo.has(a.id));
@@ -2087,20 +2128,27 @@ function paint(){
 }
 function showTip(e,k){
   const c=S.cByK.get(k); if(!c||!inA(k)) return hideTip();
-  const t=$("#tip"); const sf=safeOf(k);
-  t.innerHTML=S.layer==="safe"?`<b>${esc(c.properties.ru)}</b>${sf?.l?esc(SAFE[sf.l].label)+(sf.s?`<br><span style="color:var(--muted)">по оценке: ${esc(SRC[sf.s])}</span>`:""):"Нет оценки"}${zonesIn(k).length?`<br>Опасных районов: ${zonesIn(k).length}`:""}`
-    :`<b>${esc(c.properties.ru)}</b>${S.pass.map(p=>{const e=entry(p,k);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
+  const t=$("#tip"); let sf=safeOf(k), nm=c.properties.ru;
+  let ek=k;
+  if(S.safeParts?.length){let ll=null;try{const [x,y]=T.invert(d3.pointer(e,svg.node()));ll=proj.invert([x,y]);if(ll)ll=[normLon(ll[0]),ll[1]]}catch(_){}
+    const part=partAt(k,ll);if(part){sf=safeOf(part.dk);nm=part.name;ek=part.dk}}
+  t.innerHTML=S.layer==="safe"?`<b>${esc(nm)}</b>${sf?.l?esc(SAFE[sf.l].label)+(sf.s?`<br><span style="color:var(--muted)">по оценке: ${esc(SRC[sf.s])}</span>`:""):"Нет оценки"}${zonesIn(k).length?`<br>Опасных районов: ${zonesIn(k).length}`:""}`
+    :`<b>${esc(nm)}</b>${S.pass.map(p=>{const e=entry(p,ek);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
   const r=$("#mapwrap").getBoundingClientRect();
   t.style.display="block"; t.style.left=Math.min(e.clientX-r.left+14,W-270)+"px"; t.style.top=(e.clientY-r.top+14)+"px";
 }
 function hideTip(){$("#tip").style.display="none"}
 function zonesIn(k){return (S.zones||[]).filter(f=>f.properties.k===k)}
+// areas drawn inside another country whose safety differs from it (see applyWorldview)
+function safePartsOf(ow){return (S.safeParts||[]).filter(x=>!ow||x.ow===ow).map(x=>({...x,sf:safeOf(x.dk),l:safeOf(x.dk)?.l})).filter(x=>x.l&&x.l!==safeOf(x.ow)?.l)}
+function partAt(k,ll){if(!ll)return null;for(const x of (S.safeParts||[]).filter(x=>x.ow===k)){const [[a,b],[c,d]]=x.b;if(ll[1]<b||ll[1]>d)continue;if(d3.geoContains(x.f,ll))return x}return null}
 function zoneInfo(id){return S.safety?.z?.[id]||null}
 function drawZones(){
-  if(!S.zones) return;
+  if(!S.zones){requestDraw();return}
   // entry map: only "do not go" regions, as a hatch; safety map: every flagged region
   const vis=S.zones.filter(f=>{const z=zoneInfo(f.properties.id);return z&&z.l&&(S.layer==="safe"||z.l===4)});
   cvShapes.zones=vis.map(f=>{const z=zoneInfo(f.properties.id);return {p:p2(path(f)),l:z.l,hatch:!!(z.p||S.layer!=="safe"),c:SAFE[z.l].c}}).filter(z=>z.p);
+
   requestDraw();
 }
 function placeZone(p){if(!S.zones)return null;if(p.__z!==undefined)return p.__z;let best=null;
@@ -2571,6 +2619,27 @@ function gaTapScene(root,vb,list,withCard){
   };
   gaLater(step,250);
 }
+// scene: open «Мои места», tap the map name, add a new map, then open another one
+function gaMapsScene(root){
+  const g=root.querySelector(".ga-mp"); if(!g) return;
+  const tap=g.querySelector(".ga-finger"), W=root.clientWidth, H=root.clientHeight;
+  const at=sel=>{const e=g.querySelector(sel),r=e.getBoundingClientRect(),o=root.getBoundingClientRect();return [r.left-o.left+Math.min(r.width*.35,70),r.top-o.top+r.height/2]};
+  const go=([x,y])=>{tap.style.transform=`translate(${x}px,${y}px)`};
+  const press=()=>{tap.classList.remove("press");void tap.offsetWidth;tap.classList.add("press")};
+  const cycle=()=>{
+    g.classList.remove("open","added","sw2");g.querySelectorAll(".ga-mp-o").forEach((o,i)=>o.classList.toggle("on",i===0));
+    tap.style.transition="none";go([W/2,H+30]);void tap.offsetWidth;tap.style.transition="";
+    gaLater(()=>go(at(".ga-mp-sw")),250);
+    gaLater(()=>{press();g.classList.add("open")},1000);
+    gaLater(()=>go(at(".ga-mp-a")),1900);
+    gaLater(()=>{press();g.classList.add("added")},2650);
+    gaLater(()=>go(at(".ga-mp-o.two")),3500);
+    gaLater(()=>{press();g.querySelectorAll(".ga-mp-o").forEach(o=>o.classList.toggle("on",o.classList.contains("two")))},4250);
+    gaLater(()=>{g.classList.remove("open");g.classList.add("sw2");go([W*.82,H+30])},4900);
+    gaLater(cycle,7600);
+  };
+  cycle();
+}
 // scene: the layer switch flips and the same map repaints by safety
 function gaSafeScene(root){
   const seg=root.querySelector(".ga-seg2"), pill=seg?.querySelector(".lq"), btns=seg?.querySelectorAll("span:not(.lq)"), top=root.querySelector(".ga-map.ga-top");
@@ -2579,10 +2648,10 @@ function gaSafeScene(root){
   btns.forEach((b,j)=>b.classList.toggle("act",j===0)); liquid(seg,pill,btns[0]); gaLater(flip,1400);
 }
 // a still globe turned towards Europe, with flag pins at real cities
-const GA_PINS=[["PT",-9.14,38.72,"want"],["FI",24.94,60.17,"want"],["IT",12.5,41.9,"want"],["JO",35.93,31.95,"want"]];
+const GA_PINS=[["US",-118.24,34.05,"want"],["MX",-99.13,19.43,"want"],["CU",-82.37,23.13,"want"],["CO",-74.08,4.71,"want"]];
 function gaStillGlobe(size){
   if(!gaWorld()) return `<div class="ga-globe" style="--s:${size}px"><div class="ga-wait"></div></div>`;
-  const pj=d3.geoOrthographic().rotate([-14,-44]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
+  const pj=d3.geoOrthographic().rotate([100,-20]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
   const land=S.countries.filter(f=>f.properties.k!=="AQ").map(f=>{const d=pth(f);return d?`<path d="${d}" style="fill:${gaEntryC(f.properties.k)}"/>`:""}).join("");
   const pins=GA_PINS.map(([k,lon,lat,st],i)=>{const [x,y]=pj([lon,lat]);return `<i class="ga-pin2" style="--x:${(x-size/2).toFixed(1)}px;--y:${(y-size/2).toFixed(1)}px;--c:${PIN[st].c}"><svg viewBox="-13 -36 26 37"><path d="${PIN_PATH}"/></svg>${flagImg(k)}</i>`}).join("");
   return `<div class="ga-globe ga-still" style="--s:${size}px"><svg viewBox="0 0 ${size} ${size}" aria-hidden="true">${land}</svg><i class="ga-shade"></i></div>${pins}`;
@@ -2594,15 +2663,16 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=11;
+const GUIDE_VER=13;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
-const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
+// every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
+const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.col,["IT","TN","FR","PT","AT","HU","PL","JO","NL"],false)},
+    run:r=>gaTapScene(r,GUIDE_VB.col,["FR","IT","ES","NL","AT","DE","CH","BE"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
     mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
@@ -2611,7 +2681,7 @@ const GUIDE=[
     m:"Нажмите на страну на карте или найдите её в списке справа. Выедет карточка: условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
     mob:"Нажмите на страну на карте или найдите её в разделе «Страны». Внизу появится карточка: условия въезда, срок, опасные районы и ваши места. Потяните её вверх, чтобы прочитать всё.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}${gaPointer()}<div class="ga-sheet"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.card,["IT","FR","AT","CZ","PL","HU"],true)},
+    run:r=>gaTapScene(r,GUIDE_VB.card,["FR","IT","DE","NL","AT","ES"],true)},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.safe,gaEntryC)}${gaMap(GUIDE_VB.safe,gaSafeC,"ga-top")}<div class="ga-seg2"><span class="lq"></span><span>Въезд</span><span>Безопасность</span></div></div>`,
@@ -2621,28 +2691,18 @@ const GUIDE=[
     mob:"Кнопка «+» внизу добавляет место по ссылке из Google Карт или точкой на карте. Каждое место — булавка с флагом страны, все они собраны в «Моих местах». Войдите в Профиле, и карта сохранится на всех устройствах.",
     art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("plus",22)}</i></div>`,
     run:r=>{if(!MOB())gaPinScene(r)}},
-  {since:4, t:"Фото городов и мест",
-    m:"В карточке страны сверху — фото столицы и крупных городов. Нажмите на город, чтобы открыть его: там тоже лента фото. В списках мест у каждого места появилась маленькая фотография. Снимки берутся из Википедии.",
-    art:()=>`<div class="ga ga-ph">${[["Рим","#c98b5a","#7a4a2c"],["Париж","#8fa3c4","#4b5f86"],["Вена","#b9a37a","#6e5a3a"]].map(([n,a,b],i)=>`<div class="ga-cg" style="--i:${i}"><i style="background:linear-gradient(160deg,${a},${b})"></i><b>${n}</b></div>`).join("")}<div class="ga-prow"><i></i><span><b></b><b></b></span></div></div>`},
-  {since:5, t:"Регионы и описания городов",
-    m:"В карточке страны регионы теперь списком: сначала те, где есть ваши места, у каждого — центр, строка о нём и отметка, если там неспокойно. У столиц и центров регионов появились короткие описания: чем город интересен и что посмотреть рядом.",
-    art:()=>`<div class="ga ga-rg">${[["Татарстан","Казань",1],["Карелия","Петрозаводск",0],["Алтай","Горно-Алтайск",0]].map(([a,b,n],i)=>`<div class="ga-rgr" style="--i:${i}"><b>${a}</b><span></span><i>центр: ${b}</i>${n?`<em>3 места</em>`:""}</div>`).join("")}</div>`},
   {since:6, t:"Поделиться и позвать друзей",
     m:"В «Моих местах» и в Профиле — «Поделиться картой»: соберётся картинка для сторис с картой, числом стран и флагами, вместе со ссылкой на вашу карту. «Пригласить друзей» отправляет ссылку, по которой друг войдёт и будет отмечать места вместе с вами. В карточке места кнопка «Я тоже хочу» показывает, кто ещё хочет туда поехать. ",
     art:()=>`<div class="ga ga-sh"><div class="ga-story"><b>Хочу побывать</b><em>23</em><i></i><span>nash-atlas.ru</span></div><div class="ga-fans">${["И","М","А"].map((x,i)=>`<span class="av" style="--i:${i}">${x}</span>`).join("")}<b>Я тоже хочу</b></div></div>`},
-  {since:8, t:"Где вы уже были",
-    m:"У мест две отметки: «Хотим» и «Были». Побывали — нажмите на «Хотим» у места в списке, и оно станет «✓ Были». На картинке для сторис появится «Был в N странах, хочу ещё в M».",
-    art:()=>`<div class="ga ga-bn"><span class="ga-b1">Хотим</span><span class="ga-ar">→</span><span class="ga-b2">✓ Были</span></div>`},
-  {since:9, t:"Своя карта и общие",
-    m:"Присоединившись к общей карте, вы не теряете свою. Наверху «Моих мест» видно, какая карта открыта; нажмите на неё, чтобы переключиться или завести новую. При добавлении места можно выбрать, в какую карту оно попадёт.",
-    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Мой атлас</span><span class="ga-ar">⇄</span><span class="ga-b2" style="background:#ffd166">Отпуск вдвоём</span></div>`},
-  {since:10, t:"Места прямо из Google Карт",
-    m:"Вставьте в «+ Место» любую ссылку Google Карт или Яндекс Карт, даже короткую: точка и название найдутся сами.",
-    mob:"В Google Картах или Яндекс Картах нажмите «Поделиться» у места: на Android выберите «Атлас» (после «Установить приложение»), на iPhone скопируйте ссылку и вставьте в «+ Место». Точка и название найдутся сами. Подробности — в Профиле.",
-    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Поделиться</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
-  {since:11, t:"Любое место через поиск",
-    m:"Наберите в поиске музей, пляж, парк или улицу и выберите «Найти на карте мира». Найденное место появится на карте, а добавить его можно кнопкой «+ Добавить в мои места».",
-    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Лувр</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
+  {since:13, t:"Несколько карт",
+    m:"Места можно разложить по разным картам, например «Мой атлас» и «Отпуск вдвоём». Откройте «Мои места» и нажмите на название карты наверху: там все ваши карты и кнопка «Новая карта». Когда добавляете место, выберите, в какую карту его положить. Переименовать открытую карту можно в меню аккаунта. Общая карта, в которую вас позвали, появится в том же списке, а ваша останется на месте.",
+    art:()=>`<div class="ga ga-mp"><div class="ga-mp-p">
+      <div class="ga-mp-sw"><small>Карта</small><span class="ga-mp-nm"><b>Мой атлас</b><b>Отпуск вдвоём</b></span><i>▾</i></div>
+      <div class="ga-mp-r"><i></i><b style="--w:62%"></b></div><div class="ga-mp-r"><i></i><b style="--w:45%"></b></div><div class="ga-mp-r"><i></i><b style="--w:70%"></b></div></div>
+      <div class="ga-mp-s"><div class="ga-mp-o on">${ic("map",14)}Мой атлас<small>ваша</small></div><div class="ga-mp-o two">${ic("user",14)}Отпуск вдвоём<small>общая</small></div>
+        <div class="ga-mp-o nw">${ic("map",14)}Новая карта<small>ваша</small></div><div class="ga-mp-a">${ic("plus",14)}Новая карта</div></div>
+      ${gaPointer()}</div>`,
+    run:r=>gaMapsScene(r)},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -3143,7 +3203,9 @@ function entryBlock(k){
       :`Сложнее всего с паспортом ${pName(non.find(([,e])=>legendCode(e.c)===legendCode(worst))[0])}: ${ST[worst].label.toLowerCase()}`;
     return `<div class="verdict" style="--c:${ST[legendCode(worst)]?.c||ST.U.c}">${esc(t)}</div>`})();
   const own=S.pass.filter(p=>S.visa?.[p]), other=S.pass.filter(p=>!S.visa?.[p]);
-  return `<section class="blk"><h2>Въезд</h2>${verdict}<div class="entry">${es.map(([p,e])=>row(p,e)).join("")}</div>
+  const parts=(S.safeParts||[]).filter(x=>x.ow===k).map(x=>({x,pe:S.pass.map(p=>[p,entry(p,x.dk)])})).filter(({pe})=>pe.some(([p,e],i)=>e.c!==es[i][1].c||e.s!==es[i][1].s));
+  const partsHtml=parts.map(({x,pe})=>`<h3 class="entry-part">${esc(x.name)}: свои правила въезда</h3><div class="entry">${pe.map(([p,e])=>row(p,e)).join("")}</div>`).join("");
+  return `<section class="blk"><h2>Въезд</h2>${verdict}<div class="entry">${es.map(([p,e])=>row(p,e)).join("")}</div>${partsHtml}
   <div class="src">Для поездки по одному паспорту, без ВНЖ и других виз.${own.length?` ${own.map(pName).join(" и ")}: сверено по Википедии (${own.map(p=>`<a href="${WIKI[p]}" target="_blank" rel="noopener">${pName(p)}</a>`).join(", ")}) и новостям на ${fmtDate(S.visa.updated)}.`:""}${other.length?` ${esc(other.map(pName).join(", "))}: данные <a href="https://www.passportindex.org/" target="_blank" rel="noopener">Passport Index</a> на 17 февраля 2026 года, их стоит перепроверить.`:""} Перед поездкой сверьтесь с сайтом посольства.</div></section>`;
 }
 function fmtDate(iso){const d=new Date(iso+"T12:00:00");return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}
@@ -3358,7 +3420,11 @@ function hfApplyMap(){
 function bindFinder(){
   const q=$("#cfq"); if(!q) return;
   // names of regions and airports load only when someone starts searching
-  const lazy=()=>{if(!S.admNames&&!S._anL){S._anL=1;getData("admnames").then(a=>{S.admNames=a;if(S.hf.q)renderDrop()}).catch(()=>{})}
+  const lazy=()=>{if(!S.admNames&&!S._anL){S._anL=1;getData("admnames").then(a=>{
+    // regions in this view: owner and name as the owner has them; the two halves of a region split by the front are one entry
+    if(S.contested?.length){const rn=S.wv?.regionNames?.[S.view?.id]||{},seen=new Set();
+      a=a.map(x=>{const k=viewK(x[3],x[5],x[4]),id=String(x[0]).replace(/-XU$/,"");return [x[0],rn[id]||x[1],x[2],k,x[4],x[5]]}).filter(x=>{const key=x[3]+"|"+String(x[0]).replace(/-XU$/,"");if(seen.has(key))return false;seen.add(key);return true})}
+    S.admNames=a;if(S.hf.q)renderDrop()}).catch(()=>{})}
     if(!S.airports&&!S._apL){S._apL=1;getData("airports").then(a=>{S.airports=a;if(S.hf.q)renderDrop()}).catch(()=>{})}};
   q.oninput=()=>{lazy();S.hf.q=q.value;hfSel=0;renderDrop()};
   q.onfocus=()=>{lazy();if(S.hf.q.trim())renderDrop()};
@@ -3440,6 +3506,7 @@ function safetyBlock(k){
   return `<section class="blk"><h2>Безопасность</h2>
     <div class="safe-badge" style="--c:${SAFE[sf.l].c}"><span class="dot"></span>${esc(SAFE[sf.l].label)}</div>
     ${sf.n?`<p class="status-note">${esc(sf.n)}</p>`:""}
+    ${safePartsOf(k).map(x=>`<div class="safe-badge" style="--c:${SAFE[x.l].c};margin-top:10px"><span class="dot"></span>${esc(x.name)}: ${esc(SAFE[x.l].label.toLowerCase())}</div>${x.sf?.n?`<p class="status-note">${esc(x.sf.n)}</p>`:""}`).join("")}
     ${zs.length?`<ul class="safe-z">${zs.map(x=>`<li><span class="dot" style="background:${SAFE[x.z.l].c}"></span><span><button data-reg="${esc(x.f.properties.id)}">${esc(nameOf(x))}</button> — ${esc(SAFE[x.z.l].label.toLowerCase())}${x.z.p?" (часть региона)":""}${x.z.n?`: ${esc(x.z.n)}`:""}</span></li>`).join("")}</ul>`:""}
     ${sf.zn?`<p class="status-note">${esc(sf.zn)}</p>`:""}
     ${ac?`<p class="status-note">${ac}</p>`:""}
@@ -4008,8 +4075,8 @@ function ensureAdm(){
     const groups=new Map();
     for(const o of Object.values(t.objects))for(const g of o.geometries){const c=d3.geoCentroid(topojson.feature(t,g)),k=viewK(g.properties.k,c[0],c[1]);
       const key=k+"|"+String(g.properties.id).replace(/-XU$/,"");(groups.get(key)||groups.set(key,[]).get(key)).push({g,k})}
-    S.adm=[];
-    for(const gs of groups.values()){const main=gs.find(x=>!/-XU$/.test(x.g.properties.id))||gs[0],props={...main.g.properties,k:main.k};
+    S.adm=[];const rn=S.wv?.regionNames?.[S.view?.id]||{};
+    for(const gs of groups.values()){const main=gs.find(x=>!/-XU$/.test(x.g.properties.id))||gs[0],props={...main.g.properties,k:main.k},nm=rn[String(props.id).replace(/-XU$/,"")];if(nm)props.ru=nm;
       S.adm.push(gs.length>1?{type:"Feature",properties:props,geometry:topojson.merge(t,gs.map(x=>x.g))}:{...topojson.feature(t,main.g),properties:props})}
   }).catch(()=>{});
   return admPromise;
@@ -4021,25 +4088,85 @@ function ensureAdm(){
 // if it cannot be found, the international (UN) view is used. Belarus sees the de facto map (Ukraine's de facto line).
 async function viewerCountry(){
   if(!CFG.supabaseUrl) return "RU";   // offline copy without our server
-  try{const q=new URLSearchParams(location.search).get("view");if(q)return q.toUpperCase()}catch(e){}
-  try{const c=sessionStorage.getItem("atlas-cc");if(c)return c==="-"?tzCountry():c}catch(e){}
+  try{const q=new URLSearchParams(location.search).get("view");if(q){S.viewParam=1;return q.toUpperCase()}}catch(e){}
+  S.geoP=geoCountry();
+  // a signed-in visitor told us their country: it wins over the address. openCloud checks it against the account.
+  const h=homeSaved(); if(h) return h.c;
+  return S.geoP}
+// checked on every visit, not remembered: a guest may be travelling
+async function geoCountry(){
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
-    const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal});clearTimeout(t);
-    const c=r.ok?(await r.json()).c:null;try{sessionStorage.setItem("atlas-cc",c||"-")}catch(e){}return c||tzCountry()}catch(e){return tzCountry()}}
+    const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal,cache:"no-store"});clearTimeout(t);
+    return (r.ok?(await r.json()).c:null)||tzCountry()}catch(e){return tzCountry()}}
+function ccName(k){return k?(S.meta?.[k]?.ru||S.ccNames?.get(k)||""):""}
+function homeSaved(){try{const h=JSON.parse(localStorage.getItem("atlas-home")||"null");return h&&h.c?h:null}catch(e){return null}}
+function homeSet(h){try{h?localStorage.setItem("atlas-home",JSON.stringify(h)):localStorage.removeItem("atlas-home")}catch(e){}}
+// after sign-in is known: the account's country (user_metadata.country) decides the borders; ask once if there is none
+function homeCountryCheck(u){
+  const h=homeSaved();
+  if(!u){if(h){homeSet(null);if(!S.viewParam)location.reload()}return}
+  const c=u.user_metadata?.country;
+  if(c){if(!h||h.c!==c||h.u!==u.id){homeSet({u:u.id,c});if(!S.viewParam&&S.view?.cc!==c)location.reload()}return}
+  if(h&&h.u!==u.id)homeSet(null);
+  let later=false;try{later=!!sessionStorage.getItem("atlas-home-later")}catch(e){}
+  // wait until the welcome guide, the tour and the passport picker are closed
+  const tryAsk=()=>document.querySelector(".amodal,#tour,#ppick")?setTimeout(tryAsk,2500):askHomeCountry(false);
+  if(!later)setTimeout(tryAsk,1800)}
+async function askHomeCountry(change){
+  const geo=await (S.geoP||Promise.resolve(null)), cur=S.acct?.user?.user_metadata?.country||null;
+  let pick=cur||geo||S.view?.cc||"";
+  const all=(S.wv?.members||[...(S.ccNames||new Map()).keys()]).map(k=>[k,ccName(k)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1],"ru"));
+  const {el,close}=modal("homeBox",`<h2 id="homeT">Ваша страна</h2>
+    <p>Укажите страну, в которой живёте: так карта будет точнее для вас.</p>
+    <label class="f" for="homeIn">Страна</label>
+    <div class="cc-box"><span class="cc-flag" id="homeFlag" aria-hidden="true"></span>
+      <input class="txt" id="homeIn" role="combobox" aria-expanded="true" aria-controls="homeList" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Начните печатать название"></div>
+    <ul class="cc-list" id="homeList" role="listbox" aria-label="Страны"></ul>
+    <p class="hint">Изменить можно в меню аккаунта.</p>
+    <div class="ck-acts" style="margin-top:14px">${change?"":`<button class="btn" id="homeLater">Потом</button>`}<button class="btn primary" id="homeGo">Сохранить</button></div>`,{labelledby:"homeT"});
+  const inp=el.querySelector("#homeIn"), list=el.querySelector("#homeList"), fl=el.querySelector("#homeFlag"), go=el.querySelector("#homeGo");
+  let shown=[], act=-1;
+  const setPick=k=>{pick=k;inp.value=ccName(k);fl.innerHTML=flagImg(k);go.disabled=!k};
+  const render=(q="")=>{const n=nz(q.trim());shown=n?all.filter(([k,nm])=>nz(nm).includes(n)).sort((a,b)=>(nz(a[1]).startsWith(n)?0:1)-(nz(b[1]).startsWith(n)?0:1)):all;
+    act=Math.max(0,shown.findIndex(x=>x[0]===pick));if(n)act=0;
+    list.innerHTML=shown.length?shown.map(([k,nm],i)=>`<li role="option" id="hc-${esc(k)}" data-k="${esc(k)}" aria-selected="${i===act}">${flagImg(k)}<span>${esc(nm)}</span></li>`).join(""):`<li class="cc-none">Ничего не нашлось</li>`;
+    move(0)};
+  const move=d=>{if(!shown.length)return;act=Math.min(shown.length-1,Math.max(0,act+d));list.querySelectorAll("[role=option]").forEach((x,i)=>x.setAttribute("aria-selected",i===act));
+    const li=list.children[act];if(li){inp.setAttribute("aria-activedescendant",li.id);li.scrollIntoView({block:"nearest"})}};
+  inp.addEventListener("input",()=>{fl.innerHTML="";pick="";go.disabled=true;render(inp.value)});
+  inp.addEventListener("focus",()=>inp.select());
+  inp.addEventListener("keydown",e=>{if(e.key==="ArrowDown"){e.preventDefault();move(1)}else if(e.key==="ArrowUp"){e.preventDefault();move(-1)}
+    else if(e.key==="Enter"){e.preventDefault();if(shown[act]){setPick(shown[act][0]);render("");if(pick)go.focus()}}});
+  list.addEventListener("click",e=>{const li=e.target.closest("[data-k]");if(!li)return;setPick(li.dataset.k);render("");go.focus()});
+  setPick(pick);render("");
+  el.querySelector("#homeLater")?.addEventListener("click",()=>{try{sessionStorage.setItem("atlas-home-later","1")}catch(e){}close()});
+  go.onclick=async()=>{const c=pick;if(!c)return;go.disabled=true;go.textContent="Сохраняю…";
+    const {data,error}=await sb.auth.updateUser({data:{country:c}});
+    if(error){go.disabled=false;go.textContent="Сохранить";status("Не сохранилось. Проверьте интернет и попробуйте ещё раз.",5000);return}
+    if(data?.user)S.acct.user=data.user;homeSet({u:S.acct.user.id,c});close();
+    if(c!==S.view?.cc){status("Обновляю карту…",3000);setTimeout(()=>location.reload(),400)}else status("Сохранено",2500)}}
 // the server did not answer: a Russian or Belarusian time zone is a good enough sign of where the visitor is
 function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
   if(z==="Europe/Minsk")return "BY";
   if(/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/.test(z))return "RU"}catch(e){}return null}
 function applyWorldview(ct,wv,cc){
   const o=ct.objects[Object.keys(ct.objects)[0]];
-  const map=(wv&&(wv.views[cc]||(cc?wv.intl:wv.intl)))||{};
-  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};
+  S.ccNames=new Map(o.geometries.filter(g=>g.properties.k&&g.properties.k[0]!=="~"&&g.properties.k!=="XU"&&g.properties.ru).map(g=>[g.properties.k,g.properties.ru]));
+  // the UN view, plus where this country's official position differs from it
+  const map=wv?{...wv.intl,...(wv.views[cc]||{})}:{};
+  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};S.wv=wv;
   const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
   // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
   const contested=new Set([...Object.keys(wv?.intl||{}),...Object.values(wv?.views||{}).flatMap(Object.keys)]);
   S.contested=o.geometries.filter(g=>contested.has(g.properties.k)&&!g.properties.small).map(g=>{const f=topojson.feature(ct,g);return {f,b:d3.geoBounds(f),ow:own(g)}});
   // countries whose shape differs from the de facto map: their written dispute note describes the de facto map, so it gives way to a note about the view
   S.viewChanged=new Set();for(const g of o.geometries){const k=g.properties.k,d=k[0]==="~"?g.properties.host:k,ow=own(g);if(ow!==d){S.viewChanged.add(ow);S.viewChanged.add(d)}}
+  // safety never follows the drawn border: every area that joins another country here keeps its own safety rating
+  // (de facto holder: a piece's host, otherwise the territory itself); drawn over the owner and listed in its card
+  const pn={...(wv?.partNames?.all||{}),...(wv?.partNames?.[S.view.id]||{})};
+  S.safeParts=o.geometries.filter(g=>!g.properties.small&&own(g)!==(g.properties.k[0]==="~"?g.properties.host:g.properties.k)).map(g=>{
+    const k=g.properties.k,dk=k[0]==="~"?g.properties.host:k,f=topojson.feature(ct,g);
+    return {k,dk,ow:own(g),f,b:d3.geoBounds(f),name:pn[k]||g.properties.ru||k}});
   const groups=new Map();
   for(const g of o.geometries){const ow=own(g);if(!groups.has(ow))groups.set(ow,[]);groups.get(ow).push(g)}
   const out=[];S.absorbed=new Map();
@@ -4057,9 +4184,7 @@ function applyWorldview(ct,wv,cc){
   }
   o.geometries=out;
 }
-function viewNote(){const v=S.view;
-  if(v?.id&&v.id!=="intl"){const n=S.cByK?.get(v.id)?.properties.ru||S.meta?.[v.id]?.ru;if(n)return `Границы этой страны показаны по официальной позиции страны, из которой вы открыли карту (${n}). В других странах карта может выглядеть иначе.`}
-  return "Границы этой страны показаны по позиции ООН. В отдельных странах карта может выглядеть иначе."}
+function viewNote(){return "Границы спорных территорий на карте показаны с учётом официальных позиций государств."}
 // a place or city stored under a de facto holder → the country it belongs to in this view
 function viewK(k,lng,lat){
   if(lng!=null&&S.contested)for(const a of S.contested){const b=a.b;if(lat>=b[0][1]&&lat<=b[1][1]&&(b[0][0]<=b[1][0]?lng>=b[0][0]&&lng<=b[1][0]:lng>=b[0][0]||lng<=b[1][0])&&d3.geoContains(a.f,[lng,lat]))return a.ow}
@@ -4080,7 +4205,8 @@ async function boot(){
   for(const a of AREAS) S.areaGeo.set(a.id,topojson.merge(ct,geoms.filter(g=>areaOf(g.properties.k)===a.id)));
   S.baseLists=lists||[]; applySeed(S.baseLists,true);
   rebuildPlaces();
-  if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k}}
+  // a city that changes country in this view: its local name is the new owner's (Ukrainian names for Ukraine, none for Russian-speaking owners)
+  if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k;c[9]=k==="UA"?(S.wv?.cityUk?.[c[1]]||c[9]||""):""}}
   S.cities=cities; S.citiesByIso=d3.group(cities,c=>c[4]); S.cityIdx=new Map(cities.map(c=>[cityKey(c),c])); S.meta=meta; S.visa=visa;
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){
