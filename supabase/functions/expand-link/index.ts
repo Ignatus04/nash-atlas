@@ -9,8 +9,10 @@ const SHORT = [
 ];
 // Google's app links now lead to maps.google.com/?q=Name,+address&ftid=… (no /maps in the path, often no coordinates)
 const FULL = /^https:\/\/(?:(?:www\.)?google\.[a-z.]+\/maps|maps\.google\.[a-z.]+\/|(?:www\.)?yandex\.(?:ru|com|by|kz)\/maps)/i;
-const CORS = {
-  "Access-Control-Allow-Origin": "https://nash-atlas.ru",
+// our sites: the main one and the beta at beta.nash-atlas.ru (server/beta.sh)
+const ORIGINS = ["https://nash-atlas.ru", "https://beta.nash-atlas.ru"];
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://nash-atlas.ru",  // set per request: the site or its beta copy
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Vary": "Origin",
@@ -19,6 +21,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "public, max-age=86400" } });
 
 Deno.serve(async (req) => {
+  { const o = req.headers.get("origin") ?? ""; CORS["Access-Control-Allow-Origin"] = ORIGINS.includes(o) ? o : ORIGINS[0]; }
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   const u = new URL(req.url).searchParams.get("u") ?? "";
   if (u.length > 300 || !SHORT.some((r) => r.test(u))) return json({ error: "not a short map link" }, 400);

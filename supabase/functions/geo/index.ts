@@ -5,14 +5,17 @@
 import { Reader } from "npm:mmdb-lib@3.0.5";
 import { Buffer } from "node:buffer";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "https://nash-atlas.ru",
+// our sites: the main one and the beta at beta.nash-atlas.ru (server/beta.sh)
+const ORIGINS = ["https://nash-atlas.ru", "https://beta.nash-atlas.ru"];
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://nash-atlas.ru",  // set per request: the site or its beta copy
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Vary": "Origin",
 };
 // both layouts: DB-IP's own file ({country:{iso_code}}) and the ip-location-db copy ({country_code})
-let reader: Reader<{ country?: { iso_code?: string }; country_code?: string }> | null = null;
+// deno-lint-ignore no-explicit-any
+let reader: Reader<any> | null = null;
 try {
   reader = new Reader(Buffer.from(await Deno.readFile(new URL("./country.mmdb", import.meta.url))));
 } catch (err) {
@@ -20,6 +23,7 @@ try {
 }
 
 Deno.serve((req) => {
+  { const o = req.headers.get("origin") ?? ""; CORS["Access-Control-Allow-Origin"] = ORIGINS.includes(o) ? o : ORIGINS[0]; }
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   // Caddy puts the visitor's address first in X-Forwarded-For
   const ip = (req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "").split(",")[0].trim();
