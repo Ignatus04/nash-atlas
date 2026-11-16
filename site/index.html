@@ -317,6 +317,7 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .ap-maps{display:flex;flex-direction:column;padding:2px 0 4px}
 .ap-list{display:flex;flex-direction:column;padding:2px 0}
 .ap-foot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
+.ap-legal{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 12px 4px;font-size:12.5px}.ap-legal a,.ap-legal button{color:var(--muted);text-decoration:none;background:none;border:0;padding:4px 0;font:inherit;cursor:pointer}.ap-legal a:hover,.ap-legal button:hover{color:var(--ink);text-decoration:underline}
 .ap-item{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px;min-height:40px}
 .ap-item:hover{background:var(--panel-2)}
 .ap-item .ic{color:var(--muted);flex:none}
@@ -1750,7 +1751,8 @@ function bindAcctMenu(p,close,rerender){
 function openAcct(){
   closeAcct();
   const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
-  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>`;
+  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>
+    <div class="ap-legal"><a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a><a href="/privacy.html" target="_blank" rel="noopener">Политика обработки данных</a>${consentUsed()?`<button id="apCk">Настройки cookie</button>`:""}</div>`;
   document.body.appendChild(p);
   const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
   if(innerWidth>560){p.style.top=(r.bottom+8)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
@@ -1760,6 +1762,7 @@ function openAcct(){
   (p.querySelector(".ap-item")||p).focus?.();
   bindAcctMenu(p,closeAcct,openAcct);
   p.querySelector("#apGuide").onclick=()=>{closeAcct();openGuide(0)};
+  p.querySelector("#apCk")?.addEventListener("click",()=>{closeAcct();openCookieSettings()});
 }
 
 /* who sees the map: two links (to look, to edit) and the people who joined */
