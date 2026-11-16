@@ -533,6 +533,7 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .ai ul{margin:4px 0 0;padding-left:18px}
 .hint{font-size:12.5px;color:var(--muted)}
 .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.entry-part{font-size:14px;font-weight:600;margin:14px 0 8px}
 .cc-box{position:relative}.cc-box .txt{padding-left:40px}.cc-flag{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex}.cc-flag .fimg{width:20px;height:20px}
 .cc-list{list-style:none;margin:8px 0 0;padding:4px;max-height:min(260px,40vh);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .cc-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;min-height:40px}
@@ -1898,7 +1899,7 @@ function drawCanvas(){
       // countries the data cuts at the date line are filled once more, so the cut doesn't show as a border
       cx.globalAlpha=op; for(const [f,pth] of lod) if(seamCountry(f)){const c=cols.get(f.properties.k)||"#22324c";cx.fillStyle=c;cx.fill(pth);cx.strokeStyle=c;cx.lineWidth=3*lw;cx.stroke(seamPath(f))} cx.globalAlpha=1}
     // zones (safety), disputed territories, lines of control
-    cx.globalAlpha=op;for(const x of cvShapes.parts||[]){cx.fillStyle=x.c;cx.fill(x.p)}cx.globalAlpha=1;
+    cx.globalAlpha=op;for(const x of cvShapes.parts||[]){const c=cols.get(x.dk);if(c&&c!==cols.get(x.ow)){cx.fillStyle=c;cx.fill(x.p)}}cx.globalAlpha=1;
     const zOp=tiles?Math.max(op,.35):1;
     for(const z of cvShapes.zones){cx.globalAlpha=zOp;cx.fillStyle=z.hatch?patAt(zoneHatch(z.l),k):z.c;cx.fill(z.p);
       cx.globalAlpha=.9;cx.strokeStyle=SAFE[z.l].c;cx.lineWidth=1.2*lw;cx.stroke(z.p)}
@@ -1936,6 +1937,7 @@ function cvCountries(){return TILES?S.countries.filter(f=>f.properties.k!=="AQ")
 // colours: fade from the old to the new over half a second when the layer or the selection changes
 function cvSetColors(animate){
   const next=new Map(cvCountries().map(f=>[f.properties.k,rc(colorFor(f.properties.k))]));
+  for(const x of S.safeParts||[]) if(!next.has(x.dk)) next.set(x.dk,rc(colorFor(x.dk)));
   if(!animate||REDUCED||!cvColors.size){cvColors=next;cvAnim=null;requestDraw();return}
   const from=cvColors, ks=[...next.keys()].filter(k=>from.get(k)!==next.get(k)); if(!ks.length){cvColors=next;requestDraw();return}
   const ip=new Map(ks.map(k=>[k,d3.interpolateRgb(from.get(k)||next.get(k),next.get(k))])), t0=performance.now(), me={};
@@ -2044,6 +2046,8 @@ function drawBase(){
   setLod(lodFor(T.k));
   // territories whose real control differs from the claim: hatched, and the line of control drawn on top
   cvShapes.df=S.countries.filter(f=>DEFACTO.has(f.properties.k)).map(f=>p2(path(f))).filter(Boolean);
+  // areas inside another country in this view keep their own entry rules and safety: their own colour wherever it differs
+  cvShapes.parts=(S.safeParts||[]).map(x=>({p:p2(path(x.f)),dk:x.dk,ow:x.ow})).filter(x=>x.p);
   cvShapes.front=S.front?p2(path(S.front)):null; cvShapes.ks=S.ksBorder?p2(path(S.ksBorder)):null;
   drawZones(); if(focusGeo) updateFocus();
   cvSetColors(false); if(!bindCanvasPointer.done){bindCanvasPointer.done=1;bindCanvasPointer()}
@@ -2096,10 +2100,11 @@ function paint(){
 function showTip(e,k){
   const c=S.cByK.get(k); if(!c||!inA(k)) return hideTip();
   const t=$("#tip"); let sf=safeOf(k), nm=c.properties.ru;
-  if(S.layer==="safe"&&S.safeParts?.length){let ll=null;try{const [x,y]=T.invert(d3.pointer(e,svg.node()));ll=proj.invert([x,y]);if(ll)ll=[normLon(ll[0]),ll[1]]}catch(_){}
-    const part=safePartAt(k,ll);if(part){sf=part.sf;nm=part.name}}
+  let ek=k;
+  if(S.safeParts?.length){let ll=null;try{const [x,y]=T.invert(d3.pointer(e,svg.node()));ll=proj.invert([x,y]);if(ll)ll=[normLon(ll[0]),ll[1]]}catch(_){}
+    const part=partAt(k,ll);if(part){sf=safeOf(part.dk);nm=part.name;ek=part.dk}}
   t.innerHTML=S.layer==="safe"?`<b>${esc(nm)}</b>${sf?.l?esc(SAFE[sf.l].label)+(sf.s?`<br><span style="color:var(--muted)">по оценке: ${esc(SRC[sf.s])}</span>`:""):"Нет оценки"}${zonesIn(k).length?`<br>Опасных районов: ${zonesIn(k).length}`:""}`
-    :`<b>${esc(c.properties.ru)}</b>${S.pass.map(p=>{const e=entry(p,k);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
+    :`<b>${esc(nm)}</b>${S.pass.map(p=>{const e=entry(p,ek);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
   const r=$("#mapwrap").getBoundingClientRect();
   t.style.display="block"; t.style.left=Math.min(e.clientX-r.left+14,W-270)+"px"; t.style.top=(e.clientY-r.top+14)+"px";
 }
@@ -2107,15 +2112,14 @@ function hideTip(){$("#tip").style.display="none"}
 function zonesIn(k){return (S.zones||[]).filter(f=>f.properties.k===k)}
 // areas drawn inside another country whose safety differs from it (see applyWorldview)
 function safePartsOf(ow){return (S.safeParts||[]).filter(x=>!ow||x.ow===ow).map(x=>({...x,sf:safeOf(x.dk),l:safeOf(x.dk)?.l})).filter(x=>x.l&&x.l!==safeOf(x.ow)?.l)}
-function safePartAt(k,ll){if(!ll)return null;for(const x of safePartsOf(k)){const [[a,b],[c,d]]=x.b;if(ll[1]<b||ll[1]>d)continue;if(d3.geoContains(x.f,ll))return x}return null}
+function partAt(k,ll){if(!ll)return null;for(const x of (S.safeParts||[]).filter(x=>x.ow===k)){const [[a,b],[c,d]]=x.b;if(ll[1]<b||ll[1]>d)continue;if(d3.geoContains(x.f,ll))return x}return null}
 function zoneInfo(id){return S.safety?.z?.[id]||null}
 function drawZones(){
-  cvShapes.parts=S.layer==="safe"?safePartsOf().map(x=>({p:p2(path(x.f)),c:SAFE[x.l].c})).filter(x=>x.p):[];
   if(!S.zones){requestDraw();return}
   // entry map: only "do not go" regions, as a hatch; safety map: every flagged region
   const vis=S.zones.filter(f=>{const z=zoneInfo(f.properties.id);return z&&z.l&&(S.layer==="safe"||z.l===4)});
   cvShapes.zones=vis.map(f=>{const z=zoneInfo(f.properties.id);return {p:p2(path(f)),l:z.l,hatch:!!(z.p||S.layer!=="safe"),c:SAFE[z.l].c}}).filter(z=>z.p);
-  cvShapes.parts=S.layer==="safe"?safePartsOf().map(x=>({p:p2(path(x.f)),c:SAFE[x.l].c})).filter(x=>x.p):[];
+
   requestDraw();
 }
 function placeZone(p){if(!S.zones)return null;if(p.__z!==undefined)return p.__z;let best=null;
@@ -3161,7 +3165,9 @@ function entryBlock(k){
       :`Сложнее всего с паспортом ${pName(non.find(([,e])=>legendCode(e.c)===legendCode(worst))[0])}: ${ST[worst].label.toLowerCase()}`;
     return `<div class="verdict" style="--c:${ST[legendCode(worst)]?.c||ST.U.c}">${esc(t)}</div>`})();
   const own=S.pass.filter(p=>S.visa?.[p]), other=S.pass.filter(p=>!S.visa?.[p]);
-  return `<section class="blk"><h2>Въезд</h2>${verdict}<div class="entry">${es.map(([p,e])=>row(p,e)).join("")}</div>
+  const parts=(S.safeParts||[]).filter(x=>x.ow===k).map(x=>({x,pe:S.pass.map(p=>[p,entry(p,x.dk)])})).filter(({pe})=>pe.some(([p,e],i)=>e.c!==es[i][1].c||e.s!==es[i][1].s));
+  const partsHtml=parts.map(({x,pe})=>`<h3 class="entry-part">${esc(x.name)}: свои правила въезда</h3><div class="entry">${pe.map(([p,e])=>row(p,e)).join("")}</div>`).join("");
+  return `<section class="blk"><h2>Въезд</h2>${verdict}<div class="entry">${es.map(([p,e])=>row(p,e)).join("")}</div>${partsHtml}
   <div class="src">Для поездки по одному паспорту, без ВНЖ и других виз.${own.length?` ${own.map(pName).join(" и ")}: сверено по Википедии (${own.map(p=>`<a href="${WIKI[p]}" target="_blank" rel="noopener">${pName(p)}</a>`).join(", ")}) и новостям на ${fmtDate(S.visa.updated)}.`:""}${other.length?` ${esc(other.map(pName).join(", "))}: данные <a href="https://www.passportindex.org/" target="_blank" rel="noopener">Passport Index</a> на 17 февраля 2026 года, их стоит перепроверить.`:""} Перед поездкой сверьтесь с сайтом посольства.</div></section>`;
 }
 function fmtDate(iso){const d=new Date(iso+"T12:00:00");return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"})}
@@ -4071,7 +4077,7 @@ function homeCountryCheck(u){
 async function askHomeCountry(change){
   const geo=await (S.geoP||Promise.resolve(null)), cur=S.acct?.user?.user_metadata?.country||null;
   let pick=cur||geo||S.view?.cc||"";
-  const all=[...(S.ccNames||new Map()).keys()].map(k=>[k,ccName(k)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1],"ru"));
+  const all=(S.wv?.members||[...(S.ccNames||new Map()).keys()]).map(k=>[k,ccName(k)]).filter(x=>x[1]).sort((a,b)=>a[1].localeCompare(b[1],"ru"));
   const {el,close}=modal("homeBox",`<h2 id="homeT">Ваша страна</h2>
     <p>Укажите страну, в которой живёте: так карта будет точнее для вас.</p>
     <label class="f" for="homeIn">Страна</label>

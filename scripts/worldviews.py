@@ -130,9 +130,13 @@ for v in countries + ['VA']:
 KASHMIR = ('~Jammu and Kashmir', '~Aksai Chin', '~Shaksam Valley', '~Gilgit-Baltistan', '~Azad Kashmir', '~Siachen Glacier',
            '~Demchok', '~Samdu Valleys', '~Tirpani Valleys', '~Bara Hotii Valleys', '~Arunachal Pradesh', '~Junagadh and Manavadar')
 for k in KASHMIR: views['RU'].pop(k, None)
-# a partly recognized state sees itself
-for k in ('XK', 'TW', 'XA', 'XO', 'XN', 'XS', 'EH', 'XT'):
-    if k in views: views[k][k] = k
+# unrecognized and partly recognized states and other territories: their own view does not count (owner's decision);
+# visitors from there see the UN view. Only UN members and observers (VA, PS) are offered as "your country".
+NOT_STATES = {'XK', 'TW', 'XA', 'XO', 'XN', 'XS', 'EH', 'XT', 'XU'}
+members = sorted({A3.get(p['ADM0_A3']) for f in ne for p in [f['properties']]
+                  if p['SOVEREIGNT'] == p['ADMIN'] and p['TYPE'] in ('Sovereign country', 'Country')} - NOT_STATES - {None, '-99'} | {'VA', 'PS', 'CU', 'IL', 'KZ'})   # three the Natural Earth fields miss
+views = {v: m for v, m in views.items() if v not in NOT_STATES}
+print('members', len(members))
 # the disputing sides themselves
 views['RS']['XK'] = 'RS'; views['CN']['TW'] = 'CN'; views['GE'].update({'XA': 'GE', 'XO': 'GE'})
 # Belarus (our rule): the de facto line in Ukraine; otherwise the UN view, which matches its recognitions
@@ -196,7 +200,7 @@ partNames = {'all': {'XK': 'Косово', 'TW': 'Тайвань', 'XU': 'Тер
                     '~UA-claim': 'Часть ДНР, Запорожской и Херсонской областей вне контроля российских властей'}}
 regionNames = {'RU': {'UKR-327': 'Донецкая Народная Республика', 'UKR-329': 'Луганская Народная Республика',
                       'RUS-283': 'Республика Крым', 'RUS-5482': 'Севастополь'}}
-json.dump({'intl': INTL, 'views': views, 'cityUk': cityUk, 'regionNames': regionNames, 'partNames': partNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
+json.dump({'intl': INTL, 'views': views, 'members': members, 'cityUk': cityUk, 'regionNames': regionNames, 'partNames': partNames, 'source': 'Natural Earth disputed areas (public domain), DB-IP Lite'},
           open(R + 'site/data/worldviews.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print('pieces', [(k, h, round(g.area * KM2)) for k, g, h, _ in pieces])
 print('views', len(views), 'RU', views['RU'], 'BY', views['BY'], 'US', views['US'])
