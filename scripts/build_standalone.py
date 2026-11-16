@@ -10,7 +10,7 @@ for url,path in libs.items():
     code=open(path,encoding='utf-8').read().replace('</script','<\\/script')
     html=html.replace(tag,'<script>'+code+'</script>')
 data={}
-for n in ['countries','worldviews','cities','meta','visa','lists','admin1','flags','descs','urban','safety','safezones','visa_all','passports','airports','areaplaces','admnames']:
+for n in ['countries','cities','meta','visa','lists','admin1','flags','descs','urban','safety','safezones','visa_all','passports','airports','areaplaces','admnames']:
     data[n]=json.load(open(S+f'data/{n}.json',encoding='utf-8'))
 blob=json.dumps(data,ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
 marker='<script>\n"use strict";'

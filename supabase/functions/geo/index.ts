@@ -25,8 +25,7 @@ Deno.serve((req) => {
   const ip = (req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "").split(",")[0].trim();
   let c: string | null = null;
   try { const r = ip ? reader?.get(ip) : null; c = r?.country?.iso_code || r?.country_code || null; } catch { c = null; }
-  // db: false means server/geo.sh has not put the database next to this file yet
-  return new Response(JSON.stringify({ c, db: Boolean(reader) }), {
+  return new Response(JSON.stringify({ c }), {
     headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "private, no-store" },
   });
 });
