@@ -684,13 +684,15 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-seg2 span.act{color:var(--ocean)}
 .ga-pass{display:grid;place-items:center}
 .ga-ph{display:flex;gap:10px;justify-content:center;padding-top:12px}
-.ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;opacity:0;transform:translateY(14px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-cg{width:84px;display:flex;flex-direction:column;gap:6px;animation:gaIn .7s var(--spring-soft) both;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-cg i{display:block;height:50px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
 .ga-cg b{font-size:12px;color:var(--ink)}
-.ga-prow{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;opacity:0;animation:gaCg .7s var(--spring-soft) .6s forwards;transform:translateY(14px)}
+.ga-prow{position:absolute;left:50%;bottom:10px;width:220px;margin-left:-110px;display:flex;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;animation:gaIn .7s var(--spring-soft) .6s both}
 .ga-prow i{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#c98b5a,#7a4a2c);flex:none}
 .ga-prow span{display:flex;flex-direction:column;gap:6px;flex:1}.ga-prow b{display:block;height:7px;border-radius:4px;background:#3a4f70}.ga-prow b+b{width:60%;background:#2a3b57}
 @keyframes gaCg{to{opacity:1;transform:none}}
+/* pictures are visible on their own and only come in from hidden: with animations off (iOS «Уменьшение движения») they still show */
+@keyframes gaIn{from{opacity:0;transform:translateY(14px)}}@keyframes gaStoryIn{from{opacity:0;transform:translateY(14px) rotate(-4deg)}}
 /* scene «Несколько карт»: the map switcher in «Мои места» opens the list, a new map is added, another map is opened */
 .ga-mp{display:flex;justify-content:center}
 .ga-mp-p{position:relative;width:min(250px,86%);margin-top:12px;display:flex;flex-direction:column;gap:7px}
@@ -716,19 +718,19 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-mp.added .ga-mp-o.nw{opacity:1;transform:none}
 .ga-mp-a{height:22px;border-radius:7px;display:flex;align-items:center;gap:6px;padding:0 8px;font:700 11.5px var(--body);color:var(--accent)}
 .ga-bn{display:flex;align-items:center;justify-content:center;gap:14px}
-.ga-bn span{opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards}
+.ga-bn span{animation:gaIn .7s var(--spring-soft) both}
 .ga-b1,.ga-b2{font-weight:700;font-size:15px;padding:8px 14px;border-radius:999px;color:#10151f}
 .ga-b1{background:#ff8a5c;animation-delay:.15s!important}.ga-ar{color:var(--muted);font-size:20px;animation-delay:.35s!important}.ga-b2{background:#5fd0ff;animation-delay:.55s!important}
 .ga-sh{display:flex;align-items:center;justify-content:center;gap:22px}
-.ga-story{width:96px;height:170px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);opacity:0;transform:translateY(14px) rotate(-4deg);animation:gaCg .8s var(--spring-soft) .15s forwards}
+.ga-story{width:84px;height:138px;border-radius:14px;background:linear-gradient(180deg,#0b1526,#13243d);border:1px solid #2c4062;padding:10px 9px;display:flex;flex-direction:column;gap:3px;box-shadow:0 12px 26px rgba(0,0,0,.4);animation:gaStoryIn .8s var(--spring-soft) .15s both}
 .ga-story b{font-size:8px;color:#9aa7bb}.ga-story em{font-style:normal;font-weight:800;font-size:30px;color:#ff8a5c;line-height:1}
 .ga-story i{flex:1;margin:6px 0;border-radius:8px;background:radial-gradient(circle at 40% 45%,#ff8a5c 0 18%,transparent 19%),radial-gradient(circle at 70% 60%,#ff8a5c 0 12%,transparent 13%),#22324c}
 .ga-story span{font-size:8px;color:#eef1f6;font-weight:700}
-.ga-fans{display:flex;align-items:center;opacity:0;transform:translateY(14px);animation:gaCg .8s var(--spring-soft) .45s forwards}
+.ga-fans{display:flex;align-items:center;animation:gaIn .8s var(--spring-soft) .45s both}
 .ga-fans .av{margin-left:-6px;box-shadow:0 0 0 2px var(--panel)}.ga-fans .av:first-child{margin-left:0}
 .ga-fans b{margin-left:10px;font-size:12px;background:var(--accent,#ff8a5c);color:#1a1206;padding:6px 10px;border-radius:10px}
 .ga-rg{display:flex;flex-direction:column;gap:8px;padding:14px 24px}
-.ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;opacity:0;transform:translateY(12px);animation:gaCg .7s var(--spring-soft) forwards;animation-delay:calc(var(--i)*.12s + .15s)}
+.ga-rgr{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;animation:gaIn .7s var(--spring-soft) both;animation-delay:calc(var(--i)*.12s + .15s)}
 .ga-rgr b{font-size:12.5px;color:var(--ink)}.ga-rgr span{height:6px;width:80%;border-radius:3px;background:#3a4f70}.ga-rgr i{font-style:normal;font-size:11px;color:#cfe6ff}
 .ga-rgr em{position:absolute;right:10px;top:7px;font-style:normal;font-size:11px;color:var(--muted)}
 .ga-pp{position:absolute;left:50%;top:22px;width:70px;height:96px;margin-left:-35px;border-radius:9px;background:linear-gradient(160deg,#7d2430,#4f1520);box-shadow:0 10px 24px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:7px;animation:gaFanL 4.2s var(--spring) infinite}
@@ -769,7 +771,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-pin2{position:absolute;left:50%;top:50%;width:26px;height:37px;margin:-37px 0 0 -13px;translate:var(--x) var(--y);opacity:0;filter:drop-shadow(0 4px 5px rgba(0,0,0,.45))}
 .ga-pin2 svg{position:absolute;inset:0;width:100%;height:100%;fill:var(--c);stroke:#0c1626;stroke-width:1.2}
 .ga-pin2 .fimg{position:absolute;left:5px;top:5px;width:16px;height:16px;border-radius:50%;object-fit:cover}
-.ga-pin2.on{animation:gaDrop2 .75s var(--spring-soft) forwards}
+.ga-pin2.on{opacity:1;animation:gaDrop2 .75s var(--spring-soft) both}
 .ga-still svg{position:absolute;inset:0;width:100%;height:100%}
 @media (max-width:860px){.ga-pl .ga-pin2{opacity:1;animation:none}}
 .ga-still path{stroke:#1b3a5f;stroke-width:.5}
