@@ -2646,10 +2646,10 @@ function gaSafeScene(root){
   btns.forEach((b,j)=>b.classList.toggle("act",j===0)); liquid(seg,pill,btns[0]); gaLater(flip,1400);
 }
 // a still globe turned towards Europe, with flag pins at real cities
-const GA_PINS=[["PT",-9.14,38.72,"want"],["FI",24.94,60.17,"want"],["IT",12.5,41.9,"want"],["JO",35.93,31.95,"want"]];
+const GA_PINS=[["US",-118.24,34.05,"want"],["MX",-99.13,19.43,"want"],["CU",-82.37,23.13,"want"],["CO",-74.08,4.71,"want"]];
 function gaStillGlobe(size){
   if(!gaWorld()) return `<div class="ga-globe" style="--s:${size}px"><div class="ga-wait"></div></div>`;
-  const pj=d3.geoOrthographic().rotate([-14,-44]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
+  const pj=d3.geoOrthographic().rotate([100,-20]).scale(size*.85).translate([size/2,size/2]).clipAngle(90), pth=d3.geoPath({stream:o=>pj.stream(thin(o,0.5))});
   const land=S.countries.filter(f=>f.properties.k!=="AQ").map(f=>{const d=pth(f);return d?`<path d="${d}" style="fill:${gaEntryC(f.properties.k)}"/>`:""}).join("");
   const pins=GA_PINS.map(([k,lon,lat,st],i)=>{const [x,y]=pj([lon,lat]);return `<i class="ga-pin2" style="--x:${(x-size/2).toFixed(1)}px;--y:${(y-size/2).toFixed(1)}px;--c:${PIN[st].c}"><svg viewBox="-13 -36 26 37"><path d="${PIN_PATH}"/></svg>${flagImg(k)}</i>`}).join("");
   return `<div class="ga-globe ga-still" style="--s:${size}px"><svg viewBox="0 0 ${size} ${size}" aria-hidden="true">${land}</svg><i class="ga-shade"></i></div>${pins}`;
@@ -2664,12 +2664,13 @@ function gaPinScene(root){
 const GUIDE_VER=13;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
-const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
+// every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
+const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.col,["IT","TN","FR","PT","AT","HU","PL","JO","NL"],false)},
+    run:r=>gaTapScene(r,GUIDE_VB.col,["FR","IT","ES","NL","AT","DE","CH","BE"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
     m:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в любой момент.",
     mob:"Если едете вдвоём или компанией, отметьте все паспорта. Тогда страна раскрасится по самому строгому правилу из них. Паспорта меняются в Профиле.",
@@ -2678,7 +2679,7 @@ const GUIDE=[
     m:"Нажмите на страну на карте или найдите её в списке справа. Выедет карточка: условия въезда, срок пребывания, опасные районы и ваши места в этой стране.",
     mob:"Нажмите на страну на карте или найдите её в разделе «Страны». Внизу появится карточка: условия въезда, срок, опасные районы и ваши места. Потяните её вверх, чтобы прочитать всё.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.card,gaEntryC)}${gaPointer()}<div class="ga-sheet"></div></div>`,
-    run:r=>gaTapScene(r,GUIDE_VB.card,["IT","FR","AT","CZ","PL","HU"],true)},
+    run:r=>gaTapScene(r,GUIDE_VB.card,["FR","IT","DE","NL","AT","ES"],true)},
   {since:1, t:"Въезд или безопасность",
     m:"Переключатель «Въезд / Безопасность» сверху перекрашивает карту по советам МИДов: где спокойно, где стоит быть осторожнее, а куда лучше не ехать.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.safe,gaEntryC)}${gaMap(GUIDE_VB.safe,gaSafeC,"ga-top")}<div class="ga-seg2"><span class="lq"></span><span>Въезд</span><span>Безопасность</span></div></div>`,
