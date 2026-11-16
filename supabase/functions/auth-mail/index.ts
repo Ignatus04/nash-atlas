@@ -6,10 +6,11 @@
 //    through Yandex Cloud Postbox only if step 1 let this address through. A script that calls Supabase directly,
 //    without the captcha, gets no email.
 //
-// Secrets (Supabase → Edge Functions → Secrets): SMARTCAPTCHA_SERVER_KEY, POSTBOX_API_KEY (the secret part of the
-// Postbox API key, the same one as the SMTP password), SEND_EMAIL_HOOK_SECRET (from the hook settings, "v1,whsec_…").
+// Secrets: POSTBOX_KEY_ID + POSTBOX_KEY_SECRET (a static access key of the postbox-sender service account),
+// SEND_EMAIL_HOOK_SECRET ("v1,whsec_…"), optionally SMARTCAPTCHA_SERVER_KEY.
 // SUPABASE_URL and SUPABASE_DB_URL are provided by Supabase itself.
 import { Webhook } from "npm:standardwebhooks@1.0.0";
+import { AwsClient } from "npm:aws4fetch@1.0.20";
 
 // the public address (on our own server SUPABASE_URL is the internal gateway, not reachable from an email)
 const URL_ = Deno.env.get("SUPABASE_PUBLIC_URL") ?? Deno.env.get("SUPABASE_URL")!;
@@ -106,6 +107,12 @@ const TEMPLATE = `<!doctype html>
 </html>
 `;
 
+const KEY_ID = Deno.env.get("POSTBOX_KEY_ID") ?? "", KEY_SECRET = Deno.env.get("POSTBOX_KEY_SECRET") ?? "";
+const aws = KEY_ID && KEY_SECRET ? new AwsClient({ accessKeyId: KEY_ID, secretAccessKey: KEY_SECRET, service: "ses", region: "ru-central1" }) : null;
+const postbox = (url: string, init: RequestInit) =>
+  aws ? aws.fetch(url, init)
+      : fetch(url, { ...init, headers: { ...(init.headers as Record<string, string>), Authorization: `Api-Key ${Deno.env.get("POSTBOX_API_KEY") ?? ""}` } });
+
 async function hook(req: Request) {
   const payload = await req.text();
   const secret = (Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "").replace(/^v1,whsec_/, "");
@@ -128,9 +135,10 @@ async function hook(req: Request) {
   const esc = (s: string) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
   const html = TEMPLATE.replaceAll("{{ .Token }}", esc(e.token ?? "")).replaceAll("{{ .ConfirmationURL }}", esc(link));
   const text = `Код для входа в «Наш атлас»: ${e.token}\n\nВведите его в окне входа на сайте nash-atlas.ru. Код действует час и подходит для одного входа.\nИли войдите по ссылке: ${link}\n\nЕсли вход запрашивали не вы, удалите письмо.`;
-  const r = await fetch("https://postbox.cloud.yandex.net/v2/email/outbound-emails", {
+  // Postbox's Amazon-compatible API takes a static access key (Signature V4); an API key works only for SMTP
+  const r = await postbox("https://postbox.cloud.yandex.net/v2/email/outbound-emails", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Api-Key ${Deno.env.get("POSTBOX_API_KEY") ?? ""}` },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       FromEmailAddress: FROM,
       Destination: { ToAddresses: [email] },

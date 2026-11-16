@@ -26,6 +26,8 @@ services:
       VERIFY_JWT: "false"
       SMARTCAPTCHA_SERVER_KEY: ${SMARTCAPTCHA_SERVER_KEY:-}
       POSTBOX_API_KEY: ${POSTBOX_API_KEY:-}
+      POSTBOX_KEY_ID: ${POSTBOX_KEY_ID:-}
+      POSTBOX_KEY_SECRET: ${POSTBOX_KEY_SECRET:-}
       SEND_EMAIL_HOOK_SECRET: ${SEND_EMAIL_HOOK_SECRET:-}
 
   # the database and its pooler are reachable only inside the server, never from the internet
