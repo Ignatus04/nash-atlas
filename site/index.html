@@ -1475,6 +1475,7 @@ async function openCloud(){
   oauthErrorFromUrl();
   const {data:{session}}=await sb.auth.getSession();
   S.acct.user=session?.user||null;
+  homeCountryCheck(S.acct.user);
   sb.auth.onAuthStateChange((ev,s)=>{const was=S.acct.user?.id||null,now=s?.user?.id||null;if(ev==="SIGNED_OUT"||(ev==="SIGNED_IN"&&was!==now))setTimeout(()=>location.reload(),50)});
   const tok=shareTokenFromUrl();
   if(tok&&S.acct.user){ // joining a shared map
@@ -1691,7 +1692,7 @@ function openDeleteAccount(){
     const {error}=await sb.rpc("delete_my_account");
     if(error){go.disabled=false;go.textContent="Удалить навсегда";status("Не получилось удалить аккаунт. Попробуйте ещё раз или напишите на ignat.shubin0409@gmail.com",7000);return}
     try{["atlas-map","atlas-migrate-hide"].forEach(k=>localStorage.removeItem(k))}catch(e){}
-    await sb.auth.signOut().catch(()=>{}); close(); status("Аккаунт удалён",4000); setTimeout(()=>location.reload(),900)};
+    await sb.auth.signOut().catch(()=>{}); homeSet(null); close(); status("Аккаунт удалён",4000); setTimeout(()=>location.reload(),900)};
 }
 /* the account popover: who, which map, and a short list of actions */
 function mapStats(){const n=S.places?.size||0;const ks=new Set();S.places?.forEach(p=>p.k&&ks.add(p.k));
@@ -1715,6 +1716,7 @@ function acctMenuHTML(){
       ${item("apOut","down","Скачать копию карты")}
       ${!ro?item("apIn","up","Загрузить копию"):""}
       ${item("apNew","plus","Новая карта")}
+      ${CFG.supabaseUrl?item("apHome","globe","Страна для границ",`<span class="ap-r">${esc(S.ccNames?.get(a.user.user_metadata?.country)||"не указана")}</span>`):""}
     </div>
     <div class="ap-list ap-foot">${own?"":item("apLeave","leave","Убрать из моих карт")}${item("apSignOut","out","Выйти")}${item("apDel","x","Удалить аккаунт")}</div>`;
 }
@@ -1729,7 +1731,8 @@ function bindAcctMenu(p,close,rerender){
   on("apNew",async()=>{const {data,error}=await sb.from("maps").insert({name:"Новая карта"}).select().single();if(error){status("Карта не создалась. Проверьте интернет и попробуйте снова.",5000);return}switchMap(data.id)});
   on("apLeave",async()=>{const {error}=await sb.from("map_members").delete().eq("map_id",a.map.id).eq("user_id",a.user.id);if(error){status("Не получилось убрать карту. Попробуйте ещё раз.",5000);return}try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
   on("apDel",()=>{close();openDeleteAccount()});
-  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map")}catch(e){}location.reload()});
+  on("apSignOut",async()=>{await sb.auth.signOut();try{localStorage.removeItem("atlas-map");localStorage.removeItem("atlas-home")}catch(e){}location.reload()});
+  on("apHome",()=>{close();askHomeCountry(true)});
   p.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>switchMap(b.dataset.map));
   on("apRename",()=>{const box=p.querySelector("#apName");box.innerHTML=`<form class="ap-ren"><label class="sr" for="apNameIn">Название карты</label><input class="txt" id="apNameIn" maxlength="80" value="${esc(a.map.name)}"><button class="iconbtn" aria-label="Сохранить название">${ic("check",16)}</button></form>`;
     const f=box.querySelector("form"), i=box.querySelector("input"); i.focus(); i.select();
@@ -2594,7 +2597,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=11;
+const GUIDE_VER=12;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 const GUIDE_VB={col:[-12,60,40,30],card:[-6,56,26,38],safe:[-12,64,72,22]};
@@ -2643,6 +2646,9 @@ const GUIDE=[
   {since:11, t:"Любое место через поиск",
     m:"Наберите в поиске музей, пляж, парк или улицу и выберите «Найти на карте мира». Найденное место появится на карте, а добавить его можно кнопкой «+ Добавить в мои места».",
     art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Лувр</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#ff8a5c">+ Место</span></div>`},
+  {since:12, t:"Границы вашей страны",
+    m:"Спорные территории карта показывает так, как их официально признаёт страна, из которой вы её открыли. Если вы вошли в аккаунт, страну можно указать самому: меню аккаунта → «Страна для границ».",
+    art:()=>`<div class="ga ga-bn"><span class="ga-b1" style="background:#cfe6ff">Страна</span><span class="ga-ar">→</span><span class="ga-b2" style="background:#9ee6b8">Границы</span></div>`},
 ];
 const TOUR=[
   {since:2, sel:{m:'.seg[aria-label="Что показывать на карте"]',d:'.seg[aria-label="Что показывать на карте"]'}, t:"Въезд или безопасность", m:"Переключает, чем раскрашена карта."},
@@ -4025,17 +4031,53 @@ function ensureAdm(){
 // if it cannot be found, the international (UN) view is used. Belarus sees the de facto map (Ukraine's de facto line).
 async function viewerCountry(){
   if(!CFG.supabaseUrl) return "RU";   // offline copy without our server
-  try{const q=new URLSearchParams(location.search).get("view");if(q)return q.toUpperCase()}catch(e){}
-  try{const c=sessionStorage.getItem("atlas-cc");if(c)return c==="-"?tzCountry():c}catch(e){}
+  try{const q=new URLSearchParams(location.search).get("view");if(q){S.viewParam=1;return q.toUpperCase()}}catch(e){}
+  S.geoP=geoCountry();
+  // a signed-in visitor told us their country: it wins over the address. openCloud checks it against the account.
+  const h=homeSaved(); if(h) return h.c;
+  return S.geoP}
+// checked on every visit, not remembered: a guest may be travelling
+async function geoCountry(){
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
-    const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal});clearTimeout(t);
-    const c=r.ok?(await r.json()).c:null;try{sessionStorage.setItem("atlas-cc",c||"-")}catch(e){}return c||tzCountry()}catch(e){return tzCountry()}}
+    const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal,cache:"no-store"});clearTimeout(t);
+    return (r.ok?(await r.json()).c:null)||tzCountry()}catch(e){return tzCountry()}}
+function homeSaved(){try{const h=JSON.parse(localStorage.getItem("atlas-home")||"null");return h&&h.c?h:null}catch(e){return null}}
+function homeSet(h){try{h?localStorage.setItem("atlas-home",JSON.stringify(h)):localStorage.removeItem("atlas-home")}catch(e){}}
+// after sign-in is known: the account's country (user_metadata.country) decides the borders; ask once if there is none
+function homeCountryCheck(u){
+  const h=homeSaved();
+  if(!u){if(h){homeSet(null);if(!S.viewParam)location.reload()}return}
+  const c=u.user_metadata?.country;
+  if(c){if(!h||h.c!==c||h.u!==u.id){homeSet({u:u.id,c});if(!S.viewParam&&S.view?.cc!==c)location.reload()}return}
+  if(h&&h.u!==u.id)homeSet(null);
+  let later=false;try{later=!!sessionStorage.getItem("atlas-home-later")}catch(e){}
+  // wait until the welcome guide, the tour and the passport picker are closed
+  const tryAsk=()=>document.querySelector(".amodal,#tour,#ppick")?setTimeout(tryAsk,2500):askHomeCountry(false);
+  if(!later)setTimeout(tryAsk,1800)}
+async function askHomeCountry(change){
+  const geo=await (S.geoP||Promise.resolve(null)), cur=S.acct?.user?.user_metadata?.country||null;
+  const pre=cur||geo||S.view?.cc||"";
+  const names=[...(S.ccNames||new Map())].sort((a,b)=>a[1].localeCompare(b[1],"ru"));
+  const {el,close}=modal("homeBox",`<h2 id="homeT">${change?"Ваша страна":"Из какой вы страны?"}</h2>
+    <p>Спорные границы на карте показываются так, как их официально признаёт ваша страна.${geo&&!cur?` По адресу подключения похоже на «${esc(S.ccNames?.get(geo)||geo)}».`:""}</p>
+    <label class="f" for="homeIn">Страна</label>
+    <select class="txt" id="homeIn">${names.map(([k,n])=>`<option value="${esc(k)}"${k===pre?" selected":""}>${esc(n)}</option>`).join("")}</select>
+    <p class="hint">Запомним в аккаунте. Изменить можно в меню аккаунта.</p>
+    <div class="ck-acts" style="margin-top:14px">${change?"":`<button class="btn" id="homeLater">Потом</button>`}<button class="btn primary" id="homeGo">Сохранить</button></div>`,{labelledby:"homeT"});
+  el.querySelector("#homeLater")?.addEventListener("click",()=>{try{sessionStorage.setItem("atlas-home-later","1")}catch(e){}close()});
+  const go=el.querySelector("#homeGo");
+  go.onclick=async()=>{const c=el.querySelector("#homeIn").value;go.disabled=true;go.textContent="Сохраняю…";
+    const {data,error}=await sb.auth.updateUser({data:{country:c}});
+    if(error){go.disabled=false;go.textContent="Сохранить";status("Не сохранилось. Проверьте интернет и попробуйте ещё раз.",5000);return}
+    if(data?.user)S.acct.user=data.user;homeSet({u:S.acct.user.id,c});close();
+    if(c!==S.view?.cc){status("Обновляю карту…",3000);setTimeout(()=>location.reload(),400)}else status("Сохранено",2500)}}
 // the server did not answer: a Russian or Belarusian time zone is a good enough sign of where the visitor is
 function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
   if(z==="Europe/Minsk")return "BY";
   if(/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/.test(z))return "RU"}catch(e){}return null}
 function applyWorldview(ct,wv,cc){
   const o=ct.objects[Object.keys(ct.objects)[0]];
+  S.ccNames=new Map(o.geometries.filter(g=>g.properties.k&&g.properties.k[0]!=="~"&&g.properties.k!=="XU"&&g.properties.ru).map(g=>[g.properties.k,g.properties.ru]));
   // the UN view, plus where this country's official position differs from it
   const map=wv?{...wv.intl,...(wv.views[cc]||{})}:{};
   S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};S.wv=wv;

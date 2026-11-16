@@ -125,6 +125,13 @@ for v in countries + ['VA']:
     for d in POS.values():
         if v in d['who']: m.update(d['map'])
     views[v] = m
+# Russia: Kashmir along the line of control, as on UN maps (owner's decision), not Natural Earth's Indian Kashmir
+KASHMIR = ('~Jammu and Kashmir', '~Aksai Chin', '~Shaksam Valley', '~Gilgit-Baltistan', '~Azad Kashmir', '~Siachen Glacier',
+           '~Demchok', '~Samdu Valleys', '~Tirpani Valleys', '~Bara Hotii Valleys', '~Arunachal Pradesh', '~Junagadh and Manavadar')
+for k in KASHMIR: views['RU'].pop(k, None)
+# a partly recognized state sees itself
+for k in ('XK', 'TW', 'XA', 'XO', 'XN', 'XS', 'EH', 'XT'):
+    if k in views: views[k][k] = k
 # the disputing sides themselves
 views['RS']['XK'] = 'RS'; views['CN']['TW'] = 'CN'; views['GE'].update({'XA': 'GE', 'XO': 'GE'})
 # Belarus (our rule): the de facto line in Ukraine; otherwise the UN view, which matches its recognitions
