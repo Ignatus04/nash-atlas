@@ -40,6 +40,8 @@ alter default privileges in schema public grant all on functions to anon, authen
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 SQL
 grep -v '^CREATE SCHEMA public;$\|^COMMENT ON SCHEMA public' schema.sql | $PSQL
+# a repeated run: the accounts copied last time are replaced by the fresh ones (sessions go with them)
+echo "truncate auth.users cascade;" | $PSQL
 # triggers off while copying rows, otherwise «add owner on new map» would duplicate members
 ( echo "set session_replication_role = replica;"; cat auth.sql; cat data.sql ) | $PSQL
 # realtime for the shared maps, and the functions that may not have been run in the cloud
