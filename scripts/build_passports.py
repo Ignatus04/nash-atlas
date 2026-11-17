@@ -39,6 +39,11 @@ for x in json.load(open('/tmp/ppd/atlas-passports-2.json')):
 json.dump({'updated': '2026-02-17', 'dest': dests, 'p': codes, 'd': days}, open(D + 'visa_all.json', 'w'), separators=(',', ':'))
 # Identity pages and unclear attribution-only files must never be restored.
 for k in ('PY','UY','GL','FO'): cov.pop(k,None)
+# Preserve the separately reviewed CC0 cover; never restore the former identity page.
+try:
+    reviewed=json.load(open(D+'passports.json')).get('PY')
+    if reviewed and reviewed.get('page')=='https://commons.wikimedia.org/wiki/File:PARAGUAY_PASSPORT_PIC.webp' and reviewed.get('lic')=='CC0': cov['PY']=reviewed
+except (OSError,ValueError): pass
 json.dump(cov, open(D + 'passports.json', 'w'), separators=(',', ':'))
 import os
 print('passports', len(P), 'covers', len(cov), 'missing covers', sorted(set(P) - set(cov)))
