@@ -55,6 +55,10 @@
 - Страницы собираются с Content-Security-Policy (`scripts/build_web.py`): скрипты только свои, хэшированные встроенные и Яндекс после согласия. Новый внешний сервис (API, картинки, скрипт, iframe) нужно добавить в CSP, иначе браузер его заблокирует. Проверка: событие `securitypolicyviolation` в консоли.
 - Код входа на почту защищён Яндекс SmartCaptcha: сайт (`captchaPass`) → функция `auth-mail?captcha` → пропуск в `captcha_pass` → хук Supabase «Send Email» вызывает ту же `auth-mail`, она шлёт письмо через Postbox только по пропуску. Подробности — `supabase/email/README.md`.
 
+## Android
+- Приложение для Android — оболочка TWA вокруг боевого сайта: настройки в `android/twa-manifest.json`, порядок сборки и подписи в `android/README.md`. Ключ подписи (`*.keystore`) в репозиторий не кладётся.
+- Связь с сайтом — `/.well-known/assetlinks.json`: сборка создаёт его из отпечатков в `android/fingerprint.txt` (`scripts/build_web.py`). Изменение иконок и манифеста (`web-src/`, манифест в `build_web.py`) требует новой сборки приложения.
+
 ## Данные
 - `site/data/lists.json` — личные списки, в публичную сборку не попадают.
 - Секреты (ключи Supabase, Postbox, Google, Яндекс) в репозиторий не кладутся.

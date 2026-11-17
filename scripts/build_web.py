@@ -91,12 +91,21 @@ for f in ('privacy.html','terms.html','consent.html'):
   t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)
   open(OUT+f,'w',encoding='utf-8').write(t)
 for f in ['icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']: shutil.copy(SRC+f,OUT+'icons/'+f)
-json.dump({"name":"Наш атлас"+(" · бета" if BETA else ""),"short_name":"Атлас β" if BETA else "Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
-  "lang":"ru","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",
+json.dump({"id":"./","name":"Наш атлас"+(" · бета" if BETA else ""),"short_name":"Атлас β" if BETA else "Атлас","description":"Карта путешествий: места, правила въезда, безопасность.",
+  "lang":"ru","categories":["travel","navigation"],"start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"#0f1a2e","theme_color":"#13213a",
   "share_target":{"action":"./","method":"GET","params":{"title":"addtitle","text":"addtext","url":"add"}},
   "icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png"},
            {"src":"icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]},
   open(OUT+'manifest.webmanifest','w',encoding='utf-8'),ensure_ascii=False,indent=1)
+
+# Android app (TWA): Digital Asset Links tie the app to this site. The fingerprint is the SHA-256 of the app signing key (android/README.md); it is public.
+fp=ROOT+'android/fingerprint.txt'
+if os.path.exists(fp):
+  fps=[l.strip() for l in open(fp,encoding='utf-8') if l.strip() and not l.lstrip().startswith('#')]
+  if fps:
+    os.makedirs(OUT+'.well-known',exist_ok=True)
+    json.dump([{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"ru.nashatlas.app","sha256_cert_fingerprints":fps}}],
+      open(OUT+'.well-known/assetlinks.json','w',encoding='utf-8'),indent=1)
 
 core=['./','index.html',f'app.js?v={ver}',f'app.css?v={ver}','manifest.webmanifest']+['vendor/'+n for _,n in libs.values()]+\
      [f'data/{n}.json?v={ver}' for n in ['countries','worldviews','cities','meta','visa','visa_all','areaplaces','flags','safety','safezones','urban']]+['vendor/supabase.js']+\
