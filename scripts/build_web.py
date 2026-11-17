@@ -1,7 +1,7 @@
 """Build the website version of Наш атлас into /home/claude/web:
 index.html + app.js + app.css, self-hosted libraries and fonts, data/*.json loaded on demand,
 web app manifest and a service worker (works offline for what has been opened)."""
-import json, re, os, shutil, hashlib
+import json, re, os, shutil, hashlib, html as htmltools
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 S=ROOT+'site/'; SRC=ROOT+'web-src/'; OUT=ROOT+'web/'
 B=next(p for p in [ROOT+'node_modules/',ROOT+'build/node_modules/'] if os.path.isdir(p+'d3'))
@@ -91,6 +91,18 @@ for f in sorted(os.listdir(S+'data')):
                 c['img']='passports/'+name
     out=json.dumps(d,ensure_ascii=False,separators=(',',':'))
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
+
+# Human-readable attribution for cover images, including derivative licence links.
+covers=json.load(open(OUT+'data/passports.json',encoding='utf-8'))
+e=htmltools.escape
+rows=[]
+for k,c in sorted(covers.items()):
+    page=c.get('page',''); licurl=c.get('licenseUrl','')
+    if not page.startswith('https://commons.wikimedia.org/wiki/'): continue
+    licence=f'<a href="{e(licurl,quote=True)}">{e(c.get("lic",""))}</a>' if licurl.startswith('https://') else e(c.get('lic',''))
+    rows.append(f'<article><img src="{e(c["img"],quote=True)}" alt="Обложка {e(k)}" loading="lazy"><div><h2>{e(k)}</h2><p>{e(c.get("by",""))}</p><p>{licence} · <a href="{e(page,quote=True)}">Источник и условия использования</a></p><p>{e(c.get("changes","Уменьшено и перекодировано в WebP"))}</p></div></article>')
+credits='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Источники обложек — Наш атлас</title><style>body{margin:0 auto;padding:24px;max-width:850px;background:#101c30;color:#eef1f6;font:15px/1.5 system-ui}a{color:#9cd3ff}article{display:flex;gap:24px;padding:20px 0;border-bottom:1px solid #33445f}img{width:90px;height:130px;object-fit:contain}h2{margin:0}p{margin:8px 0}</style><a href="/">← На карту</a><h1>Источники обложек паспортов</h1><p>Автор, исходное изображение и лицензия каждого файла. Для отсутствующих обложек используется условное изображение без фотографии. Указанная лицензия относится и к подготовленной версии изображения.</p>'+''.join(rows)+'</html>'
+open(OUT+'passport-sources.html','w',encoding='utf-8').write(credits)
 
 if BETA: open(OUT+'robots.txt','w').write('User-agent: *\nDisallow: /\n')
 else: shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages

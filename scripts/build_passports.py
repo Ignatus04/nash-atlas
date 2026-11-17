@@ -37,6 +37,8 @@ for x in json.load(open('/tmp/ppd/atlas-passports.json')):
 for x in json.load(open('/tmp/ppd/atlas-passports-2.json')):
     cov.setdefault(x['k'], {'img': x['img'], 'lic': x.get('lic'), 'by': x.get('artist', ''), 'page': x.get('page')})
 json.dump({'updated': '2026-02-17', 'dest': dests, 'p': codes, 'd': days}, open(D + 'visa_all.json', 'w'), separators=(',', ':'))
+# Identity pages and unclear attribution-only files must never be restored.
+for k in ('PY','UY','GL','FO'): cov.pop(k,None)
 json.dump(cov, open(D + 'passports.json', 'w'), separators=(',', ':'))
 import os
 print('passports', len(P), 'covers', len(cov), 'missing covers', sorted(set(P) - set(cov)))

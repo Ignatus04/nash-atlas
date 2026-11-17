@@ -4432,7 +4432,7 @@ async function openPassports(force){
     <div class="pp-grid" role="listbox" aria-multiselectable="true"><div class="pp-loading">Загружаю обложки…</div></div>
     <div class="pp-foot"><label class="pp-skip"><input type="checkbox" ${skip?"checked":""}> Больше не спрашивать при запуске</label>
       <span class="pp-sum"></span><button class="pp-go">Поехали</button></div>
-    <p class="pp-cred">Фото обложек — <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a>, свободные лицензии; наведите на обложку, чтобы увидеть автора. Правила въезда: для РФ и РБ — наша сверка, для остальных — Passport Index (февраль 2026).</p></div>`;
+    <p class="pp-cred">Фото обложек — Wikimedia Commons. <a href="/passport-sources.html" target="_blank" rel="noopener">Авторы, источники и лицензии</a>. Правила въезда: для РФ и РБ — наша сверка, для остальных — Passport Index (февраль 2026).</p></div>`;
   document.body.appendChild(el); requestAnimationFrame(()=>el.classList.add("on"));
   if(!S.vm||!S.flags||!S.countries.length) await new Promise(r=>{const t=setInterval(()=>{if(S.vm&&S.flags&&S.countries.length){clearInterval(t);r()}},120)});
   let covers={};
