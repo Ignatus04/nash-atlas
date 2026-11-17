@@ -923,6 +923,15 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .ga-install{padding-bottom:34px}
 .gi-play{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);min-height:32px;padding:5px 12px;border:1px solid #3b5172;border-radius:18px;background:#18283f;color:#bfe3ff;font:600 11px var(--body);white-space:nowrap;z-index:2}
 .gi-play:active{background:#263f62}
+/* Fine atlas engraving sits on the existing panel fill, without image downloads. */
+#pbody:has(.card-art){background-image:var(--card-art);background-position:right top;background-size:380px 480px;background-repeat:no-repeat}
+#pbody:not(:has(.card-art)){background-image:none}
+.card-art{position:relative;isolation:isolate;padding:12px 0 16px;min-height:80px}
+.card-art h1{line-height:1.3}.card-art .grow{position:relative}
+.seg [data-layer]{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+[data-layer-icon]{display:inline-flex;flex:none;opacity:.85}
+.tip .tip-title{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.tip .tip-title b{margin:0}.tip .tip-title .fimg{width:26px;height:26px;margin:0;box-shadow:0 0 0 1px #ffffff18;flex:none}
 </style>
 </head>
 <body>
@@ -948,8 +957,8 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
       </div>
       <span class="tb-br" aria-hidden="true"></span>
       <div class="seg" role="group" aria-label="Что показывать на карте">
-        <button data-layer="entry" aria-pressed="true">Въезд</button>
-        <button data-layer="safe" aria-pressed="false">Безопасность</button>
+        <button data-layer="entry" aria-pressed="true"><span data-layer-icon="passport" aria-hidden="true"></span>Въезд</button>
+        <button data-layer="safe" aria-pressed="false"><span data-layer-icon="shield" aria-hidden="true"></span>Безопасность</button>
       </div>
       <div class="actions">
         <button class="btn ibtn" id="shareTop" aria-label="Поделиться" title="Поделиться: картинка для сторис и приглашение"></button>
@@ -1596,6 +1605,7 @@ async function uploadRows(rows,what){
 
 /* ---------- account: sign-in by code, account popover, sharing dialog ---------- */
 const IC={
+  shield:'<path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
   share:'<path d="M15 8a3 3 0 1 0-2.9-3.8L8.9 6.1a3 3 0 1 0 0 3.8l3.2 1.9A3 3 0 1 0 13 10l-3.2-1.9a3 3 0 0 0 0-.2 3 3 0 0 0 0-.2L13 5.8A3 3 0 0 0 15 8Z" transform="translate(2 4)"/>',
   move:'<path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>',
   down:'<path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14"/>',
@@ -2278,14 +2288,22 @@ function paint(){
   cvSetColors(!flying&&!document.body.classList.contains("moving"));
   drawLegend();
 }
+// Check original disputed geometry BEFORE merging it into any viewer's country.
+function disputedPoint(ll){
+  if(!ll)return true;
+  return (S.flagExcludedAreas||[]).some(a=>{const b=a.b;return ll[1]>=b[0][1]&&ll[1]<=b[1][1]&&(b[0][0]<=b[1][0]?ll[0]>=b[0][0]&&ll[0]<=b[1][0]:ll[0]>=b[0][0]||ll[0]<=b[1][0])&&d3.geoContains(a.f,ll)})
+}
+function hoverFlag(k,ll){return S.flagExcludedKeys?.has(k)||disputedPoint(ll)?"":flagImg(k)}
 function showTip(e,k){
   const c=S.cByK.get(k); if(!c||!inA(k)) return hideTip();
   const t=$("#tip"); let sf=safeOf(k), nm=c.properties.ru;
-  let ek=k;
-  if(S.safeParts?.length){let ll=null;try{const [x,y]=T.invert(d3.pointer(e,svg.node()));ll=proj.invert([x,y]);if(ll)ll=[normLon(ll[0]),ll[1]]}catch(_){}
+  let ek=k,ll=null;
+  try{const [x,y]=T.invert(d3.pointer(e,svg.node()));ll=proj.invert([x,y]);if(ll)ll=[normLon(ll[0]),ll[1]]}catch(_){}
+  if(S.safeParts?.length){
     const part=partAt(k,ll);if(part){sf=safeOf(part.dk);nm=part.name;ek=part.dk}}
-  t.innerHTML=S.layer==="safe"?`<b>${esc(nm)}</b>${sf?.l?esc(SAFE[sf.l].label)+(sf.s?`<br><span style="color:var(--muted)">по оценке: ${esc(SRC[sf.s])}</span>`:""):"Нет оценки"}${zonesIn(k).length?`<br>Опасных районов: ${zonesIn(k).length}`:""}`
-    :`<b>${esc(nm)}</b>${S.pass.map(p=>{const e=entry(p,ek);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
+  const title=`<div class="tip-title">${hoverFlag(k,ll)}<b>${esc(nm)}</b></div>`;
+  t.innerHTML=S.layer==="safe"?`${title}${sf?.l?esc(SAFE[sf.l].label)+(sf.s?`<br><span style="color:var(--muted)">по оценке: ${esc(SRC[sf.s])}</span>`:""):"Нет оценки"}${zonesIn(k).length?`<br>Опасных районов: ${zonesIn(k).length}`:""}`
+    :`${title}${S.pass.map(p=>{const e=entry(p,ek);return `${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}`}).join("<br>")}`;
   const r=$("#mapwrap").getBoundingClientRect();
   t.style.display="block"; t.style.left=Math.min(e.clientX-r.left+14,W-270)+"px"; t.style.top=(e.clientY-r.top+14)+"px";
 }
@@ -2598,6 +2616,7 @@ function openTab(t){
 }
 function openSheetFromCard(){if(sheet.state==="peek")setSheet("half")}
 function bindShell(){
+  document.querySelectorAll("[data-layer-icon]").forEach(e=>e.innerHTML=ic(e.dataset.layerIcon,17));
   document.querySelectorAll("[data-ic]").forEach(e=>e.innerHTML=ic(e.dataset.ic,e.classList.contains("tb-plus")?24:22));
   $("#srchBtn").innerHTML=ic("search",20); $("#shareBtn").innerHTML=ic("share",19); $("#shareTop").innerHTML=ic("share",19); $("#importBtn").innerHTML=ic("import",19);
   document.querySelectorAll("#tabbar [data-tab]").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
@@ -2816,7 +2835,7 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=17;
+const GUIDE_VER=18;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
@@ -2825,8 +2844,8 @@ const GUIDE=[
   {since:17,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
     install:true,art:installArt,run:playInstallScene},
-  {since:1, t:"Цвет страны — правила въезда",
-    m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
+  {since:18, t:"Цвет страны — правила въезда",
+    m:"Карта раскрашена по вашему паспорту. В шапке паспорт обозначает въезд, щит — безопасность. При наведении виден флаг страны; на спорных территориях флаг не показывается. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
     run:r=>gaTapScene(r,GUIDE_VB.col,["FR","IT","ES","NL","AT","DE","CH","BE"],false)},
   {since:1, t:"Паспорта — ваши или всех, кто едет",
@@ -3606,16 +3625,30 @@ function renderList(L,pts){
   bindCrumbs();bindPlaceLinks();
 }
 
+const cardArtCache=new Map();
+function countryCardArt(k){
+  if(cardArtCache.has(k))return cardArtCache.get(k);
+  const f=S.cByK.get(k);if(!f)return "";
+  let seed=Array.from(k).reduce((a,c)=>a*31+c.charCodeAt(0),17)>>>0;
+  const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+  const projection=d3.geoEqualEarth().fitExtent([[120,40],[360,245]],f),outline=d3.geoPath(projection)(f)||"";
+  const waves=Array.from({length:12},(_,i)=>{const y=210+i*18,a=20+rnd()*35;return `<path d="M-60 ${y} Q70 ${y-a} 160 ${y} T420 ${y}"/>`}).join("");
+  const stars=Array.from({length:15},()=>{const x=25+rnd()*330,y=30+rnd()*370;return `<path d="M${x-2} ${y}h4m-2-2v4"/>`}).join("");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="380" height="480" viewBox="0 0 380 480"><g fill="none" stroke="#a9c8db" stroke-width=".7" opacity=".07">${waves}${stars}<circle cx="280" cy="100" r="81"/><circle cx="280" cy="100" r="92" stroke-dasharray="1 7"/><path d="M185 100h190M280 5v190"/></g><path d="${outline}" fill="#9bb9ce" fill-opacity=".025" stroke="#b8d4e5" stroke-width=".85" stroke-opacity=".12"/></svg>`;
+  const url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;cardArtCache.set(k,url);return url;
+}
+function setCountryArt(k){$("#pbody").style.setProperty("--card-art",countryCardArt(k))}
 function renderCountry(k){
   if(S.found&&S.sel.type==="country"&&S.sel.k===k){renderFound(S.found);return}
   if(!S.adm) ensureAdm().then(()=>{if(S.adm&&S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});
+  setCountryArt(k);
   const f=S.cByK.get(k), m=S.meta[k]||{};
   const cities=S.cities.filter(c=>c[4]===k).slice(0,14);
   const regs=(S.adm||[]).filter(a=>a.properties.k===k).sort((a,b)=>(a.properties.ru||a.properties.en||"").localeCompare(b.properties.ru||b.properties.en||"","ru"));
   const pl=byLoc(placesIn(p=>p.k===k));
   $("#pbody").innerHTML=`
     ${crumbs([{t:"Весь мир",go:{type:"home"}},{t:f.properties.ru}])}
-    <div class="p-head"><div class="flag">${m.flag||(S.flags?.[k]?`<img src="${S.flags[k]}" alt="" style="width:40px;height:40px;border-radius:50%">`:"")}</div><div class="grow"><h1>${esc(f.properties.ru)}</h1><p>${esc(f.properties.en)}${m.sub?" · "+esc(subRu(m.sub)):""}</p></div></div>
+    <div class="p-head card-art"><div class="flag">${m.flag||(S.flags?.[k]?`<img src="${S.flags[k]}" alt="" style="width:40px;height:40px;border-radius:50%">`:"")}</div><div class="grow"><h1>${esc(f.properties.ru)}</h1><p>${esc(f.properties.en)}${m.sub?" · "+esc(subRu(m.sub)):""}</p></div></div>
     ${cityPhotosHTML(k)}
     ${entryBlock(k)}
     ${safetyBlock(k)}
@@ -3677,13 +3710,14 @@ function zoneMini(id){const z=zoneInfo(id);if(!z?.l&&!z?.a)return "";
   ${z.n?`<p class="status-note">${esc(z.n)}</p>`:""}${z.a?`<p class="status-note">За август–октябрь 2026 года: ${z.a[0]} ${ruPlural(z.a[0],"эпизод","эпизода","эпизодов")} политического насилия${z.a[1]?`, погибли ${z.a[1]}`:""} (ACLED).</p>`:""}</section>`}
 function entryMini(k){return `<section class="blk"><h2>Въезд в страну</h2><div class="chips">${S.pass.map(p=>{const e=entry(p,k);return `<span class="chip">${esc(pName(p))}: ${esc(ST[e.c]?.label||"нет данных")}${e.s?", "+esc(e.s):""}</span>`}).join("")}</div></section>`}
 function renderCity(c){
+  setCountryArt(c[4]);
   const [ru,en,lat,lon,iso,adm,pop]=c, cf=S.cByK.get(iso), reg=regionOfCity(c);
   const ck=cityKey(c); const pl=placesIn(x=>placeCity(x)===ck||distKm(lat,lon,x.lat,x.lng)<3);
   const crumb=[{t:"Весь мир",go:{type:"home"}},{t:cf?.properties.ru||iso,go:{type:"country",k:iso}}];
   if(reg) crumb.push({t:reg.properties.ru,go:{type:"region",id:reg.properties.id}}); crumb.push({t:ru});
   $("#pbody").innerHTML=`
     ${crumbs(crumb)}
-    <div class="p-head"><div class="flag">${S.meta[iso]?.flag||""}</div><div class="grow"><h1>${esc(ru)}</h1><p>${esc([en!==ru?en:"",pop?"население около "+fmtPop(pop):""].filter(Boolean).join(" · "))}</p></div></div>
+    <div class="p-head card-art"><div class="flag">${S.meta[iso]?.flag||""}</div><div class="grow"><h1>${esc(ru)}</h1><p>${esc([en!==ru?en:"",pop?"население около "+fmtPop(pop):""].filter(Boolean).join(" · "))}</p></div></div>
     ${cityDesc(c)?`<p class="lead-d">${esc(cityDesc(c))}</p>`:""}
     ${cityGalleryHTML()}
     ${entryMini(iso)}
@@ -4321,6 +4355,8 @@ function applyWorldview(ct,wv,cc){
   const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
   // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
   const contested=new Set([...Object.keys(wv?.intl||{}),...Object.values(wv?.views||{}).flatMap(Object.keys)]);
+  S.flagExcludedKeys=new Set([...contested,...o.geometries.filter(g=>g.properties.k.startsWith("~")).map(g=>g.properties.k)]);
+  S.flagExcludedAreas=o.geometries.filter(g=>S.flagExcludedKeys.has(g.properties.k)).map(g=>{const f=topojson.feature(ct,g);return {k:g.properties.k,f,b:d3.geoBounds(f)}});
   S.contested=o.geometries.filter(g=>contested.has(g.properties.k)&&!g.properties.small).map(g=>{const f=topojson.feature(ct,g);return {f,b:d3.geoBounds(f),ow:own(g)}});
   // countries whose shape differs from the de facto map: their written dispute note describes the de facto map, so it gives way to a note about the view
   S.viewChanged=new Set();for(const g of o.geometries){const k=g.properties.k,d=k[0]==="~"?g.properties.host:k,ow=own(g);if(ow!==d){S.viewChanged.add(ow);S.viewChanged.add(d)}}
