@@ -2,12 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Наш атлас</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+[data-install][hidden],#installNow[hidden]{display:none!important}
+#installTitle{padding-right:24px}
 /* Ночной атлас: тёмный океан, страны окрашены по режиму въезда, справа карточка выбранного места. Одна тема намеренно. */
 :root{
   --ocean:#0c1626; --ocean-2:#101e33; --ink:#eef1f6; --muted:#9aa7bb; --line:#22324b; --panel:#121f33; --panel-2:#18283f;
@@ -1613,6 +1615,38 @@ function modal(id,html,{labelledby}={}){let el=document.getElementById(id);if(el
       if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus()}}});
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=close);return {el,close}}
 
+/* ---------- install the online app ---------- */
+let installPrompt=null, installedThisSession=false;
+const appDisplay=matchMedia("(display-mode: standalone)");
+function appInstalled(){return installedThisSession||appDisplay.matches||navigator.standalone===true||matchMedia("(display-mode: fullscreen)").matches}
+function installEntry(){return !window.isSecureContext||appInstalled()?"":`<button class="ap-item" data-install>${ic("down")}<span>Установить приложение<small>«Наш атлас» на главном экране телефона</small></span></button>`}
+function refreshInstall(){
+  document.querySelectorAll("[data-install]").forEach(b=>b.hidden=appInstalled());
+  const b=document.querySelector("#installNow");if(b)b.hidden=!installPrompt||appInstalled();
+  if(appInstalled()&&document.querySelector("#installBox"))document.querySelector("#installBox [data-close]")?.click();
+}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();installPrompt=e;refreshInstall()});
+addEventListener("appinstalled",()=>{installedThisSession=true;installPrompt=null;refreshInstall()});
+appDisplay.addEventListener?.("change",refreshInstall);
+// Delegation also covers profile and home panels redrawn after navigation.
+document.addEventListener("click",e=>{if(e.target.closest("[data-install]"))openInstall()});
+function openInstall(){
+  if(appInstalled())return;
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const android=/Android/i.test(navigator.userAgent);
+  const steps=ios?`<ol class="hm-ol"><li>Откройте этот сайт в Safari.</li><li>Нажмите «Поделиться» и выберите «На экран Домой». Если пункта не видно, прокрутите список действий.</li><li>Если есть переключатель «Открывать как веб-приложение», включите его. Нажмите «Добавить».</li></ol>`
+    :android?`<ol class="hm-ol"><li>Откройте этот сайт в Chrome.</li><li>В меню ⋮ выберите «Установить приложение» или «Добавить на главный экран».</li><li>Подтвердите установку и запускайте «Атлас» с главного экрана.</li></ol>`
+    :`<p class="hint">В Chrome или Edge откройте меню браузера и выберите установку «Нашего атласа» как приложения. На телефоне откройте этот же сайт и найдите «Установить приложение» в Профиле.</p>`;
+  const {el,close}=modal("installBox",`<h2 id="installTitle">Установить «Наш атлас»</h2><p class="hint">Запускайте карту по иконке, в отдельном окне. Для работы нужен интернет. Войдите в аккаунт, чтобы ваши места открылись в приложении.</p><button class="btn primary" id="installNow" ${installPrompt?"":"hidden"}>Установить</button><div>${steps}</div>`,{labelledby:"installTitle"});
+  el.querySelector("#installNow").onclick=async()=>{
+    const prompt=installPrompt;if(!prompt)return;
+    installPrompt=null;const b=el.querySelector("#installNow");b.disabled=true;
+    try{await prompt.prompt();const result=await prompt.userChoice;if(result.outcome==="accepted")close()}
+    catch(e){status("Установите приложение через меню браузера.",5000)}
+    finally{b.disabled=false;refreshInstall()}
+  };
+}
+
 /* Google sign-in on our own page: Google's window then names nash-atlas.ru instead of the Supabase address.
    If Google's script can't load, the plain button (redirect through Supabase) stays in place. */
 let gsiLoad=null;
@@ -1788,7 +1822,7 @@ function bindAcctMenu(p,close,rerender){
 function openAcct(){
   closeAcct();
   const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
-  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot"><button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>
+  p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot">${installEntry()}<button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>
     <div class="ap-legal"><a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a><a href="/privacy.html" target="_blank" rel="noopener">Политика обработки данных</a>${consentUsed()?`<button id="apCk">Настройки cookie</button>`:""}</div>`;
   document.body.appendChild(p);
   const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
@@ -2553,6 +2587,7 @@ function renderProfile(){
     <section class="blk"><h2>Добавлять места</h2><button class="ap-item" id="pfFromMaps">${ic("pin")}<span>Из Google Карт и Яндекс Карт<small>Прямо из приложения на телефоне, через «Поделиться»</small></span></button></section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
+    <section class="blk"><h2>Приложение</h2>${installEntry()}<p class="hint">${appInstalled()?"Вы открыли установленное приложение. ":""}Для работы нужен интернет.</p></section>
     <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="/terms.html">${ic("doc")}<span>Пользовательское соглашение</span></a><a class="ap-item" href="/privacy.html">${ic("doc")}<span>Политика обработки данных</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
@@ -2674,12 +2709,16 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=13;
+const GUIDE_VER=14;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:14,t:"Атлас как приложение",
+    m:"На главной странице нажмите «Установить приложение». Если браузер предлагает установку, подтвердите её. На телефоне эта кнопка также есть в Профиле. Приложению нужен интернет; войдите в аккаунт, чтобы открыть свои места.",
+    mob:"В Профиле нажмите «Установить приложение». На Android подтвердите установку или воспользуйтесь меню Chrome. На iPhone откройте сайт в Safari: «Поделиться» → «На экран Домой». Приложению нужен интернет; войдите в аккаунт, чтобы открыть свои места.",
+    art:()=>`<div class="ga ga-pl">${gaStillGlobe(140)}<i class="ga-plus">${ic("down",22)}</i></div>`},
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
@@ -3296,6 +3335,7 @@ function renderHome(){
     ${areaHTML("world")}
     ${manual.length?placesBlock(manual,"Добавленные вручную"):""}
     ${STANDALONE&&!(S.db instanceof CloudDB)?`<section class="blk"><h2>Ваши данные</h2><p class="hint" style="margin:0">${S.db instanceof CloudDB?`Всё сохраняется в аккаунте и видно на всех устройствах. Копия пригодится, чтобы перенести места из файла-версии атласа или сохранить архив.`:CLOUD?`Без входа заметки, статусы и фото хранятся только в этом браузере. Войди, чтобы они были на всех устройствах, или перенеси копию вручную.`:`Заметки, статусы и фото хранятся в этом браузере. Чтобы перенести их на другой компьютер или отдать девушке, скачай копию и загрузи её там.`}</p><div class="row2"><button class="btn small" id="bkOut">Скачать копию</button><button class="btn small ghost" id="bkIn">Загрузить копию</button><input type="file" id="bkFile" accept=".json" hidden></div></section>`:""}
+    ${installEntry()}
     <div class="src">Правила въезда сверены на ${fmtDate(S.visa.updated)}. <button class="linkbtn" id="howBtn">Как пользоваться</button></div>`;
   if(STANDALONE&&$("#bkOut")){
     $("#bkOut").onclick=exportBackup;
