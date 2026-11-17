@@ -924,7 +924,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .gi-play{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);min-height:32px;padding:5px 12px;border:1px solid #3b5172;border-radius:18px;background:#18283f;color:#bfe3ff;font:600 11px var(--body);white-space:nowrap;z-index:2}
 .gi-play:active{background:#263f62}
 /* Fine atlas engraving sits on the existing panel fill, without image downloads. */
-#pbody:has(.card-art){background-image:var(--card-art);background-position:right top;background-size:380px 480px;background-repeat:no-repeat}
+#pbody:has(.card-art){background-image:var(--card-art);background-position:center top;background-size:360px 600px;background-repeat:repeat-y}
 #pbody:not(:has(.card-art)){background-image:none}
 .card-art{position:relative;isolation:isolate;padding:12px 0 16px;min-height:80px}
 .card-art h1{line-height:1.3}.card-art .grow{position:relative}
@@ -932,6 +932,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 [data-layer-icon]{display:inline-flex;flex:none;opacity:.85}
 .tip .tip-title{display:flex;align-items:center;gap:8px;margin-bottom:5px}
 .tip .tip-title b{margin:0}.tip .tip-title .fimg{width:26px;height:26px;margin:0;box-shadow:0 0 0 1px #ffffff18;flex:none}
+.filter-symbol{display:grid;place-items:center;flex:none;width:25px;height:25px;border-radius:8px;background:color-mix(in srgb,var(--filter-c) 12%,transparent);color:var(--filter-c)}
+.fchip{padding:5px 10px 5px 6px;gap:7px;min-height:37px;border-radius:12px}
+.fchip[aria-pressed="true"] .filter-symbol{color:inherit;background:#ffffff20}
+.fchip .n{margin-left:1px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -1605,6 +1609,11 @@ async function uploadRows(rows,what){
 
 /* ---------- account: sign-in by code, account popover, sharing dialog ---------- */
 const IC={
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  warning:'<path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
+  blocked:'<circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/>',
+  online:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4m-4-11 3 3 5-5"/>',
+  arrival:'<path d="m3 5 7 7 9-3 2 2-10 6-5-3-4 1m1 6h18"/>',
   shield:'<path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/>',
   share:'<path d="M15 8a3 3 0 1 0-2.9-3.8L8.9 6.1a3 3 0 1 0 0 3.8l3.2 1.9A3 3 0 1 0 13 10l-3.2-1.9a3 3 0 0 0 0-.2 3 3 0 0 0 0-.2L13 5.8A3 3 0 0 0 15 8Z" transform="translate(2 4)"/>',
   move:'<path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>',
@@ -3522,8 +3531,8 @@ function finderHTML(){
   return `<section class="blk cfind"><h2>Страны</h2>
     <div class="cf-search"><input id="cfq" type="search" autocomplete="off" placeholder="Страна, город или аэропорт" aria-label="Найти страну по названию, городу или аэропорту" value="${esc(S.hf.q)}" role="combobox" aria-expanded="false" aria-controls="cfdrop" aria-autocomplete="list"><div id="cfdrop" role="listbox" hidden></div></div>
     <div class="cf-scope" role="group" aria-label="Какие страны показывать"><button data-scope="ours" aria-pressed="${hfScope()==="ours"}">С нашими местами · ${ours}</button><button data-scope="all" aria-pressed="${hfScope()==="all"}">Все · ${all}</button></div>
-    <div class="cf-row"><span class="cf-lab">Въезд</span><div class="chips">${ent.map(([g,t,n])=>`<button class="chip fchip" data-fe="${g}" aria-pressed="${S.hf.entry===g}"><span class="sw" style="background:${col(g)}"></span>${t} <span class="n">${n}</span></button>`).join("")}</div></div>
-    ${saf.length?`<div class="cf-row"><span class="cf-lab">Безопасность</span><div class="chips">${saf.map(([l,t,n])=>`<button class="chip fchip" data-fs="${l}" aria-pressed="${S.hf.safe===l}"><span class="sw" style="background:${SAFE[l].c}"></span>${t} <span class="n">${n}</span></button>`).join("")}</div></div>`:""}
+    <div class="cf-row"><span class="cf-lab">Въезд</span><div class="chips">${ent.map(([g,t,n])=>`<button class="chip fchip" data-fe="${g}" aria-pressed="${S.hf.entry===g}"><span class="filter-symbol" style="--filter-c:${col(g)}">${ic(({F:"check",EA:"arrival",V:"online",R:"passport",X:"blocked"})[g],17)}</span>${t} <span class="n">${n}</span></button>`).join("")}</div></div>
+    ${saf.length?`<div class="cf-row"><span class="cf-lab">Безопасность</span><div class="chips">${saf.map(([l,t,n])=>`<button class="chip fchip" data-fs="${l}" aria-pressed="${S.hf.safe===l}"><span class="filter-symbol" style="--filter-c:${SAFE[l].c}">${ic(({1:"shield",2:"eye",3:"warning",4:"blocked"})[l],17)}</span>${t} <span class="n">${n}</span></button>`).join("")}</div></div>`:""}
     <div id="cfres" aria-live="polite"></div></section>`;
 }
 let hfRes=[];
@@ -3625,16 +3634,87 @@ function renderList(L,pts){
   bindCrumbs();bindPlaceLinks();
 }
 
+// Original line drawings: a quiet travel sketchbook, repeated down the whole card.
+const NATIONAL_MARKS={
+ eiffel:'M22 4h4m-2 0-3 18-8 20h8l3-10 3 10h8l-8-20-3-18M17 31h14M19 23h10M21 14h6M16 42h16',
+ croissant:'M7 32Q0 16 14 10l5 7q5-3 10 0l5-7q14 6 7 22l-9-3q-8 6-16 0l-9 3Zm7-22 2 19m3-12 2 14m8-14-2 14m7-21-2 19',
+ eagle:'M24 16 19 11l-6 3-10-3 6 10-5 1 12 5 4-1-3 12 7-5 7 5-3-12 4 1 12-5-5-1 6-10-10 3-6-3-5 5Zm-2 1 2 4 4-3m-7 10 3 5 3-5',
+ star:'m24 5 5 12 14 1-11 9 4 14-12-8-12 8 4-14-11-9 14-1Z',
+ cornflower:'M24 23v21m0-11-9-5m9 10 9-5M24 23l-9-5 4-3-3-7 7 3 1-8 4 8 7-3-3 7 4 3-10 5Zm-4-6 4 6 5-6',
+ bison:'M6 29v-9l7-9 15-2 10 7 5 1v12l-7 2-5-4-2 4H12l-1 10H7Zm9 2v10m14-10v10m8-12 2 10M35 16l-3-6m8 7 3-6M6 23 2 19',
+ textile:'M24 3 40 19 24 35 8 19Zm0 8 8 8-8 8-8-8Zm-16 8H2m38 0h6M24 35v10m-7-8 7 8 7-8',
+ dome:'M8 41h32M12 41V25h24v16M10 25q0-7 7-10l7-8 7 8q7 3 7 10ZM24 7V2m-3 3h6M21 41V30h6v11',
+ maple:'m24 3 5 10 6-5-1 10 10-2-4 10 4 2-17 8 1 9h-6l1-9-17-8 4-2-4-10 10 2-1-10 6 5Z',
+ lotus:'M24 33Q8 26 6 13q12 0 18 10 6-10 18-10-2 13-18 20Zm0 0Q14 19 24 5q10 14 0 28Zm-16 5q16 8 32 0',
+ torii:'M5 10q19 6 38 0M7 17h34M13 13v31m22-31v31M24 15v8M9 25h30',
+ blossom:'M24 14q-10-17-15-6-4 8 7 12-20 0-14 11 5 7 15-1-6 18 7 17 9-1 5-16 15 11 19 0 3-9-12-11 12-11 2-16-9-5-14 10Zm-4 9h8m-4-4v8',
+ pagoda:'M24 4 10 12h28L24 4ZM15 12v8m18-8v8M24 15 6 24h36L24 15ZM12 24v11m24-11v11M24 29 3 39h42M15 39v6m18-6v6',
+ bamboo:'M17 45 20 3m-4 10h8m-9 13h8m-9 12h8M22 16q12-10 20-6-8 10-20 6ZM19 28Q7 15 3 20q4 11 16 8Zm3 6q13-8 20-3-6 8-20 3Z',
+ mountain:'M2 40 16 11l10 18L34 9l12 31ZM10 23l6 5 5-5m7-1 6 5 6-5',
+ tulip:'M24 26v18M13 6l11 8L35 6v9q0 13-11 13T13 15ZM24 38Q8 38 7 28q15 0 17 10Zm0 0q16 0 17-10-15 0-17 10Z',
+ windmill:'M24 21 19 7l5-5 4 17 14-4 4 5-18 5 4 15-5 5-5-18-15 4-4-5 18-5ZM20 29l-3 16h16l-4-16',
+ olive:'M8 43 36 6M14 34Q0 26 6 21q11 1 8 13Zm5-7Q10 10 17 9q10 5 2 18Zm7-9Q24 2 31 3q7 6-5 15Zm-8 15q17 2 19-7-9-6-19 7Zm9-12q17 0 17-8-12-4-17 8Z',
+ column:'M7 9h34M9 5h30v10H9Zm4 10v24m7-24v24m8-24v24m7-24v24M9 39h30v5H9Z',
+ amphora:'M18 4h12m-10 0v9Q8 21 14 34l6 9h8l6-9q6-13-6-21V4M15 17Q1 12 6 25l7 6m20-14q14-5 9 8l-7 6',
+ pizza:'M8 7q16-7 32 0L24 44ZM8 7l3 6q13-6 26 0M20 20h.1m8 7h.1m-6 7h.1',
+ gondola:'M3 31q19 9 40-1l-5 9H12ZM30 30V8l10-4M19 29q0-6 7-6m-20 22q8-5 16 0t20 0',
+ tower:'M15 42V12l4-6h10l4 6v30M12 42h24M15 14h18M15 22h18M15 30h18M20 42V32h8v10M21 17h6',
+ crown:'m6 13 10 7 8-14 8 14 10-7-5 23H11ZM11 30h26M12 42h24',
+ rose:'M24 26v19m0-10-10-6m10 12 11-7M24 25Q5 27 8 14 3 2 18 5 24-4 30 5q15-3 10 9 3 13-16 11Zm0-16q-13 0-9 10 16 8 18-6-3-8-13 0l4 6 6-6',
+ harp:'M10 7q22-9 30 6L19 43h-7Q24 17 10 7Zm8 4 1 24m5-25v20m6-18-1 12m7-8-4 6M12 43h9',
+ fir:'m24 3-11 14h7L8 30h11L4 41h40L29 30h11L28 17h7L24 3Zm-2 38v6h4v-6',
+ boat:'M24 4v29M22 7 6 29h16Zm5 5v17h14ZM4 34h40l-8 8H13Zm-1 12q7-5 14 0t14 0 14 0',
+ fish:'M8 24q15-20 30 0-15 20-30 0Zm0 0-7-9v18ZM31 22h.1M19 15l5-8 5 9m-10 17 5 8 5-9',
+ whale:'M4 27q0-15 13-14t12 17q13 1 10-8l7-5-2 15q-7 16-25 11T4 27ZM9 22h.1M15 8V3m-3 5L8 5m10 3 4-3',
+ pyramid:'M2 40 19 9l15 31Zm17-31 1 31m8-13 7-16 11 29H34',
+ palm:'M23 45q7-20 1-32M24 13Q7-2 3 14q12-7 21-1Zm0 0Q31-3 44 8q-13-1-20 5Zm0 0Q4 9 6 27q6-12 18-14Zm0 0q21-2 20 15-8-12-20-15Z',
+ sun:'M24 5v5m0 28v5M5 24h5m28 0h5M10 10l4 4m20 20 4 4m0-28-4 4M14 34l-4 4M34 24a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z',
+ coffee:'M11 7q-7 8 0 12m9-12q-7 8 0 12M6 23h26v9q0 10-13 10T6 32Zm26 2h5q11 0 3 10h-8M3 46h34',
+ cacao:'M25 3q-23 10-13 32l10 10q22-11 14-31L25 3Zm0 0q-12 23-3 42m3-42q12 23-3 42M13 19l23-1M12 29l21 3',
+ cactus:'M20 45V10q0-8 8-5v40M20 30H9q-5 0-5-5V13h6v10h10m8 12h10q6 0 6-6V17h-6v12H28',
+ feather:'M7 43 33 11M12 34Q4 15 27 5q21-9 16 9-4 19-31 20ZM20 24l-2-13m8 5 10 1m-20 12 12-1',
+ llama:'M9 43V24h19V11l4-3V2l4 5 7 2v7h-7v13l-6 5v9m-15-9v9m8-9v9M9 24l-5-9m26 7h6',
+ bird:'M5 34q5-11 15-14 1-12 10-12l5 6 10 1-9 5q0 14-17 16L6 43l5-11m11-8-8 8m15-17h.1',
+ turtle:'M12 15q12-10 24 0v17q-12 10-24 0Zm0 4L4 13v10l8 2m24-6 8-6v10l-8 2M16 34l-5 9m21-9 5 9M20 12V5h8v7m-4 3-8 9 8 10 8-10-8-9Z',
+ shell:'M24 43 5 18q-2-13 9-12 8-10 14-1 12-4 15 8 4 7-19 30Zm0 0L14 6m10 37L28 5m-4 38 16-31M18 43h12',
+ kangaroo:'M3 43 17 31l3-13 10-5 5-10 2 9 8 4-10 5-3 13 11 9H27l-9-7-9 7M24 24l-11-3M18 31 3 27',
+ boomerang:'M5 42 16 9q2-6 7-1l21 19-5 7-17-15-8 26Z',
+ fern:'M11 45 33 4M15 36Q2 32 6 26l9 10Zm4-8Q7 22 12 17l7 11Zm4-8Q14 12 20 9l3 11Zm4-8q-3-9 4-10l-4 10Zm-11 24q15 6 17-3l-17 3Zm4-8q16 3 16-5l-16 5Zm5-9q14 3 15-5l-15 5Z',
+ drum:'M8 13q16-12 32 0v22q-16 12-32 0Zm0 0q16 12 32 0M8 35q16-12 32 0M10 15l8 20 6-15 6 15 8-20M2 2l12 7m32-7-12 7',
+ mask:'M10 7q14-8 28 0l-3 26-11 12-11-12Zm6 10 6 3-8 3m18-6-6 3 8 3m-10-8v14m-5 6h10',
+ elephant:'M5 34V18q3-12 18-10 13-7 20 7l2 28h-7l-2-16-5 6v10h-5V31H14v12H8V29M27 12q-10 8 0 16l5-9Zm-22 9L1 28',
+ baobab:'M14 45q7-18 4-26M34 45q-7-18-4-26M5 19h38M18 19 9 9m21 10 9-10M24 19V6M4 9h12M32 9h12M18 5h12M10 45h28',
+ lion:'M24 3 34 7l9 10-2 17-17 12L7 34 5 17 14 7Zm-9 13-2 13 11 11 11-11-2-13-9-6Zm2 7h3m8 0h3m-10 7h6l-3 4Zm3 4v4',
+ giraffe:'M12 44V30h15l2-23 7-2 7 6-8 5-1 20-6 2v6m-10-6v6M30 6V1m7 5V1M12 30l-7-5m26-10h4m-5 8h4',
+ arch:'M6 43V12l5-7h26l5 7v31H31V27q0-12-7-12t-7 12v16ZM6 12h36M3 43h42',
+ tile:'M24 3 30 12h10v10l6 5-10 5v10H26l-5 5-5-10H6V27l-5-5 10-5V7h10Zm0 12 10 10-10 10-10-10Z',
+ rug:'M9 6h30v36H9Zm3-5v5m8-5v5m8-5v5m8-5v5M12 42v5m8-5v5m8-5v5m8-5v5M24 13l9 11-9 11-9-11Zm0 7 4 4-4 4-4-4Z',
+ wheat:'M24 45V5M24 14Q10 12 13 5q12 1 11 9Zm0 9Q8 20 12 13q12 2 12 10Zm0 9Q8 29 12 22q12 2 12 10Zm0-18q14-2 11-9-12 1-11 9Zm0 9q16-3 12-10-12 2-12 10Zm0 9q16-3 12-10-12 2-12 10Z',
+ grape:'M24 13Q12 1 6 8q0 10 18 5Zm0 0q0-10 10-11M24 15a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm-9 7a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm18 0a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm-9 9a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z',
+ castle:'M6 43V14h7V6h6v8h10V6h6v8h7v29ZM6 22h36M19 43V32q5-8 10 0v11M12 27v-3m24 3v-3',
+ bell:'M8 35q5-5 5-18 0-12 11-12t11 12q0 13 5 18ZM18 35q0 10 6 10t6-10M21 5V1h6v4',
+ dragon:'M5 38q17 8 18-6 0-8-9-10-13-4-5-14l8 2 6-7 4 7 10-1 8 7-12 7-6-2M34 12l2 3M11 13h8m7 10 9 5-7 5m-9-4-8 3 1 8m17-19 9 1',
+ tea:'M6 21h28v10q0 10-14 10T6 31Zm28 2h6q8 3 0 10h-6M3 45h35M13 14q-5-5 0-10m10 10q-5-5 0-10',
+ yurt:'M5 22 24 8l19 14v21H5Zm0 0h38M19 43V28h10v15M24 8V3M11 22v21m26-21v21',
+ gear:'M20 3h8l2 8 7-4 6 6-4 7 6 1v8l-8 2 4 7-6 6-7-4-2 6h-8l-2-8-7 4-6-6 4-7-6-2v-8l8-2-4-7 6-6 7 4Zm12 21a8 8 0 1 0-16 0 8 8 0 0 0 16 0Z'
+};
+const NATIONAL_PATTERNS={};
+// Curated travel motifs, rather than flags or state emblems. Shared traditions
+// intentionally share a drawing; each country has its own composition.
+for(const [keys,marks] of [
+ ['FR','eiffel croissant rose'],['US','eagle star cactus'],['BY','cornflower bison textile'],['RU','dome fir wheat'],['CA','maple mountain fir'],['JP','torii blossom mountain'],['CN','dragon bamboo pagoda'],['IT','pizza column gondola'],['GR CY','column olive amphora'],['NL','windmill tulip boat'],['BE','tower rose wheat'],['DE','castle gear wheat'],['GB','tower crown rose'],['IE','harp textile rose'],['CH AT LI','mountain fir bell'],['ES AD','arch olive rose'],['PT','tile boat grape'],['DK FO GL','boat fish whale'],['NO IS','mountain boat fish'],['SE FI AX','fir fish textile'],['EE LV LT','textile fir wheat'],['PL CZ SK','castle wheat textile'],['HU','textile pepper wheat'],['RO MD','grape textile rose'],['BG','rose mountain textile'],['UA','wheat cornflower textile'],['RS ME BA HR SI MK AL XK','mountain textile grape'],['GE AM','grape mountain arch'],['TR','tulip arch tile'],['AZ','rug arch wheat'],['IR','tile rose rug'],['IQ SY','arch palm tile'],['IL PS','olive arch palm'],['LB','fir column olive'],['JO','arch mountain palm'],['SA AE QA BH KW OM YE','palm arch coffee'],['EG','pyramid lotus sun'],['MA DZ TN','tile arch olive'],['LY','arch palm sun'],['IN','lotus elephant arch'],['PK AF','arch rug mountain'],['BD','lotus boat textile'],['LK','elephant tea lotus'],['NP BT','mountain pagoda textile'],['MV','shell palm fish'],['KZ KG','yurt mountain textile'],['UZ TJ TM','tile rug arch'],['MN','yurt mountain bird'],['KR KP','pagoda blossom mountain'],['TW','pagoda tea mountain'],['HK MO','boat blossom tile'],['TH','elephant lotus pagoda'],['VN','lotus boat bamboo'],['KH','arch lotus palm'],['LA MM','pagoda lotus bamboo'],['MY SG BN','blossom tile palm'],['ID','tile bird volcano'],['PH','boat palm shell'],['TL','textile shell coffee'],['AU','kangaroo boomerang sun'],['NZ','fern mountain bird'],['PG','bird mask shell'],['FJ SB VU','mask shell palm'],['WS TO TV','textile turtle palm'],['KI MH FM PW NR','fish shell turtle'],['NC PF CK NU','shell blossom palm'],['MX','cactus pyramid sun'],['GT HN SV BZ','pyramid cacao bird'],['NI CR PA','bird coffee palm'],['CU','palm coffee boat'],['JM','drum palm sun'],['HT DO','palm drum shell'],['BS BB AG KN LC VC GD TT DM','shell palm fish'],['AR','sun mountain tea'],['UY','sun tea wheat'],['PY','textile tea bird'],['BR','bird coffee palm'],['PE','llama mountain textile'],['BO','llama textile mountain'],['CL','mountain grape bird'],['EC','turtle mountain cacao'],['CO','coffee bird blossom'],['VE','bird mountain cacao'],['GY SR GF','bird palm boat'],['ZA','sun elephant textile'],['NA BW','sun elephant shell'],['ZW ZM','bird elephant drum'],['MZ MW','boat fish textile'],['MG','baobab shell blossom'],['MU SC KM','shell palm bird'],['TZ KE UG','giraffe mountain coffee'],['RW BI','coffee drum mountain'],['ET ER','coffee textile arch'],['SO DJ','shell coffee sun'],['SD SS','pyramid drum palm'],['SN GM','baobab drum boat'],['ML BF NE','mask textile sun'],['NG GH CI','cacao textile drum'],['BJ TG','mask palm textile'],['CM GA GQ CG CD','mask elephant palm'],['CF TD','elephant drum sun'],['AO','baobab drum shell'],['GN GW SL LR','palm drum mask'],['CV ST','boat coffee shell'],['LS SZ','mountain textile sun'],['MT','boat arch olive'],['LU','castle rose grape'],['MC SM VA','column olive arch'],['GI','mountain boat arch'],['FK GS','bird boat mountain'],['AQ','mountain whale star'],['EH','sun rug palm'],['XA XO XT XN XS','mountain textile wheat'],['IM GG JE BM KY AI MS TC SH','boat shell rose'],['RE YT','palm blossom shell'],['PR VI VG AW CW SX BQ','shell palm sun'],['GU MP AS UM','palm turtle shell'],['IO CX CC NF PN TK','shell fish bird'],['SJ BV HM TF','mountain whale boat'],['BL MF PM GP MQ','boat shell blossom'],['WF','turtle textile palm'],['MR','rug palm sun'],['CP','bird shell fish'],['XU','wheat textile grape']
+])for(const k of keys.split(' '))NATIONAL_PATTERNS[k]=marks.split(' ');
+// These aliases use the same drawing without adding another asset.
+NATIONAL_MARKS.pepper='M30 6q-10 0-7 9-3 9-17 25-17 25 29 2 29-20-2-8-12-5m0 0q12-12 7-17';
+NATIONAL_MARKS.volcano=NATIONAL_MARKS.mountain;
 const cardArtCache=new Map();
 function countryCardArt(k){
   if(cardArtCache.has(k))return cardArtCache.get(k);
-  const f=S.cByK.get(k);if(!f)return "";
-  let seed=Array.from(k).reduce((a,c)=>a*31+c.charCodeAt(0),17)>>>0;
-  const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
-  const projection=d3.geoEqualEarth().fitExtent([[120,40],[360,245]],f),outline=d3.geoPath(projection)(f)||"";
-  const waves=Array.from({length:12},(_,i)=>{const y=210+i*18,a=20+rnd()*35;return `<path d="M-60 ${y} Q70 ${y-a} 160 ${y} T420 ${y}"/>`}).join("");
-  const stars=Array.from({length:15},()=>{const x=25+rnd()*330,y=30+rnd()*370;return `<path d="M${x-2} ${y}h4m-2-2v4"/>`}).join("");
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="380" height="480" viewBox="0 0 380 480"><g fill="none" stroke="#a9c8db" stroke-width=".7" opacity=".07">${waves}${stars}<circle cx="280" cy="100" r="81"/><circle cx="280" cy="100" r="92" stroke-dasharray="1 7"/><path d="M185 100h190M280 5v190"/></g><path d="${outline}" fill="#9bb9ce" fill-opacity=".025" stroke="#b8d4e5" stroke-width=".85" stroke-opacity=".12"/></svg>`;
+  const marks=NATIONAL_PATTERNS[k]||['textile','sun','boat'];
+  const seed=Array.from(k).reduce((a,c)=>a+c.charCodeAt(0),0);
+  const positions=[[28,28,1.55,-14],[208,80,1.85,12],[112,224,1.35,8],[12,347,1.65,-9],[235,407,1.35,16],[128,496,1.05,-12]];
+  const drawings=positions.map(([x,y,z,r],i)=>`<g transform="translate(${x} ${y}) rotate(${r+(seed%5)-2} 24 24) scale(${z})"><path d="${NATIONAL_MARKS[marks[i%marks.length]]}"/></g>`).join('');
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="360" height="600" viewBox="0 0 360 600"><g fill="none" stroke="#b8cedf" stroke-opacity=".075" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${drawings}</g></svg>`;
   const url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;cardArtCache.set(k,url);return url;
 }
 function setCountryArt(k){$("#pbody").style.setProperty("--card-art",countryCardArt(k))}
