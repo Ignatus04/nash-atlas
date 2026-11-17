@@ -1,0 +1,33 @@
+{
+  "packageId": "ru.nashatlas.app",
+  "host": "nash-atlas.ru",
+  "name": "Наш атлас",
+  "launcherName": "Атлас",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#13213a",
+  "navigationColor": "#13213a",
+  "backgroundColor": "#0f1a2e",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://nash-atlas.ru/icons/icon-512.png",
+  "maskableIconUrl": "https://nash-atlas.ru/icons/icon-maskable-512.png",
+  "webManifestUrl": "https://nash-atlas.ru/manifest.webmanifest",
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "signingKey": {
+    "path": "./atlas-release.keystore",
+    "alias": "atlas"
+  },
+  "fallbackType": "customtabs",
+  "shareTarget": {
+    "action": "/",
+    "method": "GET",
+    "params": { "title": "addtitle", "text": "addtext", "url": "add" }
+  },
+  "features": {},
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 21,
+  "targetSdkVersion": 35
+}

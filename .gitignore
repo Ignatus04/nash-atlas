@@ -5,6 +5,7 @@
 !/web-src/
 !/supabase/
 !/server/
+!/android/
 !/.github/
 !/package.json
 !/README.md
