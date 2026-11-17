@@ -13,5 +13,5 @@ self.addEventListener("fetch",e=>{
     e.respondWith(caches.open(TILES).then(async c=>{const hit=await c.match(r);if(hit)return hit;const res=await fetch(r);if(res.ok){c.put(r,res.clone());if(Math.random()<.02)trimTiles()}return res}));return}
   if(u.origin!==location.origin) return;
   // app files and data (versioned URLs): cache first
-  e.respondWith(caches.open(APP).then(async c=>{const hit=await c.match(r);if(hit)return hit;const res=await fetch(r);if(res.ok&&(u.search.includes("v=")||/\/(fonts|vendor|icons)\//.test(u.pathname)))c.put(r,res.clone());return res}));
+  e.respondWith(caches.open(APP).then(async c=>{const hit=await c.match(r);if(hit)return hit;const res=await fetch(r);if(res.ok&&(u.search.includes("v=")||/\/(fonts|vendor|icons|passports)\//.test(u.pathname)))c.put(r,res.clone());return res}));
 });

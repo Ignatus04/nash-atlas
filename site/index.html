@@ -4435,14 +4435,15 @@ async function openPassports(force){
     <p class="pp-cred">Фото обложек — <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a>, свободные лицензии; наведите на обложку, чтобы увидеть автора. Правила въезда: для РФ и РБ — наша сверка, для остальных — Passport Index (февраль 2026).</p></div>`;
   document.body.appendChild(el); requestAnimationFrame(()=>el.classList.add("on"));
   if(!S.vm||!S.flags||!S.countries.length) await new Promise(r=>{const t=setInterval(()=>{if(S.vm&&S.flags&&S.countries.length){clearInterval(t);r()}},120)});
-  const covers=await getData("passports").catch(()=>({}));
+  let covers={};
+  const coversP=getData("passports").catch(()=>({}));
   const all=Object.keys(S.vm?.p||{}).map(P=>P.toLowerCase()).filter(p=>S.cByK.get(p.toUpperCase())||PASS_SHORT[p]);
   const nameOf=p=>S.cByK.get(p.toUpperCase())?.properties.ru||p.toUpperCase();
   const order=[...POPULAR.filter(p=>all.includes(p)),...all.filter(p=>!POPULAR.includes(p)).sort((a,b)=>nameOf(a).localeCompare(nameOf(b),"ru"))];
   const grid=el.querySelector(".pp-grid");
   const card=p=>{const P=p.toUpperCase(),c=covers[P];
     return `<button class="pp-card" role="option" data-pp="${p}" aria-pressed="${pick.has(p)}" aria-selected="${pick.has(p)}" title="${c?esc(`${nameOf(p)}: фото ${c.by||"Wikimedia Commons"}, ${c.lic||""}`):esc(nameOf(p)+": фото обложки нет")}">
-      <span class="pp-cover">${c?`<img class="pp-img" src="${c.img}" alt="Обложка паспорта: ${esc(nameOf(p))}" loading="lazy" decoding="async">`:genericCover(P)}${flagImg(p).replace('class="fimg"','class="pp-flag"')}<span class="pp-check" aria-hidden="true">✓</span></span>
+      <span class="pp-cover">${c?`<img class="pp-img" src="${safeUrl(c.img.startsWith("passports/")?new URL(c.img,location.href).href:c.img)}" alt="Обложка паспорта: ${esc(nameOf(p))}" loading="${POPULAR.slice(0,6).includes(p)?"eager":"lazy"}" decoding="async">`:genericCover(P)}${flagImg(p).replace('class="fimg"','class="pp-flag"')}<span class="pp-check" aria-hidden="true">✓</span></span>
       <span class="pp-name">${esc(nameOf(p))}</span></button>`};
   const draw=()=>{const q=nz(el.querySelector(".pp-q").value);
     const list=q?order.filter(p=>{const f=S.cByK.get(p.toUpperCase())?.properties;return nz(f?.ru).includes(q)||nz(f?.en).includes(q)||nz(PASS_SHORT[p]).includes(q)||(q.length>2&&nz(swapLayout(q))&&nz(f?.ru).includes(swapLayout(q)))}):order;
@@ -4460,7 +4461,8 @@ async function openPassports(force){
   el.querySelector(".pp-q").oninput=draw; el.querySelector(".pp-go").onclick=close;
   el.addEventListener("keydown",e=>{if(e.key==="Escape"&&pick.size)close()});
   el.addEventListener("click",e=>{if(e.target===el&&pick.size)close()});
-  draw(); sum(); setTimeout(()=>el.querySelector(".pp-q").focus(),60);
+  draw(); sum(); setTimeout(()=>{if(el.isConnected)el.querySelector(".pp-q").focus()},60);
+  coversP.then(c=>{if(!el.isConnected)return;covers=c;const scroll=grid.scrollTop;draw();grid.scrollTop=scroll});
 }
 bindShell();
 Promise.resolve().then(()=>{if(document.readyState!=="loading")startIntro();else addEventListener("DOMContentLoaded",startIntro)});

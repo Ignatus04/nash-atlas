@@ -79,6 +79,16 @@ PRIVATE={'lists.json'}
 for f in sorted(os.listdir(S+'data')):
     if f in PRIVATE: continue
     d=json.load(open(S+'data/'+f,encoding='utf-8'))
+    if f=='passports.json':
+        # Keep attribution in the small index; fetch only visible covers.
+        os.makedirs(OUT+'passports',exist_ok=True)
+        for k,c in d.items():
+            src=c.get('img','')
+            if src.startswith('data:image/webp;base64,'):
+                raw=base64.b64decode(src.split(',',1)[1],validate=True)
+                name=k.lower()+'-'+hashlib.sha256(raw).hexdigest()[:12]+'.webp'
+                open(OUT+'passports/'+name,'wb').write(raw)
+                c['img']='passports/'+name
     out=json.dumps(d,ensure_ascii=False,separators=(',',':'))
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
 
