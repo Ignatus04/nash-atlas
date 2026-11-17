@@ -1084,7 +1084,9 @@ function safeDN(type){try{return new Intl.DisplayNames(["ru"],{type})}catch(e){r
 /* ---------- standalone (opened outside Claude) ---------- */
 const DEFACTO=new Set(["XU","XA","XO","XT","XN"]);
 const STANDALONE=!(window.claude&&typeof window.claude.use==="function");
-function getData(n){if(window.__DATA&&window.__DATA[n])return Promise.resolve(window.__DATA[n]);return fetch("data/"+n+".json"+(window.ATLAS_VER?"?v="+window.ATLAS_VER:"")).then(r=>{if(!r.ok)throw new Error(n);return r.json()})}
+const dataRequests=new Map();
+function getData(n){if(dataRequests.has(n))return dataRequests.get(n);const p=loadData(n).catch(e=>{dataRequests.delete(n);throw e});dataRequests.set(n,p);return p}
+function loadData(n){if(window.__DATA&&window.__DATA[n])return Promise.resolve(window.__DATA[n]);return fetch("data/"+n+".json"+(window.ATLAS_VER?"?v="+window.ATLAS_VER:"")).then(r=>{if(!r.ok)throw new Error(n);return r.json()})}
 class LocalDB{
   constructor(){this.k="atlas:";this.subs=new Map()}
   _get(p){try{const v=localStorage.getItem(this.k+p);return v?JSON.parse(v):null}catch(e){return null}}
@@ -4355,6 +4357,7 @@ function viewK(k,lng,lat){
 async function boot(){
   size(); consentApply(); setTimeout(consentBar,1200);
   const ccP=viewerCountry(), wvP=getData("worldviews").catch(()=>null);
+  const flagsP=getData("flags").then(f=>{S.flags=f;renderPassBtn();S.flagsReady?.();return f}).catch(()=>null);
   const [ct,cities,meta,visa,lists,va,ap]=await Promise.all(["countries","cities","meta","visa","lists","visa_all","areaplaces"].map(n=>n==="lists"?(window.ATLAS_VER?Promise.resolve([]):getData(n).catch(()=>[])):getData(n))); // the website keeps personal lists in the account
   applyWorldview(ct,await wvP,await ccP);
   S.areaIds=ap||{};
@@ -4385,7 +4388,7 @@ async function boot(){
   Promise.all([getData("safety"),getData("safezones")]).then(([sf,zt])=>{S.safety=sf;S.zones=topojson.feature(zt,zt.objects[Object.keys(zt.objects)[0]]).features;
     drawZones();paint();scheduleOverlay();if(S.sel.type==="country")renderCountry(S.sel.k);else if(S.sel.type==="home")renderHome()}).catch(e=>console.warn("safety",e));
   getData("urban").then(u=>{S.urban=u;if(S.sel.type==="city"||S.sel.type==="place")updateFocus()}).catch(()=>{});
-  getData("flags").then(f=>{S.flags=f;scheduleOverlay();brandFlags();renderPassBtn();S.flagsReady?.()}).catch(()=>{});
+  flagsP.then(f=>{if(f){scheduleOverlay();brandFlags()}});
   initClaude();
   addFromUrl();
 }

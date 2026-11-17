@@ -18,7 +18,7 @@ libs={'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js':('d3/dist/d3.m
 for url,(src,name) in libs.items():
     shutil.copy(B+src,OUT+'vendor/'+name)
     tag=f'<script src="{url}"></script>'; assert tag in html
-    html=html.replace(tag,f'<script src="vendor/{name}"' + (' defer' if name=='jszip.min.js' else '') + '></script>')
+    html=html.replace(tag,f'<script src="vendor/{name}"' + ' defer' + '></script>')
 # accounts: Supabase client and the project settings
 shutil.copy(B+'@supabase/supabase-js/dist/umd/supabase.js',OUT+'vendor/supabase.js')
 shutil.copy(SRC+'config.js',OUT+'config.js')
@@ -40,7 +40,7 @@ ver=hashlib.sha1((css+js+open(SRC+'config.js').read()+''.join(hashlib.sha1(open(
 open(OUT+'app.css','w',encoding='utf-8').write(css)
 open(OUT+'app.js','w',encoding='utf-8').write(js)
 html=html.replace(st.group(0),f'<link rel="stylesheet" href="app.css?v={ver}">')
-html=html.replace(m.group(0),f'<script src="vendor/supabase.js"></script>\n<script src="config.js?v={ver}"></script>\n<script>window.ATLAS_VER="{ver}"</script>\n<script src="app.js?v={ver}"></script>\n'
+html=html.replace(m.group(0),f'<script defer src="vendor/supabase.js"></script>\n<script defer src="config.js?v={ver}"></script>\n<script>window.ATLAS_VER="{ver}"</script>\n<script defer src="app.js?v={ver}"></script>\n'
  '<script>if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>')
 head='''<meta name="theme-color" content="#13213a">
 <meta name="description" content="Наша карта путешествий: где были, куда хотим, правила въезда и безопасность по странам.">
@@ -107,9 +107,9 @@ if os.path.exists(fp):
     json.dump([{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"ru.nashatlas.app","sha256_cert_fingerprints":fps}}],
       open(OUT+'.well-known/assetlinks.json','w',encoding='utf-8'),indent=1)
 
-core=['./','index.html',f'app.js?v={ver}',f'app.css?v={ver}','manifest.webmanifest']+['vendor/'+n for _,n in libs.values()]+\
-     [f'data/{n}.json?v={ver}' for n in ['countries','worldviews','cities','meta','visa','visa_all','areaplaces','flags','safety','safezones','urban']]+['vendor/supabase.js']+\
-     ['fonts/'+f for f in sorted(os.listdir(OUT+'fonts'))]+['icons/icon-192.png','icons/icon.svg']
+# Cache files when actually requested. Eagerly downloading every font and data set
+# on each update competes with the visible map and doubles cold-load requests.
+core=['manifest.webmanifest','icons/icon-192.png','icons/icon.svg']
 sw=open(SRC+'sw.js',encoding='utf-8').read().replace('__VER__',ver).replace('__CORE__',json.dumps(core))
 open(OUT+'sw.js','w',encoding='utf-8').write(sw)
 tot=sum(os.path.getsize(os.path.join(dp,f)) for dp,_,fs in os.walk(OUT) for f in fs)
