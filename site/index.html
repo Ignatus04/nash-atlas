@@ -21,7 +21,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0}
+html,body{height:100%;margin:0;overscroll-behavior:none}
 body{background:var(--ocean);color:var(--ink);font:15px/1.5 var(--body);overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -781,8 +781,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 @keyframes gaDrop2{0%{opacity:0;transform:translateY(-70px) scale(.7)}35%{opacity:1}100%{opacity:1;transform:none}}
 .ga-plus{position:absolute;right:16px;bottom:14px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px rgba(255,138,92,.4);animation:gaPulse 2.3s var(--spring-soft) infinite}
 @keyframes gaPulse{0%,60%,100%{transform:scale(1)}70%{transform:scale(.86)}}
-/* Installed iOS apps use the full containing viewport, not Safari's dynamic toolbar height. */
-@media (display-mode:standalone){html,body{position:fixed;inset:0;width:100%;height:100%}#app{height:100%}}
+/* Bottom controls are anchored inside one measured viewport, not separately fixed by WebKit. */
 /* Installation follows the guide's navy panels, orange actions and spring motion. */
 .install-steps{display:grid;gap:12px;margin:0;color:#d3dbe8;font-size:14px;line-height:1.5}
 .install-steps section{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(24,40,63,.5)}
@@ -793,18 +792,25 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .gi-phone{position:relative;width:106px;height:122px;border:1px solid #4a6081;border-radius:15px;background:linear-gradient(155deg,#263f62,#101c30);box-shadow:0 8px 18px #08111c66;overflow:hidden}
 .gi-browser{position:absolute;left:7px;right:7px;top:9px;height:18px;border:1px solid #3b5172;border-radius:6px;padding:3px 5px;font:600 7px var(--body);color:#9fb3cf}
 .gi-menu{position:absolute;right:12px;top:12px;font:700 11px/1 var(--body);color:white}
-.gi-share{position:absolute;left:44px;bottom:8px;color:#9cd3ff}.gi-share svg{width:17px;height:17px}
-.gi-action{position:absolute;left:7px;right:7px;top:42px;padding:8px 3px;border:1px solid #50688a;background:#263c5d;border-radius:8px;text-align:center;font:700 8px/1.25 var(--body);opacity:0;animation:giMenu 7s var(--spring) infinite}
+.gi-share{position:absolute;left:44px;bottom:8px;color:#9cd3ff;transition:opacity .28s ease,transform .4s cubic-bezier(.22,1,.36,1)}.gi-share svg{width:17px;height:17px}
+.gi-action{position:absolute;left:7px;right:7px;top:42px;padding:8px 3px;border:1px solid #50688a;background:#263c5d;border-radius:8px;text-align:center;font:700 8px/1.25 var(--body);opacity:0;transform:translateY(12px)}
 .gi-action b{display:block;color:var(--accent);font-size:16px;line-height:1;margin-bottom:3px}
-.gi-icon{position:absolute;left:34px;top:37px;width:38px;height:38px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 5px 14px #ff8a5c44;opacity:0;animation:giIcon 7s var(--spring-soft) infinite}
-.gi-icon svg{width:38px;height:38px;border-radius:11px}.gi-done{position:absolute;left:0;right:0;bottom:20px;text-align:center;color:#76d6b2;font:700 8px var(--body);opacity:0;animation:giDone 7s ease infinite}
-.gi-tap{position:absolute;left:78px;top:12px;width:16px;height:16px;border:2px solid white;border-radius:50%;background:#ffffff33;box-shadow:0 2px 6px #0005;opacity:0;animation:giTapAndroid 7s var(--spring) infinite}
-.gi-ios .gi-tap{left:45px;top:97px;animation-name:giTapIos}
-@keyframes giMenu{0%,19%{opacity:0;transform:translateY(14px)}28%,51%{opacity:1;transform:translateY(0)}61%,100%{opacity:0;transform:translateY(-8px)}}
-@keyframes giIcon{0%,57%{opacity:0;transform:translateY(12px) scale(.65)}70%,91%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(0) scale(1)}}
-@keyframes giDone{0%,68%{opacity:0}75%,91%{opacity:1}100%{opacity:0}}
-@keyframes giTapAndroid{0%{opacity:0;transform:translate(12px,18px)}12%,21%{opacity:1;transform:translate(0,0)}18%{transform:translate(0,0) scale(.78)}38%,48%{opacity:1;transform:translate(-34px,44px)}44%{transform:translate(-34px,44px) scale(.78)}60%,100%{opacity:0;transform:translate(-34px,44px)}}
-@keyframes giTapIos{0%{opacity:0;transform:translate(15px,10px)}12%,21%{opacity:1;transform:translate(0,0)}18%{transform:translate(0,0) scale(.78)}38%,48%{opacity:1;transform:translate(0,-41px)}44%{transform:translate(0,-41px) scale(.78)}60%,100%{opacity:0;transform:translate(0,-41px)}}
+.gi-icon{position:absolute;left:34px;top:37px;width:38px;height:38px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 5px 14px #ff8a5c44;opacity:1;transform:none}
+.gi-icon svg{width:38px;height:38px;border-radius:11px}.gi-done{position:absolute;left:0;right:0;bottom:20px;text-align:center;color:#76d6b2;font:700 8px var(--body);opacity:1}
+.gi-tap{position:absolute;left:78px;top:12px;width:16px;height:16px;border:2px solid white;border-radius:50%;background:#ffffff33;box-shadow:0 2px 6px #0005;opacity:0}
+.gi-ios .gi-tap{left:45px;top:97px;transform:none}
+.ga-install .gi-action,.ga-install .gi-icon,.ga-install .gi-done,.ga-install .gi-tap{transition:transform .55s cubic-bezier(.22,1.28,.36,1),opacity .3s ease}
+.gi-running .gi-icon{opacity:0;transform:translateY(12px) scale(.7)}.gi-running .gi-done{opacity:0}
+.gi-running.gi-menu-open .gi-action{opacity:1;transform:translateY(0)}
+.gi-running.gi-tapping .gi-tap{opacity:1}
+.gi-running.gi-select .gi-android .gi-tap{transform:translate(-34px,44px)}
+.gi-running.gi-select .gi-ios .gi-tap{transform:translate(0,-41px)}
+.gi-browser,.gi-menu{transition:opacity .28s ease,transform .4s cubic-bezier(.22,1,.36,1)}
+.gi-phone .gi-share,.gi-phone .gi-browser,.gi-phone .gi-menu{opacity:0;transform:translateY(-5px)}
+.gi-running:not(.gi-finished) .gi-share,.gi-running:not(.gi-finished) .gi-browser,.gi-running:not(.gi-finished) .gi-menu{opacity:1;transform:none}
+.gi-running.gi-finished .gi-icon{opacity:1;transform:none;transition-delay:.12s}.gi-running.gi-finished .gi-done{opacity:1;transition-delay:.3s}
+.gi-done{bottom:16px;line-height:12px;white-space:nowrap}
+.gi-running .gi-tap{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.8);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
 #installBox .gd-art{height:156px;flex:none;margin-top:8px}#installBox .abox{gap:12px}
 .gd-modal .abox{overflow-y:auto}.gd-pane>.gd-art{flex:none}
 @media(max-width:560px){.gd-modal .abox{max-height:calc(100% - env(safe-area-inset-top,0px) - 10px)}.install-steps{gap:8px;font-size:13px}.install-steps section{padding:9px 11px}}
@@ -834,7 +840,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .tabbar button[aria-current="page"] .tb-i{background:none}
   .tabbar button{z-index:1}
   aside#panel{left:6px;right:6px;border:1px solid #263854;border-bottom:0}
-  .sumcard{display:block;position:fixed;left:10px;right:10px;bottom:calc(var(--tabh) + 10px);z-index:10;min-height:64px;padding:10px 12px;border-radius:20px;
+  .sumcard{display:block;position:absolute;left:10px;right:10px;bottom:calc(var(--tabh) + 10px);z-index:10;min-height:64px;padding:10px 12px;border-radius:20px;
     background:rgba(20,33,54,.97);border:1px solid #2a3d5c;box-shadow:0 12px 32px rgba(0,0,0,.45);cursor:pointer;touch-action:none;
     transform:translateY(calc(130% + 10px));opacity:0;transition:transform .5s var(--spring),opacity .25s ease;-webkit-tap-highlight-color:transparent}
   body.peek .sumcard{transform:translateY(calc(var(--pull,0) * -14px)) scale(calc(1 - var(--pull,0)*.03));opacity:calc(1 - var(--pull,0)*.6)}
@@ -860,15 +866,15 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 /* phone: the map fills the screen, the card is a sheet you pull up, sections live in a bottom bar */
 @media (max-width:860px){
   :root{--tabh:calc(60px + env(safe-area-inset-bottom,0px))}
-  #app{grid-template-columns:1fr;grid-template-rows:1fr;height:100%}
-  aside#panel{position:fixed;left:0;right:0;bottom:var(--tabh);height:calc(100% - var(--tabh) - var(--toph,104px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;z-index:9;
+  #app{position:fixed;left:0;right:0;top:var(--app-top,0px);grid-template-columns:1fr;grid-template-rows:1fr;height:var(--app-height,100dvh)}
+  aside#panel{position:absolute;left:0;right:0;bottom:var(--tabh);height:calc(100% - var(--tabh) - var(--toph,104px));border-left:0;border-top:1px solid var(--line);border-radius:20px 20px 0 0;z-index:9;
     transform:translateY(var(--off,0px));transition:transform .34s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain;box-shadow:0 -12px 32px rgba(0,0,0,.35)}
   aside#panel.dragging{transition:none}
   aside#panel .p-inner{--px:18px;padding:2px var(--px) calc(var(--padb,0px) + 28px)}
   .grab{display:block;position:sticky;top:0;z-index:3;height:26px;margin-bottom:-4px;background:linear-gradient(var(--panel) 70%,transparent);touch-action:none;cursor:grab}
   .grab::before{content:"";position:absolute;left:50%;top:9px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:#3a4c69}
   .close{display:none!important}
-  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;height:var(--tabh);padding:0 4px env(safe-area-inset-bottom,0px);background:#0e1828;border-top:1px solid var(--line);z-index:12}
+  .tabbar{display:flex;position:absolute;left:0;right:0;bottom:0;height:var(--tabh);padding:0 4px env(safe-area-inset-bottom,0px);background:#0e1828;border-top:1px solid var(--line);z-index:12}
   .tabbar button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;color:var(--muted);font:600 11px/1.1 var(--body);touch-action:manipulation;-webkit-tap-highlight-color:transparent;position:relative}
   .tabbar button span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .tabbar button[aria-current="page"]{color:var(--ink)}
@@ -1644,6 +1650,24 @@ function modal(id,html,{labelledby}={}){let el=document.getElementById(id);if(el
       if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus()}}});
   el.querySelectorAll("[data-close]").forEach(x=>x.onclick=close);return {el,close}}
 
+/* A single mobile viewport owns the map, sheet and bottom navigation. */
+let viewportFrame=0;
+function syncMobileViewport(){
+  cancelAnimationFrame(viewportFrame);viewportFrame=requestAnimationFrame(()=>{
+    const root=document.documentElement;
+    if(innerWidth>860){root.style.removeProperty("--app-height");root.style.removeProperty("--app-top");return}
+    const vv=window.visualViewport;if(vv&&Math.abs(vv.scale-1)>.02)return;
+    const height=vv?vv.height:innerHeight,top=vv?vv.offsetTop:0;
+    const before=root.style.getPropertyValue("--app-height");
+    root.style.setProperty("--app-height",height+"px");root.style.setProperty("--app-top",top+"px");
+    if(before&&before!==height+"px")dispatchEvent(new Event("resize"));
+  });
+}
+window.visualViewport?.addEventListener("resize",syncMobileViewport);
+window.visualViewport?.addEventListener("scroll",syncMobileViewport);
+addEventListener("resize",syncMobileViewport);addEventListener("pageshow",syncMobileViewport);
+syncMobileViewport();
+
 /* ---------- install the online app ---------- */
 let installPrompt=null, installedThisSession=false;
 const appDisplay=matchMedia("(display-mode: standalone)");
@@ -1660,6 +1684,20 @@ appDisplay.addEventListener?.("change",refreshInstall);
 // Delegation also covers profile and home panels redrawn after navigation.
 document.addEventListener("click",e=>{if(e.target.closest("[data-install]"))openInstall()});
 function installInstructions(){return `<div class="install-steps"><section><h3>Андроид</h3><p>Откройте сайт в Chrome → меню ⋮ → «Установить приложение» или «Добавить на главный экран» → подтвердите установку.</p></section><section><h3>Айфон</h3><p>Откройте сайт в Safari → «Поделиться» → «На экран Домой» → «Добавить». Если есть переключатель «Открывать как веб-приложение», включите его.</p></section></div>`}
+// Runs independently of country data and of CSS keyframe/easing support.
+function playInstallScene(root){
+  const scene=root.querySelector(".ga-install");if(!scene||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const later=(fn,ms)=>setTimeout(()=>{if(scene.isConnected)fn()},ms);
+  const cycle=()=>{
+    if(document.hidden){later(cycle,1200);return}
+    scene.className="ga ga-install gi-running";
+    later(()=>scene.classList.add("gi-tapping"),300);
+    later(()=>scene.classList.add("gi-menu-open"),1000);
+    later(()=>scene.classList.add("gi-select"),2000);
+    later(()=>{scene.classList.remove("gi-menu-open","gi-tapping");scene.classList.add("gi-finished")},3100);
+    later(cycle,6500);
+  };cycle();
+}
 function iosShareIcon(){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V2m-4 4 4-4 4 4M7 10H4v12h16V10h-3"/></svg>`}
 function installArt(){return `<div class="ga ga-install" aria-hidden="true">${[["Андроид","android"],["Айфон","ios"]].map(([name,os])=>`<div class="gi-col"><span>${name}</span><div class="gi-phone gi-${os}"><div class="gi-browser">nash-atlas.ru</div>${os==="android"?'<span class="gi-menu">⋮</span>':`<span class="gi-share">${iosShareIcon()}</span>`}<div class="gi-action"><b>+</b>${os==="android"?"Установить":"На экран Домой"}</div><div class="gi-icon"><svg viewBox="0 0 512 512">
   <rect width="512" height="512" rx="112" fill="#13213a"/>
@@ -1672,6 +1710,7 @@ function installArt(){return `<div class="ga ga-install" aria-hidden="true">${[[
 function openInstall(){
   if(appInstalled())return;
   const {el,close}=modal("installBox",`<h2 id="installTitle">Атлас на главном экране</h2><div class="gd-art">${installArt()}</div><button class="btn primary" id="installNow" ${installPrompt?"":"hidden"}>Установить</button>${installInstructions()}<p class="install-note">Запускайте по иконке, в отдельном окне. Для работы нужен интернет. Войдите в аккаунт, чтобы открыть свои места.</p>`,{labelledby:"installTitle"});
+  requestAnimationFrame(()=>playInstallScene(el));
   el.querySelector("#installNow").onclick=async()=>{
     const prompt=installPrompt;if(!prompt)return;
     installPrompt=null;const b=el.querySelector("#installNow");b.disabled=true;
@@ -2743,15 +2782,15 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=15;
+const GUIDE_VER=16;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
-  {since:15,t:"Атлас как приложение",
+  {since:16,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
-    install:true,art:installArt},
+    install:true,art:installArt,run:playInstallScene},
   {since:1, t:"Цвет страны — правила въезда",
     m:"Карта раскрашена по вашему паспорту. Зелёные страны — без визы, жёлтые — виза онлайн или по прилёте, оранжевые — электронная виза, фиолетовые — обычная виза, красные — въезд закрыт. Нажмите на страну, чтобы узнать подробности.",
     art:()=>`<div class="ga ga-q">${gaMap(GUIDE_VB.col,gaEntryC)}${gaPointer()}<div class="ga-tip"></div></div>`,
@@ -2840,7 +2879,8 @@ function openGuide(start=0,steps=GUIDE,done,opts={}){
     // play the little scene; if the map or the flags are still loading, draw it again once they arrive
     gaClear();
     const art=()=>i<0?welcomeArt():steps[i].art(), run=()=>{if(i>=0)steps[i].run?.(nw.querySelector(".gd-art"))};
-    if(gaWorld()&&S.flags) run();
+    if(i>=0&&steps[i].install)run();
+    else if(gaWorld()&&S.flags) run();
     else{let n=0;const t=setInterval(()=>{if((gaWorld()&&S.flags)||++n>40){clearInterval(t);const a=nw.querySelector(".gd-art");if(a?.isConnected&&gaWorld()){a.innerHTML=art();run()}}},250);gaT.push(t)}
   };
   const go=(j,dir)=>{if(busy||j<-1||j>=steps.length||(j<0&&!opts.welcome))return;i=j;draw(dir)};
