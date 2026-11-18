@@ -23,6 +23,7 @@ for url,(src,name) in libs.items():
 # accounts: Supabase client and the project settings
 shutil.copy(B+'@supabase/supabase-js/dist/umd/supabase.js',OUT+'vendor/supabase.js')
 shutil.copy(SRC+'config.js',OUT+'config.js')
+shutil.copy(SRC+'support-sbp.png',OUT+'support-sbp.png')
 
 # fonts: self-hosted (Google Fonts is not always reachable)
 faces=[]
