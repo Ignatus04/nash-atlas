@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+.map-disclaimer{position:absolute;z-index:3;left:50%;bottom:7px;transform:translateX(-50%);width:min(610px,calc(100% - 180px));margin:0;padding:3px 7px;border-radius:6px;background:rgba(12,22,38,.85);color:#adb9cb;font:10px/1.4 var(--body);text-align:center;pointer-events:none}
+@media(max-width:860px){.map-disclaimer{left:12px;right:12px;top:calc(var(--toph,104px) + 62px);bottom:auto;transform:none;width:auto;font-size:9px;text-align:right;max-width:300px;margin-left:auto}}
+
 .support-home{position:absolute;z-index:12;right:16px;top:calc(var(--toph,120px) + 10px);display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--ink);font:600 12px var(--body);box-shadow:0 4px 18px #0003;cursor:pointer;transition:transform .2s,opacity .2s}
 .support-home .sbp-mark{width:24px;height:24px;flex:none;border-radius:6px}
 .support-home:hover{transform:translateY(-2px)}
@@ -990,6 +993,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
       </div>
     </div>
     <div class="legend" id="legend"></div>
+    <p class="map-disclaimer">Информация носит справочный характер. Перед поездкой проверяйте требования в официальных источниках. Решение о поездке принимаете вы.</p>
     <div class="zoomctl">
       <button id="zin" aria-label="Приблизить">+</button>
       <button id="zout" aria-label="Отдалить">−</button>
