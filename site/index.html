@@ -10,12 +10,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 .map-disclaimer{position:absolute;z-index:3;left:16px;bottom:calc(var(--legend-height,180px) + 24px);width:min(610px,calc(100% - 100px));margin:0;padding:3px 7px;border-radius:6px;background:rgba(12,22,38,.85);color:#adb9cb;font:10px/1.4 var(--body);text-align:center;pointer-events:none}
-@media(max-width:860px){.map-disclaimer{left:12px;right:12px;top:calc(var(--toph,104px) + 62px);bottom:auto;transform:none;width:auto;font-size:9px;text-align:right;max-width:300px;margin-left:auto}}
+@media(max-width:860px){.map-disclaimer{left:12px;right:12px;top:calc(var(--toph,104px) + 106px);bottom:auto;transform:none;width:auto;font-size:9px;text-align:right;max-width:300px;margin-left:auto}}
 
-.support-home{position:absolute;z-index:12;right:16px;top:calc(var(--toph,120px) + 10px);display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--ink);font:600 12px var(--body);box-shadow:0 4px 18px #0003;cursor:pointer;transition:transform .2s,opacity .2s}
+.author-actions{position:absolute;z-index:12;right:16px;top:calc(var(--toph,120px) + 10px);display:flex;align-items:center;gap:8px}
+.support-home{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--ink);font:600 12px var(--body);box-shadow:0 4px 18px #0003;cursor:pointer;transition:transform .2s,opacity .2s}
 .support-home .sbp-mark{width:24px;height:24px;flex:none;border-radius:6px}
+.feedback-home{text-decoration:none;min-height:44px}.feedback-home svg{width:20px;height:20px;color:#55b9ed;flex:none}
 .support-home:hover{transform:translateY(-2px)}
-@media(max-width:860px){.support-home{right:10px;top:calc(var(--toph,104px) + 8px);font-size:11px;padding:7px 11px}}
+@media(max-width:860px){.author-actions{right:10px;top:calc(var(--toph,104px) + 8px);flex-direction:column;align-items:flex-end;gap:6px}.support-home{font-size:11px;padding:7px 11px}.feedback-home{min-height:36px}}
 
 #supportBox .abox{width:min(580px,100%)}
 #supportBox h2{padding-right:24px}
@@ -961,7 +963,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 <body>
 <div id="app">
   <div id="mapwrap">
+    <div class="author-actions">
     <button class="support-home" id="supportHome" type="button" aria-label="Поддержать автора через СБП"><svg class="sbp-mark" aria-hidden="true" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none"><path fill="#fff" d="M0 0h28v28H0z"/><path fill="#5B57A2" d="m6.609 8.852 2.208 3.947v2.407l-2.206 3.94z"/><path fill="#D90751" d="m15.087 11.363 2.07-1.268 4.234-.005-6.304 3.862z"/><path fill="#FAB718" d="m15.075 8.829.012 5.225-2.213-1.36v-7.81z"/><path fill="#ED6F26" d="m21.39 10.09-4.234.005-2.08-1.266-2.202-3.946z"/><path fill="#63B22F" d="M15.087 19.167v-2.535l-2.213-1.334v7.819z"/><path fill="#1487C9" d="M17.151 17.91 8.817 12.8 6.609 8.852l14.773 9.054z"/><path fill="#017F36" d="m12.875 23.117 2.212-3.95 2.064-1.256 4.23-.006z"/><path fill="#984995" d="m6.611 19.145 6.281-3.847-2.111-1.296-1.964 1.204z"/></svg><span>Поддержать автора</span></button>
+    <a class="support-home feedback-home" id="feedbackHome" href="https://t.me/ignatus_04" target="_blank" rel="noopener noreferrer" aria-label="Прислать пожелания или замечания автору в Telegram, откроется новая вкладка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 3-4 18-6-5-4 3 1-6-5-3Z"/><path d="m8 13 9-6-6 9"/></svg><span>Пожелания и замечания</span></a>
+    </div>
     <div id="tileLayer" aria-hidden="true"><div id="tilePane"><canvas id="paneFocus"></canvas></div></div>
     <svg id="map" aria-label="Карта мира с правилами въезда и нашими местами"></svg>
     <div class="topbar">
@@ -2885,12 +2890,13 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=19;
+const GUIDE_VER=20;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
   {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроются платёжная ссылка и QR-код. Можно поддержать автора на любую сумму через Альфа-Банк или Сбербанк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
