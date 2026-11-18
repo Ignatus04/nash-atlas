@@ -3730,10 +3730,12 @@ const FRANCE_PATTERN=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 6
 <use href="#spark" transform="translate(200 60)"/><use href="#spark" transform="translate(350 400) scale(.8)"/>
 <use href="#dot" transform="translate(40 330)"/><use href="#dot" transform="translate(220 470)"/>
 </g></svg>`;
+const RASTER_CARD_ART={"FR":"france-engraving-v1.webp","BY":"belarus-engraving-v1.webp","DE":"germany-engraving-v1.webp","IT":"italy-engraving-v1.webp","ES":"spain-engraving-v1.webp","GB":"united-kingdom-engraving-v1.webp"};
 const cardArtCache=new Map();
 function countryCardArt(k){
   if(cardArtCache.has(k))return cardArtCache.get(k);
-  if(k==="FR"){const url=window.ATLAS_VER?`linear-gradient(#121f3380,#121f3380),url("patterns/france-engraving-v1.webp?v=${window.ATLAS_VER}")`:`url("data:image/svg+xml,${encodeURIComponent(FRANCE_PATTERN)}")`;cardArtCache.set(k,url);return url}
+  if(window.ATLAS_VER&&RASTER_CARD_ART[k]){const url=`linear-gradient(#121f3380,#121f3380),url("patterns/${RASTER_CARD_ART[k]}?v=${window.ATLAS_VER}")`;cardArtCache.set(k,url);return url}
+  if(k==="FR"){const url=`url("data:image/svg+xml,${encodeURIComponent(FRANCE_PATTERN)}")`;cardArtCache.set(k,url);return url}
   if(EUROPE_PATTERNS[k]){
     const recipe=EUROPE_PATTERNS[k],positions=[[90,140,1.9,-4,0],[290,115,1.25,14,1],[260,285,1.65,-12,2],[95,405,1.3,3,1],[310,505,1.15,5,0],[65,545,.9,-20,2]];
     const drawings=positions.map(([x,y,z,r,i])=>`<g transform="translate(${x} ${y}) rotate(${r+recipe.rotation}) scale(${z}) translate(-24 -24)"><path vector-effect="non-scaling-stroke" d="${NATIONAL_MARKS[recipe.motifs[i]]}"/></g>`).join("");
@@ -3747,7 +3749,7 @@ function countryCardArt(k){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="360" height="600" viewBox="0 0 360 600"><g fill="none" stroke="#b8cedf" stroke-opacity=".075" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${drawings}</g></svg>`;
   const url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;cardArtCache.set(k,url);return url;
 }
-function setCountryArt(k){const el=$("#pbody");el.style.setProperty("--card-art",countryCardArt(k));el.style.setProperty("--card-art-size",k==="FR"&&window.ATLAS_VER?"100% auto":EUROPE_PATTERNS[k]?"400px 600px":"360px 600px")}
+function setCountryArt(k){const el=$("#pbody");el.style.setProperty("--card-art",countryCardArt(k));el.style.setProperty("--card-art-size",RASTER_CARD_ART[k]&&window.ATLAS_VER?"100% auto":EUROPE_PATTERNS[k]?"400px 600px":"360px 600px")}
 function renderCountry(k){
   if(S.found&&S.sel.type==="country"&&S.sel.k===k){renderFound(S.found);return}
   if(!S.adm) ensureAdm().then(()=>{if(S.adm&&S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});

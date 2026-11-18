@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-18",
+  "tool": "built-in image_gen",
+  "base": "Use case: stylized-concept. Asset: ONLY a finished background illustration for a travel app country card, not a UI mockup. Portrait 2:3 composition. Solid uniform deep navy #121f33 edge to edge. Exquisite delicate pale desaturated blue-gray engraving in approximately #46536a: refined artisan line drawings, fine curved strokes, lightly hatched detail, premium travel journal aesthetic. Sparse airy diagonal composition with at least 75% quiet negative space. Motifs float independently, varied scale and a few subtle rotations, not a landscape or collage. Clear empty top and bottom margins for unobtrusive vertical repeating wallpaper. No text, letters, flags, maps, state emblems, logos, religious signs, people, borders, watermark, gradients, photorealism, gold, bright whites or solid filled objects. Illustrations must be beautifully drawn and recognizable rather than crude geometric icons. Background should remain subdued enough for light UI text to overlay. Same style as an elegant French etching wallpaper with Eiffel Tower/croissant/vine/window, but use ONLY the requested country's subjects. ",
+  "images": [
+    {
+      "code": "BY",
+      "name": "belarus",
+      "subject": "BELARUS: a majestic European bison in calm side profile upper left (anatomically correct, shaggy shoulder hump, small curved horns); a delicate cornflower blossom with serrated petals upper right; two graceful rye stalks with individual grains middle right; a small intricately woven Belarusian diamond embroidery ornament lower left, fine linework rather than a dense border; one smaller cornflower near the bottom and just a couple tiny spark accents. No tower, croissant, flag or coat of arms."
+    },
+    {
+      "code": "DE",
+      "name": "germany",
+      "subject": "GERMANY: an elegant romantic German hillside castle with slender towers upper left, beautifully proportioned detailed masonry; a hand-crafted curved pretzel upper right with a few salt dots; graceful oak branch with lobed leaves and two acorns middle right; a charming traditional half-timbered house facade lower left, lightly detailed beams and windows; a small hops sprig near the bottom, a couple tiny spark accents. No French landmarks, no beer labels, no flags."
+    },
+    {
+      "code": "IT",
+      "name": "italy",
+      "subject": "ITALY: a graceful detailed Roman Colosseum upper left, elegant elliptical tiers of arches and correct proportions; a small delicate slice of pizza upper right, hand-drawn with restrained fine detail; a curling olive branch middle right; a beautiful Venetian gondola with graceful raised ends and an oar lower left, no person; a small bunch of grapes near the bottom, two tiny spark accents. No French landmarks or flags."
+    },
+    {
+      "code": "ES",
+      "name": "spain",
+      "subject": "SPAIN: a beautiful ornate open Spanish hand fan upper right, graceful curved ribs and lace-like edging, not a diagram; an elegant Andalusian horseshoe arch and small architectural facade upper left, fine carved detail; a delicate olive branch with a few olives middle right; a beautifully proportioned classical Spanish guitar lower left, fine strings, rosette and rounded body; a small orange blossom sprig near bottom, two tiny spark accents. No bullfighting, flags or French landmarks."
+    },
+    {
+      "code": "GB",
+      "name": "united-kingdom",
+      "subject": "UNITED KINGDOM: an elegant detailed Elizabeth Tower (Big Ben) upper left with recognizable clock faces and a slender spire, blank clocks with simple hands but no numbers or lettering; a delicate traditional teapot upper right with curved spout; a gracefully curving English rose branch with leaves middle right; a charming Georgian arched window and finely wrought iron balcony lower left; a small oak sprig near the bottom and two tiny spark accents. No crowns, royal crests, flags, French landmarks or text."
+    }
+  ]
+}
