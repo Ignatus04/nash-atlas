@@ -9,6 +9,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+.map-disclaimer{position:absolute;z-index:3;left:16px;right:16px;bottom:5px;margin:0;padding:3px 7px;color:#adb9cb;font:10px/1.4 var(--body);text-align:center;pointer-events:none}
+@media(min-width:861px){#legend,.zoomctl{bottom:calc(var(--disclaimer-height,34px) + 14px)}}
+@media(max-width:860px){.map-disclaimer{left:16px;right:16px;bottom:calc(var(--tabh,70px) + 88px);font-size:9px;max-width:420px;margin:0 auto;padding:3px 7px;background:rgba(12,22,38,.82);border-radius:6px}}
+
+.author-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.support-home{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--ink);font:600 12px var(--body);box-shadow:0 4px 18px #0003;cursor:pointer;transition:transform .2s,opacity .2s}
+.support-home .sbp-mark{width:24px;height:24px;flex:none;border-radius:6px}
+.feedback-home{text-decoration:none;min-height:44px}.feedback-home svg{width:20px;height:20px;color:#55b9ed;flex:none}
+.support-home:hover{transform:translateY(-2px)}
+@media(max-width:860px){.topbar .author-actions{order:4;width:100%;margin-left:0;justify-content:space-between;flex-direction:row-reverse;gap:6px}.support-home{font-size:11px;padding:7px 9px;white-space:nowrap}.feedback-home{min-height:40px}.support-home .sbp-mark{width:20px;height:20px}}
+@media(max-width:360px){.support-home{font-size:10px;padding:7px;gap:4px}}
+
+#supportBox .abox{width:min(580px,100%)}
+#supportBox h2{padding-right:24px}
+#supportBox p{margin:8px 0;line-height:1.6}
+.support-options{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:18px 0}
+.support-bank{display:flex;flex-direction:column;gap:10px;min-width:0;text-align:center;text-decoration:none;color:var(--ink);font-weight:600;font-size:13px}
+.support-bank img{display:block;width:100%;height:230px;object-fit:contain;background:#fff;border-radius:12px;padding:8px;box-sizing:border-box}
+.support-bank:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
+.support-or{color:var(--muted);font-size:12px}
+#supportBox .support-phone{text-align:center;color:var(--muted);font-size:13px}
+.support-phone a{color:var(--ink);white-space:nowrap}
+@media(max-width:560px){.support-options{gap:7px}.support-bank img{height:176px;padding:5px}.support-bank{font-size:12px}}
+
 [data-install][hidden],#installNow[hidden]{display:none!important}
 #installTitle{padding-right:24px}
 /* Ночной атлас: тёмный океан, страны окрашены по режиму въезда, справа карточка выбранного места. Одна тема намеренно. */
@@ -205,7 +229,7 @@ body.hastiles .c-dot{fill:#fff;stroke:#14213a}
 .seg{display:flex;background:rgba(18,31,51,.92);border:1px solid var(--line);border-radius:12px;padding:3px}
 .seg button{background:none;border:0;border-radius:9px;padding:7px 11px;color:var(--muted);font-weight:600;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--ocean)}
-.actions{margin-left:auto;display:flex;gap:8px}
+.actions{margin-left:0;display:flex;gap:8px}
 /* two tidy rows on a computer: brand, search, passports, account; then the layer switch and the buttons */
 .tb-br{flex-basis:100%;height:0}
 @media (min-width:1750px){.tb-br{display:none}}
@@ -321,7 +345,8 @@ section.blk{display:flex;flex-direction:column;gap:10px}
 .ap-maps{display:flex;flex-direction:column;padding:2px 0 4px}
 .ap-list{display:flex;flex-direction:column;padding:2px 0}
 .ap-foot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px}
-.ap-legal{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 12px 4px;font-size:12.5px}.ap-legal a,.ap-legal button{color:var(--muted);text-decoration:none;background:none;border:0;padding:4px 0;font:inherit;cursor:pointer}.ap-legal a:hover,.ap-legal button:hover{color:var(--ink);text-decoration:underline}
+.ap-legal{display:flex;flex-wrap:wrap;gap:4px 14px;padding:8px 12px 4px;font-size:12.5px}.ap-legal a,.ap-legal button{color:var(--muted);text-decoration:none;background:none;border:0;padding:4px 0;font:inherit;cursor:pointer}.ap-legal .legal-placeholder{width:130px;min-height:24px;cursor:default}
+.ap-legal a:hover,.ap-legal button:hover{color:var(--ink);text-decoration:underline}
 .ap-item{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px;min-height:40px}
 .ap-item:hover{background:var(--panel-2)}
 .ap-item .ic{color:var(--muted);flex:none}
@@ -539,6 +564,7 @@ textarea.note{width:100%;min-height:84px;resize:vertical;background:var(--panel-
 .hint{font-size:12.5px;color:var(--muted)}
 .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .entry-part{font-size:14px;font-weight:600;margin:14px 0 8px}
+.lg-ok{display:flex;align-items:flex-start;gap:10px;margin:4px 0 2px;font-size:14px;line-height:1.4;cursor:pointer}.lg-ok input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--accent)}
 .cc-box{position:relative}.cc-box .txt{padding-left:40px}.cc-flag{position:absolute;left:11px;top:50%;transform:translateY(-50%);display:flex}.cc-flag .fimg{width:20px;height:20px}
 .cc-list{list-style:none;margin:8px 0 0;padding:4px;max-height:min(260px,40vh);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
 .cc-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;min-height:40px}
@@ -940,6 +966,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 <body>
 <div id="app">
   <div id="mapwrap">
+
     <div id="tileLayer" aria-hidden="true"><div id="tilePane"><canvas id="paneFocus"></canvas></div></div>
     <svg id="map" aria-label="Карта мира с правилами въезда и нашими местами"></svg>
     <div class="topbar">
@@ -963,6 +990,10 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
         <button data-layer="entry" aria-pressed="true"><span data-layer-icon="passport" aria-hidden="true"></span>Въезд</button>
         <button data-layer="safe" aria-pressed="false"><span data-layer-icon="shield" aria-hidden="true"></span>Безопасность</button>
       </div>
+    <div class="author-actions">
+    <button class="support-home" id="supportHome" type="button" aria-label="Поддержать автора через СБП"><svg class="sbp-mark" aria-hidden="true" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none"><path fill="#fff" d="M0 0h28v28H0z"/><path fill="#5B57A2" d="m6.609 8.852 2.208 3.947v2.407l-2.206 3.94z"/><path fill="#D90751" d="m15.087 11.363 2.07-1.268 4.234-.005-6.304 3.862z"/><path fill="#FAB718" d="m15.075 8.829.012 5.225-2.213-1.36v-7.81z"/><path fill="#ED6F26" d="m21.39 10.09-4.234.005-2.08-1.266-2.202-3.946z"/><path fill="#63B22F" d="M15.087 19.167v-2.535l-2.213-1.334v7.819z"/><path fill="#1487C9" d="M17.151 17.91 8.817 12.8 6.609 8.852l14.773 9.054z"/><path fill="#017F36" d="m12.875 23.117 2.212-3.95 2.064-1.256 4.23-.006z"/><path fill="#984995" d="m6.611 19.145 6.281-3.847-2.111-1.296-1.964 1.204z"/></svg><span>Поддержать автора</span></button>
+    <a class="support-home feedback-home" id="feedbackHome" href="https://t.me/ignatus_04" target="_blank" rel="noopener noreferrer" aria-label="Прислать пожелания или замечания автору в Telegram, откроется новая вкладка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 3-4 18-6-5-4 3 1-6-5-3Z"/><path d="m8 13 9-6-6 9"/></svg><span>Пожелания и замечания</span></a>
+    </div>
       <div class="actions">
         <button class="btn ibtn" id="shareTop" aria-label="Поделиться" title="Поделиться: картинка для сторис и приглашение"></button>
         <button class="btn" id="placesBtn">Мои места</button>
@@ -971,6 +1002,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
       </div>
     </div>
     <div class="legend" id="legend"></div>
+    <p class="map-disclaimer">Информация носит справочный характер. Перед поездкой проверяйте требования в официальных источниках. Решение о поездке принимаете вы.</p>
     <div class="zoomctl">
       <button id="zin" aria-label="Приблизить">+</button>
       <button id="zout" aria-label="Отдалить">−</button>
@@ -1575,6 +1607,7 @@ async function openCloud(){
   const {data:{session}}=await sb.auth.getSession();
   S.acct.user=session?.user||null;
   homeCountryCheck(S.acct.user);
+  recordConsent(S.acct.user);
   sb.auth.onAuthStateChange((ev,s)=>{const was=S.acct.user?.id||null,now=s?.user?.id||null;if(ev==="SIGNED_OUT"||(ev==="SIGNED_IN"&&was!==now))setTimeout(()=>location.reload(),50)});
   const tok=shareTokenFromUrl();
   if(tok&&S.acct.user){ // joining a shared map
@@ -1629,6 +1662,7 @@ const IC={
   pin:'<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.4"/>',
   user:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.4 4.2-5 7.5-5s6.1 1.6 7.5 5"/>',
   search:'<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
   help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.5M12 17h.01"/>',
   doc:'<path d="M7 3h7l4 4v14H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v4h4M9.5 12h5M9.5 16h5"/>',
   passport:'<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 16h6"/>',
@@ -1794,12 +1828,14 @@ function openLogin(){
   const share=S.acct.share;
   const {el,close}=modal("loginBox",`<div class="lg-step" id="lgS1"><h2 id="lgTitle">Вход</h2>
       <p class="lg-lead">${share?`Чтобы ${share.role==="editor"?"править карту «"+esc(share.name)+"»":"сохранить карту «"+esc(share.name)+"» себе"}, войдите. `:""}${oauthList().length?"Пароль не нужен.":"Пришлём на почту код, пароль не нужен."}</p>
+      <label class="lg-ok"><input type="checkbox" id="lgOk" aria-describedby="lgOkMsg"><span>Даю <a href="/consent.html" target="_blank" rel="noopener">согласие на обработку персональных данных</a></span></label>
+      <p class="lg-msg" id="lgOkMsg" aria-live="polite"></p>
       ${oauthList().length?`<div class="lg-oauth">${oauthList().map(p=>p.id==="google"&&CFG.googleClientId?`<div class="lg-gsi" id="lgGsi"><button type="button" class="btn lg-prov" data-prov="google">${p.label}</button></div>`:`<button type="button" class="btn lg-prov" data-prov="${p.id}">${p.label}</button>`).join("")}</div><div class="lg-or"><span>или по почте</span></div>`:""}
       <form id="lgForm" novalidate><label class="f" for="lgEmail">Почта</label>
         <input class="txt" type="email" id="lgEmail" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" aria-describedby="lgEmailMsg">
         <p class="lg-msg" id="lgEmailMsg" aria-live="polite"></p>
         <button class="btn primary lg-go" id="lgGo">Получить код</button></form>
-      <p class="lg-note">Входя, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a> и даёте согласие на обработку персональных данных на условиях <a href="/privacy.html" target="_blank" rel="noopener">Политики</a>.</p></div>
+      <p class="lg-note">Входя, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a>. Как мы храним данные — в <a href="/privacy.html" target="_blank" rel="noopener">Политике</a>.</p></div>
     <div class="lg-step" id="lgS2" hidden><h2>Введите код</h2>
       <p class="lg-lead" id="lgSent"></p>
       <form id="lgCode" novalidate><label class="f" for="lgOtp">Код из письма</label>
@@ -1809,7 +1845,13 @@ function openLogin(){
       <div class="lg-more"><button class="linkbtn" id="lgAgain"></button><button class="linkbtn" id="lgBack">Другая почта</button></div>
       <p class="lg-note">В письме есть и кнопка входа. Она сработает, если открыть письмо в этом же браузере.</p></div>`,{labelledby:"lgTitle"});
   const em=el.querySelector("#lgEmail"), otp=el.querySelector("#lgOtp"), msg1=el.querySelector("#lgEmailMsg"), msg2=el.querySelector("#lgOtpMsg");
+  // consent to personal data processing is a separate tick (152-FZ art. 9 since 1 Sept 2025); remembered for the account after sign-in
+  const ok=el.querySelector("#lgOk"), okMsg=el.querySelector("#lgOkMsg");
+  const consented=()=>{if(ok.checked){okMsg.textContent="";okMsg.classList.remove("err");ok.removeAttribute("aria-invalid");try{sessionStorage.setItem("atlas-consent",JSON.stringify({v:CONSENT_VER,at:new Date().toISOString()}))}catch(e){}return true}
+    okMsg.textContent="Отметьте согласие на обработку персональных данных: без него войти нельзя.";okMsg.classList.add("err");ok.setAttribute("aria-invalid","true");ok.focus();return false};
+  ok.addEventListener("change",()=>{if(ok.checked)consented()});
   el.querySelectorAll("[data-prov]").forEach(b=>b.onclick=async()=>{
+    if(!consented()) return;
     b.disabled=true; const label=b.textContent; b.textContent="Открываем…";
     const redirectTo=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
     const {error}=await sb.auth.signInWithOAuth({provider:b.dataset.prov,options:{redirectTo}});
@@ -1823,6 +1865,7 @@ function openLogin(){
   const send=async()=>{
     const v=em.value.trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){setMsg(msg1,"Проверьте почту: в адресе нужны @ и домен, например you@example.com.");em.focus();return false}
+    if(!consented()) return false;
     setMsg(msg1,""); busy=true; const b=el.querySelector("#lgGo"); b.disabled=true; b.textContent="Отправляем…";
     const redirect=location.origin+location.pathname+(share?`?share=${encodeURIComponent(share.token)}`:"");
     if(CFG.captchaKey){const c=await captchaPass(v);if(c!==true){b.disabled=false;b.textContent="Получить код";busy=false;setMsg(msg1,c);return false}}
@@ -1935,11 +1978,25 @@ function bindAcctMenu(p,close,rerender){
       a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();rerender()}});
   if(own) sb.from("map_members").select("user_id",{count:"exact",head:true}).eq("map_id",a.map.id).then(({count})=>{const s=p.querySelector("#apShareN");if(s&&count>1)s.textContent=`${count-1} ${ruPlural(count-1,"человек","человека","человек")}`});
 }
+new ResizeObserver(entries=>{document.documentElement.style.setProperty("--disclaimer-height",Math.ceil(entries[0].target.getBoundingClientRect().height)+"px")}).observe(document.querySelector(".map-disclaimer"));
+document.getElementById("supportHome").addEventListener("click",()=>openSupport());
+const SUPPORT_URL="https://c2c.cbrpay.ru/AS1I000IC1OG5TLK8E0Q7PK0GP507KF3";
+function openSupport(){
+  modal("supportBox",`<h2 id="supportTitle">Поддержать автора</h2>
+    <p>Если «Наш атлас» помогает вам планировать путешествия, вы можете поддержать его развитие.</p>
+    <p>Буду благодарен за любую материальную поддержку.</p>
+    <div class="support-options">
+      <a class="support-bank" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Альфа-Банк, откроется новая вкладка"><img src="support-sbp.png" alt="QR-код Альфа-Банка для добровольного перевода" width="300" height="404"><span>Альфа-Банк ↗</span></a>
+      <span class="support-or">или</span>
+      <a class="support-bank" href="https://www.sberbank.com/sms/pbpn?requisiteNumber=79037196333" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Сбербанк, откроется новая вкладка"><img src="support-sber.png" alt="QR-код Сбербанка для добровольного перевода" width="636" height="636"><span>Сбербанк ↗</span></a>
+    </div>
+    <p class="support-phone">или по номеру телефона <a href="tel:+79037196333">+7 (903) 719 63 33</a></p>`,{labelledby:"supportTitle"});
+}
 function openAcct(){
   closeAcct();
   const p=document.createElement("div"); p.id="acctPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Аккаунт");
   p.innerHTML=acctMenuHTML()+`<div class="ap-list ap-foot">${installEntry()}<button class="ap-item" id="apGuide">${ic("help")}<span>Как пользоваться</span></button></div>
-    <div class="ap-legal"><a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a><a href="/privacy.html" target="_blank" rel="noopener">Политика обработки данных</a>${consentUsed()?`<button id="apCk">Настройки cookie</button>`:""}</div>`;
+    <div class="ap-legal"><a href="/terms.html" target="_blank" rel="noopener">Пользовательское соглашение</a><button class="legal-placeholder" type="button" disabled aria-label="Раздел временно недоступен"></button>${consentUsed()?`<button id="apCk">Настройки cookie</button>`:""}</div>`;
   document.body.appendChild(p);
   const btn=$("#acctBtn"), r=btn.getBoundingClientRect();
   if(innerWidth>560){p.style.top=(r.bottom+8)+"px";p.style.right=Math.max(8,innerWidth-r.right)+"px"}
@@ -2837,12 +2894,14 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=18;
+const GUIDE_VER=20;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
+  {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроются платёжная ссылка и QR-код. Можно поддержать автора на любую сумму через Альфа-Банк или Сбербанк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
     install:true,art:installArt,run:playInstallScene},
@@ -4407,6 +4466,11 @@ async function geoCountry(){
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
     const r=await fetch(`${CFG.supabaseUrl}/functions/v1/geo`,{signal:ctl.signal,cache:"no-store"});clearTimeout(t);
     return (r.ok?(await r.json()).c:null)||tzCountry()}catch(e){return tzCountry()}}
+// the tick from the sign-in form, kept with the account: which version of the consent and when
+const CONSENT_VER="2026-11-16";
+async function recordConsent(u){if(!u)return;let c=null;try{c=JSON.parse(sessionStorage.getItem("atlas-consent")||"null")}catch(e){}
+  if(!c||u.user_metadata?.consent_v===c.v)return;
+  const {data,error}=await sb.auth.updateUser({data:{consent_v:c.v,consent_at:c.at}});if(!error){if(data?.user)S.acct.user=data.user;try{sessionStorage.removeItem("atlas-consent")}catch(e){}}}
 function ccName(k){return k?(S.meta?.[k]?.ru||S.ccNames?.get(k)||""):""}
 function homeSaved(){try{const h=JSON.parse(localStorage.getItem("atlas-home")||"null");return h&&h.c?h:null}catch(e){return null}}
 function homeSet(h){try{h?localStorage.setItem("atlas-home",JSON.stringify(h)):localStorage.removeItem("atlas-home")}catch(e){}}

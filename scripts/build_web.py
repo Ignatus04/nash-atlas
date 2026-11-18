@@ -23,6 +23,8 @@ for url,(src,name) in libs.items():
 # accounts: Supabase client and the project settings
 shutil.copy(B+'@supabase/supabase-js/dist/umd/supabase.js',OUT+'vendor/supabase.js')
 shutil.copy(SRC+'config.js',OUT+'config.js')
+shutil.copy(SRC+'support-sbp.png',OUT+'support-sbp.png')
+shutil.copy(SRC+'support-sber.png',OUT+'support-sber.png')
 
 # fonts: self-hosted (Google Fonts is not always reachable)
 faces=[]
@@ -133,7 +135,7 @@ if BETA: open(OUT+'robots.txt','w').write('User-agent: *\nDisallow: /\n')
 else: shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
 # the login email template: our own Supabase server fetches it from here (server/docker-compose.atlas.yml)
 os.makedirs(OUT+'email',exist_ok=True); shutil.copy(ROOT+'supabase/email/login.html',OUT+'email/login.html')
-for f in ('privacy.html','terms.html'):
+for f in ('privacy.html','terms.html','consent.html'):
   t=open(SRC+f,encoding='utf-8').read()
   t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)
   open(OUT+f,'w',encoding='utf-8').write(t)

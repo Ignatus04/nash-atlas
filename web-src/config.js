@@ -1,8 +1,8 @@
 // Supabase project settings. The publishable key is meant to be public:
 // what each person can see or change is enforced by the database rules in supabase/schema.sql.
 window.ATLAS_CFG = {
-  supabaseUrl: "https://api.nash-atlas.ru",
-  supabaseKey: "sb_publishable_jCBhKQbGkVwy9VgM_qTLq8_9LbsS-VS",
+  supabaseUrl: "https://hvqdjcpbevwuaymdrpye.supabase.co",
+  supabaseKey: "sb_publishable_pVRfI-YUFLDwhTXSqoQhaw_0_bArhAB",
   // one-tap sign-in buttons; a provider is listed here only after it is set up in Supabase.
   // Google is switched off: Russian sites may not sign people in through foreign services (149-FZ as amended by 406-FZ).
   // It stays set up in Supabase and in the code as a backup; adding "google" back to this list turns the button on again.
