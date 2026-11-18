@@ -7,6 +7,7 @@ S=ROOT+'site/'; SRC=ROOT+'web-src/'; OUT=ROOT+'web/'
 B=next(p for p in [ROOT+'node_modules/',ROOT+'build/node_modules/'] if os.path.isdir(p+'d3'))
 if os.path.exists(OUT): shutil.rmtree(OUT)
 for d in ['data','vendor','fonts','icons']: os.makedirs(OUT+d)
+if os.path.isdir(SRC+'patterns'): shutil.copytree(SRC+'patterns',OUT+'patterns')
 html=open(S+'index.html',encoding='utf-8').read()
 # ATLAS_BETA=1: the test copy at beta.nash-atlas.ru (server/beta.sh). Hidden from search engines, marked «бета» on screen.
 BETA=os.environ.get('ATLAS_BETA')=='1'
@@ -36,7 +37,8 @@ assert gf; html=html.replace(gf.group(0),'')
 # styles and the app script out of the page
 st=re.search(r'<style>(.*?)</style>',html,re.S); css='\n'.join(faces)+'\n'+st.group(1)
 m=re.search(r'<script>\n"use strict";(.*?)</script>',html,re.S); js='"use strict";'+m.group(1)
-ver=hashlib.sha1((css+js+open(SRC+'config.js').read()+''.join(hashlib.sha1(open(S+'data/'+f,'rb').read()).hexdigest() for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
+pattern_hash=''.join(hashlib.sha1(open(os.path.join(dp,f),'rb').read()).hexdigest() for dp,ds,fs in os.walk(SRC+'patterns') for f in sorted(fs))
+ver=hashlib.sha1((css+js+pattern_hash+open(SRC+'config.js').read()+''.join(hashlib.sha1(open(S+'data/'+f,'rb').read()).hexdigest() for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
 open(OUT+'app.css','w',encoding='utf-8').write(css)
 open(OUT+'app.js','w',encoding='utf-8').write(js)
 html=html.replace(st.group(0),f'<link rel="stylesheet" href="app.css?v={ver}">')
