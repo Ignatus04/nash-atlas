@@ -9,8 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-.map-disclaimer{position:absolute;z-index:3;left:16px;bottom:calc(var(--legend-height,180px) + 24px);width:min(610px,calc(100% - 100px));margin:0;padding:3px 7px;border-radius:6px;background:rgba(12,22,38,.85);color:#adb9cb;font:10px/1.4 var(--body);text-align:center;pointer-events:none}
-@media(max-width:860px){.map-disclaimer{left:12px;right:12px;top:calc(var(--toph,104px) + 106px);bottom:auto;transform:none;width:auto;font-size:9px;text-align:right;max-width:300px;margin-left:auto}}
+.map-disclaimer{position:absolute;z-index:3;left:16px;right:16px;bottom:5px;margin:0;padding:3px 7px;color:#adb9cb;font:10px/1.4 var(--body);text-align:center;pointer-events:none}
+@media(min-width:861px){#legend,.zoomctl{bottom:calc(var(--disclaimer-height,34px) + 14px)}}
+@media(max-width:860px){.map-disclaimer{left:16px;right:16px;bottom:calc(var(--tabh,70px) + 88px);font-size:9px;max-width:420px;margin:0 auto;padding:3px 7px;background:rgba(12,22,38,.82);border-radius:6px}}
 
 .author-actions{position:absolute;z-index:12;right:16px;top:calc(var(--toph,120px) + 10px);display:flex;align-items:center;gap:8px}
 .support-home{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--ink);font:600 12px var(--body);box-shadow:0 4px 18px #0003;cursor:pointer;transition:transform .2s,opacity .2s}
@@ -1974,7 +1975,7 @@ function bindAcctMenu(p,close,rerender){
       a.map.name=n;const m=a.maps.find(x=>x.id===a.map.id);if(m)m.name=n;renderAcctBtn();rerender()}});
   if(own) sb.from("map_members").select("user_id",{count:"exact",head:true}).eq("map_id",a.map.id).then(({count})=>{const s=p.querySelector("#apShareN");if(s&&count>1)s.textContent=`${count-1} ${ruPlural(count-1,"человек","человека","человек")}`});
 }
-new ResizeObserver(entries=>{document.documentElement.style.setProperty("--legend-height",Math.ceil(entries[0].target.getBoundingClientRect().height)+"px")}).observe(document.getElementById("legend"));
+new ResizeObserver(entries=>{document.documentElement.style.setProperty("--disclaimer-height",Math.ceil(entries[0].target.getBoundingClientRect().height)+"px")}).observe(document.querySelector(".map-disclaimer"));
 document.getElementById("supportHome").addEventListener("click",()=>openSupport());
 const SUPPORT_URL="https://c2c.cbrpay.ru/AS1I000IC1OG5TLK8E0Q7PK0GP507KF3";
 function openSupport(){
