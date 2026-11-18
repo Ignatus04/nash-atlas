@@ -29,8 +29,6 @@
 .support-bank img{display:block;width:100%;height:230px;object-fit:contain;background:#fff;border-radius:12px;padding:8px;box-sizing:border-box}
 .support-bank:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
 .support-or{color:var(--muted);font-size:12px}
-#supportBox .support-phone{text-align:center;color:var(--muted);font-size:13px}
-.support-phone a{color:var(--ink);white-space:nowrap}
 @media(max-width:560px){.support-options{gap:7px}.support-bank img{height:176px;padding:5px}.support-bank{font-size:12px}}
 
 [data-install][hidden],#installNow[hidden]{display:none!important}
@@ -1990,7 +1988,7 @@ function openSupport(){
       <span class="support-or">или</span>
       <a class="support-bank" href="https://www.sberbank.com/sms/pbpn?requisiteNumber=79037196333" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Сбербанк, откроется новая вкладка"><img src="support-sber.png" alt="QR-код Сбербанка для добровольного перевода" width="636" height="636"><span>Сбербанк ↗</span></a>
     </div>
-    <p class="support-phone">или по номеру телефона <a href="tel:+79037196333">+7 (903) 719 63 33</a></p>`,{labelledby:"supportTitle"});
+`,{labelledby:"supportTitle"});
 }
 function openAcct(){
   closeAcct();
