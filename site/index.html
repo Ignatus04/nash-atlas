@@ -24,12 +24,7 @@
 #supportBox .abox{width:min(580px,100%)}
 #supportBox h2{padding-right:24px}
 #supportBox p{margin:8px 0;line-height:1.6}
-.support-options{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:18px 0}
-.support-bank{display:flex;flex-direction:column;gap:10px;min-width:0;text-align:center;text-decoration:none;color:var(--ink);font-weight:600;font-size:13px}
-.support-bank img{display:block;width:100%;height:230px;object-fit:contain;background:#fff;border-radius:12px;padding:8px;box-sizing:border-box}
-.support-bank:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
-.support-or{color:var(--muted);font-size:12px}
-@media(max-width:560px){.support-options{gap:7px}.support-bank img{height:176px;padding:5px}.support-bank{font-size:12px}}
+#supportBox .support-payment{display:flex;justify-content:center;margin-top:18px;background:#ef3124;color:#fff;text-decoration:none}
 
 [data-install][hidden],#installNow[hidden]{display:none!important}
 #installTitle{padding-right:24px}
@@ -1978,16 +1973,12 @@ function bindAcctMenu(p,close,rerender){
 }
 new ResizeObserver(entries=>{document.documentElement.style.setProperty("--disclaimer-height",Math.ceil(entries[0].target.getBoundingClientRect().height)+"px")}).observe(document.querySelector(".map-disclaimer"));
 document.getElementById("supportHome").addEventListener("click",()=>openSupport());
-const SUPPORT_URL="https://c2c.cbrpay.ru/AS1I000IC1OG5TLK8E0Q7PK0GP507KF3";
+const SUPPORT_URL="https://alfaonline.org/public/mrv2/XLWNcQ002O";
 function openSupport(){
   modal("supportBox",`<h2 id="supportTitle">Поддержать автора</h2>
     <p>Если «Наш атлас» помогает вам планировать путешествия, вы можете поддержать его развитие.</p>
     <p>Буду благодарен за любую материальную поддержку.</p>
-    <div class="support-options">
-      <a class="support-bank" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Альфа-Банк, откроется новая вкладка"><img src="support-sbp.png" alt="QR-код Альфа-Банка для добровольного перевода" width="300" height="404"><span>Альфа-Банк ↗</span></a>
-      <span class="support-or">или</span>
-      <a class="support-bank" href="https://www.sberbank.com/sms/pbpn?requisiteNumber=79037196333" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Сбербанк, откроется новая вкладка"><img src="support-sber.png" alt="QR-код Сбербанка для добровольного перевода" width="636" height="636"><span>Сбербанк ↗</span></a>
-    </div>
+    <a class="btn support-payment" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer">Поддержать автора ↗</a>
 `,{labelledby:"supportTitle"});
 }
 function openAcct(){
@@ -2899,7 +2890,7 @@ const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
   {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
-  {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроются платёжная ссылка и QR-код. Можно поддержать автора на любую сумму через Альфа-Банк или Сбербанк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
+  {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроется ссылка для добровольной материальной поддержки автора через Альфа-Банк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
     install:true,art:installArt,run:playInstallScene},
