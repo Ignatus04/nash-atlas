@@ -2349,7 +2349,7 @@ function setupZoom(){
   zoom
     .on("start",e=>{if(e.sourceEvent&&MOB()&&sheet.state!=="peek"&&e.sourceEvent.type!=="wheel")setSheet("peek");clearTimeout(moveEndT);document.body.classList.add("moving");killBlur();if(TILES&&tileZFix==null)tileZFix=tileZFor(T.k)})
     .on("zoom",e=>{const wrap=TILES&&Math.round((viewC(T)-viewC(e.transform))/mercW())!==0;shiftT0(T,e.transform);T=e.transform;if(wrap)renderAll();else svgMove();if(blurEl)killBlur();moveOverlay();hideTip()})
-    .on("end",()=>{if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAll();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
+    .on("end",e=>{if(e.sourceEvent&&T.k>=DETAIL_K&&window.ATLAS_VER)ensureAllCities().catch(x=>console.warn("cities",x));if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);shiftT0(T,c);T=c;svgMove();moveOverlay()}}clearTimeout(moveEndT);moveEndT=setTimeout(()=>{renderAll();svg.classed("moving",false);world.classed("moving",false);document.body.classList.remove("moving");if(pendingAreas){pendingAreas=false;if(!S.area)gAreas.style("display",null).transition().duration(REDUCED?0:450).style("opacity",1)}updateFocusBlur();d3.selectAll("#dfHatch,.zh").attr("patternTransform",`rotate(45) scale(${1/T.k})`);tileZFix=null;if(TILES)drawTiles(true);scheduleOverlay()},90)});
   zoom.filter(e=>(!e.ctrlKey||e.type==="wheel")&&!e.button&&!!e.target.closest&&!!e.target.closest("#map,#ov,#tileLayer"));
   zt.call(zoom).on("dblclick.zoom",null);
   if(TILES){const c=clampT(T);if(c!==T){zt.property("__zoom",c);T=c}}
@@ -2391,7 +2391,10 @@ function focusFor(sel){
 }
 function worldRect(){const a=proj.invert?null:null;const w=mercOrSphere();return `M${w[0]},${w[1]}H${w[2]}V${w[3]}H${w[0]}Z`}
 function mercOrSphere(){const pad=Math.max(W,H)*3;return [-pad,-pad,W+pad,H+pad]}
+let urbanP;
+function ensureUrban(){if(!urbanP)urbanP=getData("urban").then(u=>{S.urban=u;if(S.sel.type==="city"||S.sel.type==="place")updateFocus()}).catch(e=>{urbanP=null;console.warn("urban",e)});return urbanP}
 function updateFocus(){
+  if(!S.urban&&(S.sel.type==="city"||S.sel.type==="place"))ensureUrban();
   const g=focusFor(S.sel); focusGeo=g;
   const d=g?simplePath(g,focusZoomFor(S.sel)):null;
   const had=cvShapes.focus; cvShapes.focus=d?{h:new Path2D(d),a:had?1:0}:null;
@@ -3331,6 +3334,11 @@ function goBack(){
 }
 document.addEventListener("keydown",e=>{if(e.key!=="Escape"||e.defaultPrevented)return;const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)||a?.isContentEditable)return;if(document.getElementById("ppick"))return;if(S.sel&&S.sel.type!=="home")goBack()});
 function select(sel,zoomIt){
+  const request=++selectionRequest;
+  const cityK=sel.type==="country"?sel.k:sel.type==="city"?sel.key?.split("|")[0]:sel.type==="region"?(sel.k||admById(sel.id)?.properties.k):sel.type==="place"?S.places.get(sel.id)?.k:null;
+  if(window.ATLAS_VER&&cityK&&!S.allCitiesReady&&!cityCountriesReady.has(cityK)){
+    ensureCountryCities(cityK).then(()=>{if(request===selectionRequest)select(sel,zoomIt)}).catch(()=>status("Не удалось загрузить города. Попробуйте открыть карточку ещё раз.",4500));return;
+  }
   rememberView(S.sel,sel);
   S.sel=sel; if(S.found){S.found=null;drawFound()} const body=$("#pbody"); $("#panel").classList.remove("min"); hotArea(null);
   S.tab="countries"; updateTabs();
@@ -3614,7 +3622,7 @@ function bindFinder(){
     S.admNames=a;if(S.hf.q)renderDrop()}).catch(()=>{})}
     if(!S.airports&&!S._apL){S._apL=1;getData("airports").then(a=>{S.airports=a;if(S.hf.q)renderDrop()}).catch(()=>{})}};
   q.oninput=()=>{lazy();S.hf.q=q.value;hfSel=0;renderDrop()};
-  q.onfocus=()=>{lazy();if(S.hf.q.trim())renderDrop()};
+  q.onfocus=()=>{prepareCitySearch();lazy();if(S.hf.q.trim())renderDrop()};
   q.onblur=()=>setTimeout(()=>{const d=$("#cfdrop");if(d&&document.activeElement!==q){d.hidden=true;q.setAttribute("aria-expanded","false")}},120);
   q.onkeydown=e=>{
     if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!hfRes.length)return;e.preventDefault();hfSel=(hfSel+(e.key==="ArrowDown"?1:-1)+hfRes.length)%hfRes.length;renderDrop();$("#cfo"+hfSel)?.scrollIntoView({block:"nearest"})}
@@ -4510,11 +4518,47 @@ function viewNote(){return "Границы спорных территорий �
 function viewK(k,lng,lat){
   if(lng!=null&&S.contested)for(const a of S.contested){const b=a.b;if(lat>=b[0][1]&&lat<=b[1][1]&&(b[0][0]<=b[1][0]?lng>=b[0][0]&&lng<=b[1][0]:lng>=b[0][0]||lng<=b[1][0])&&d3.geoContains(a.f,[lng,lat]))return a.ow}
   return S.absorbed?.get(k)||k}
+// City catalogues are merged by stable keys: saved city IDs survive worldview remapping.
+let allCitiesP, cityMapReadyResolve;
+const cityMapReady=new Promise(resolve=>{cityMapReadyResolve=resolve});
+const countryCitiesP=new Map(), cityCountriesReady=new Set();
+function mergeCityRows(rows){
+  const rowKey=c=>cityKey(c)+"|"+c[2]+"|"+c[3];
+  const indexed=new Map(S.cities.map(c=>[rowKey(c),c]));
+  for(const raw of rows){const c=raw.slice(),k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k;c[9]=k==="UA"?(S.wv?.cityUk?.[c[1]]||c[9]||""):""}indexed.set(rowKey(c),c)}
+  S.cities=[...indexed.values()].sort((a,b)=>(b[6]||0)-(a[6]||0));
+  S.citiesByIso=d3.group(S.cities,c=>c[4]);S.cityIdx=new Map(S.cities.map(c=>[cityKey(c),c]));
+  _pc.clear();scheduleOverlay();
+}
+function ensureAllCities(){
+  if(!S.cityMapReady)return cityMapReady.then(ensureAllCities);
+  if(S.allCitiesReady)return Promise.resolve();
+  if(!allCitiesP)allCitiesP=getData("cities").then(rows=>{mergeCityRows(rows);S.allCitiesReady=true}).catch(e=>{allCitiesP=null;throw e});
+  return allCitiesP;
+}
+function ensureCountryCities(k){
+  if(!S.cityMapReady)return cityMapReady.then(()=>ensureCountryCities(k));
+  if(!window.ATLAS_VER||S.allCitiesReady||cityCountriesReady.has(k))return Promise.resolve();
+  if(!countryCitiesP.has(k)){
+    const keys=new Set([k]);
+    for(const [source,owner] of S.absorbed||[])if(owner===k)keys.add(source);
+    for(const part of S.contested||[])if(part.ow===k){const p=part.f.properties;keys.add(p.k[0]==="~"?p.host:p.k)}
+    const names=[...keys].map(x=>"cities/"+x).filter(n=>window.ATLAS_ASSETS?.["data/"+n+".json"]);
+    const pending=Promise.all(names.map(getData)).then(groups=>{for(const rows of groups)mergeCityRows(rows);cityCountriesReady.add(k)}).catch(e=>{countryCitiesP.delete(k);throw e});
+    countryCitiesP.set(k,pending);
+  }
+  return countryCitiesP.get(k);
+}
+function prepareCitySearch(){
+  if(!window.ATLAS_VER||S.allCitiesReady)return;
+  ensureAllCities().then(()=>{if(document.activeElement===$("#q")){resArr=searchAll($("#q").value);resSel=-1;renderResults()}if(document.activeElement===$("#cfq"))$("#cfq").dispatchEvent(new Event("input"))}).catch(e=>console.warn("cities",e));
+}
+let selectionRequest=0;
 async function boot(){
   size(); consentApply(); setTimeout(consentBar,1200);
   const ccP=viewerCountry(), wvP=getData("worldviews").catch(()=>null);
   const flagsP=getData("flags").then(f=>{S.flags=f;renderPassBtn();S.flagsReady?.();return f}).catch(()=>null);
-  const [ct,cities,meta,visa,lists,va,ap]=await Promise.all(["countries","cities","meta","visa","lists","visa_all","areaplaces"].map(n=>n==="lists"?(window.ATLAS_VER?Promise.resolve([]):getData(n).catch(()=>[])):getData(n))); // the website keeps personal lists in the account
+  const [ct,cities,meta,visa,lists,va,ap]=await Promise.all(["countries",window.ATLAS_VER?"cities-start":"cities","meta","visa","lists","visa_all","areaplaces"].map(n=>n==="lists"?(window.ATLAS_VER?Promise.resolve([]):getData(n).catch(()=>[])):getData(n))); // the website keeps personal lists in the account
   applyWorldview(ct,await wvP,await ccP);
   S.areaIds=ap||{};
   S.vm={p:va.p,d:va.d,idx:new Map(va.dest.map((k,i)=>[k,i]))};
@@ -4530,6 +4574,7 @@ async function boot(){
   // a city that changes country in this view: its local name is the new owner's (Ukrainian names for Ukraine, none for Russian-speaking owners)
   if(S.contested?.length) for(const c of cities){const k=viewK(c[4],c[3],c[2]);if(k!==c[4]){c.k0=c[4];c[4]=k;c[9]=k==="UA"?(S.wv?.cityUk?.[c[1]]||c[9]||""):""}}
   S.cities=cities; S.citiesByIso=d3.group(cities,c=>c[4]); S.cityIdx=new Map(cities.map(c=>[cityKey(c),c])); S.meta=meta; S.visa=visa;
+  S.cityMapReady=true;cityMapReadyResolve();
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){
     $("#mapwrap").classList.add("tilesavail");
@@ -4538,12 +4583,11 @@ async function boot(){
       document.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>setBasemap(b.dataset.bm))};
     renderBM(); drawTiles();
   }
-  // region borders are big: fetch them once the map is up and the browser is idle
-  setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>ensureAdm()),window.__DATA?0:6000);
+  // Region geometry is requested by country selection or search, not by a timer.
   if(!STANDALONE) fetch("data/media.json").then(r=>r.ok?r.json():null).then(m=>{if(m)S.media=m}).catch(()=>{});
   Promise.all([getData("safety"),getData("safezones")]).then(([sf,zt])=>{S.safety=sf;S.zones=topojson.feature(zt,zt.objects[Object.keys(zt.objects)[0]]).features;
     drawZones();paint();scheduleOverlay();if(S.sel.type==="country")renderCountry(S.sel.k);else if(S.sel.type==="home")renderHome()}).catch(e=>console.warn("safety",e));
-  getData("urban").then(u=>{S.urban=u;if(S.sel.type==="city"||S.sel.type==="place")updateFocus()}).catch(()=>{});
+  // Urban outlines are requested only when focusing a city or a place.
   flagsP.then(f=>{if(f){scheduleOverlay();brandFlags()}});
   initClaude();
   addFromUrl();
@@ -4623,7 +4667,7 @@ async function openPassports(force){
 bindShell();
 Promise.resolve().then(()=>{if(document.readyState!=="loading")startIntro();else addEventListener("DOMContentLoaded",startIntro)});
 $("#q").addEventListener("input",e=>{resArr=searchAll(e.target.value);resSel=resArr.length?0:-1;renderResults()});
-$("#q").addEventListener("focus",e=>{ensureAdm();resArr=searchAll(e.target.value);resSel=-1;renderResults()});
+$("#q").addEventListener("focus",e=>{prepareCitySearch();ensureAdm();resArr=searchAll(e.target.value);resSel=-1;renderResults()});
 document.addEventListener("keydown",e=>{if((e.key==="/"&&!/input|textarea/i.test(document.activeElement?.tagName))||((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k")){e.preventDefault();$("#q").focus()}});
 $("#q").addEventListener("keydown",e=>{if(e.key==="ArrowDown"){resSel=Math.min(resSel+1,resArr.length-1);renderResults();e.preventDefault()}else if(e.key==="ArrowUp"){resSel=Math.max(resSel-1,0);renderResults();e.preventDefault()}else if(e.key==="Enter"){pick(resSel<0?0:resSel)}else if(e.key==="Escape"){resArr=[];renderResults()}});
 $("#q").addEventListener("blur",()=>setTimeout(()=>{resArr=[];renderResults()},150));

@@ -54,6 +54,17 @@ for f in sorted(os.listdir(S+'data')):
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
 
 
+# Only world-view labels are needed before the visitor explores the map.
+all_cities=json.load(open(OUT+'data/cities.json',encoding='utf-8'))
+world_cities=set(re.search(r'const WORLD_CITIES=new Set\(\[(.*?)\]\)',html,re.S).group(1).replace('"','').replace("'",'').split(','))
+world_cities={x.strip() for x in world_cities}
+startup_cities=[c for c in all_cities if c[8] or c[7]<=2 or c[4]+'|'+c[1] in world_cities]
+open(OUT+'data/cities-start.json','w',encoding='utf-8').write(json.dumps(startup_cities,ensure_ascii=False,separators=(',',':')))
+os.makedirs(OUT+'data/cities',exist_ok=True)
+for k in sorted({c[4] for c in all_cities}):
+    rows=[c for c in all_cities if c[4]==k]
+    open(OUT+'data/cities/'+k+'.json','w',encoding='utf-8').write(json.dumps(rows,ensure_ascii=False,separators=(',',':')))
+
 # Each resource keeps its cache key until its own bytes change.
 assets={}
 for folder in ("data","patterns","vendor"):
@@ -81,7 +92,7 @@ head='''<meta name="theme-color" content="#13213a">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 '''
 # Discover startup requests from the head instead of waiting for app execution.
-head+=''.join(f'<link rel="preload" href="data/{name}.json?v={assets["data/"+name+".json"]}" as="fetch" crossorigin>\n' for name in ('countries','cities','meta','visa','visa_all','worldviews','areaplaces'))
+head+=''.join(f'<link rel="preload" href="data/{name}.json?v={assets["data/"+name+".json"]}" as="fetch" crossorigin>\n' for name in ('countries','cities-start','meta','visa','visa_all','worldviews','areaplaces'))
 for name in ('d3.min.js','topojson-client.min.js','supabase.js'):
     html=html.replace(f'src="vendor/{name}"',f'src="vendor/{name}?v={assets["vendor/"+name]}"')
 html=html.replace('<title>Наш атлас</title>','<title>Наш атлас</title>\n'+head)
