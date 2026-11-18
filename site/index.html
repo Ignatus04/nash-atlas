@@ -924,7 +924,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .gi-play{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);min-height:32px;padding:5px 12px;border:1px solid #3b5172;border-radius:18px;background:#18283f;color:#bfe3ff;font:600 11px var(--body);white-space:nowrap;z-index:2}
 .gi-play:active{background:#263f62}
 /* Fine atlas engraving sits on the existing panel fill, without image downloads. */
-#pbody:has(.card-art){background-image:var(--card-art);background-position:center top;background-size:360px 600px;background-repeat:repeat-y}
+#pbody:has(.card-art){background-image:var(--card-art);background-position:center top;background-size:var(--card-art-size,360px 600px);background-repeat:repeat-y}
 #pbody:not(:has(.card-art)){background-image:none}
 .card-art{position:relative;isolation:isolate;padding:12px 0 16px;min-height:80px}
 .card-art h1{line-height:1.3}.card-art .grow{position:relative}
@@ -3707,9 +3707,29 @@ for(const [keys,marks] of [
 // These aliases use the same drawing without adding another asset.
 NATIONAL_MARKS.pepper='M30 6q-10 0-7 9-3 9-17 25-17 25 29 2 29-20-2-8-12-5m0 0q12-12 7-17';
 NATIONAL_MARKS.volcano=NATIONAL_MARKS.mountain;
+// France: user-approved composition A, transparent repeating tile.
+const FRANCE_PATTERN=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<defs>
+<g id="eiffel"><path d="M-26 0C-16-30-8-60-4-88M26 0C16-30 8-60 4-88M-18 0Q0-30 18 0M-19-34H19M-10-62H10M-5-88H5M-3-88L-1-112M3-88L1-112M0-112V-124M-15-34L-7-62M15-34L7-62M-13-34L0-48L13-34M-7-62L0-74L7-62"/></g>
+<g id="croissant"><path d="M-32 6C-28-18 28-18 32 6C24 0 14-2 8 2C4-4-4-4-8 2C-14-2-24 0-32 6Z"/><path d="M-18-9Q-12-3-14 2M0-12Q2-6 0-1M18-9Q12-3 14 2"/></g>
+<g id="grapes"><path d="M0 0C10-20 30-28 52-26M22-22C14-42 32-52 42-45C46-34 36-24 22-22ZM23-23L38-42M52-26c7-2 11 5 6 9c-3 3-8 0-5-4M8-14V-8"/><circle cx="4" cy="-4" r="4"/><circle cx="12" cy="-4" r="4"/><circle cx="0" cy="3" r="4"/><circle cx="8" cy="3" r="4"/><circle cx="16" cy="3" r="4"/><circle cx="4" cy="10" r="4"/><circle cx="12" cy="10" r="4"/><circle cx="8" cy="17" r="4"/></g>
+<g id="window"><path d="M-12 20V-8A12 12 0 0 1 12-8V20M0-20V20M-12 2H12M-17 20H17M-17 30H17M-11 20V30M-5 20V30M1 20V30M7 20V30M13 20V30M-19 33H19"/></g>
+<g id="spark"><path d="M0-4V4M-4 0H4"/></g><g id="dot"><circle r="1.4"/></g>
+</defs>
+<g fill="none" stroke="#8fa3bf" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".35">
+<use href="#eiffel" transform="translate(95 200) rotate(-4)"/>
+<use href="#croissant" transform="translate(290 120) rotate(14) scale(.9)"/>
+<use href="#grapes" transform="translate(240 300) rotate(-12) scale(1.1)"/>
+<use href="#window" transform="translate(120 420) rotate(3) scale(.9)"/>
+<use href="#eiffel" transform="translate(315 560) rotate(5) scale(.6)"/>
+<use href="#croissant" transform="translate(60 540) rotate(-20) scale(.6)"/>
+<use href="#spark" transform="translate(200 60)"/><use href="#spark" transform="translate(350 400) scale(.8)"/>
+<use href="#dot" transform="translate(40 330)"/><use href="#dot" transform="translate(220 470)"/>
+</g></svg>`;
 const cardArtCache=new Map();
 function countryCardArt(k){
   if(cardArtCache.has(k))return cardArtCache.get(k);
+  if(k==="FR"){const url=`url("data:image/svg+xml,${encodeURIComponent(FRANCE_PATTERN)}")`;cardArtCache.set(k,url);return url}
   const marks=NATIONAL_PATTERNS[k]||['textile','sun','boat'];
   const seed=Array.from(k).reduce((a,c)=>a+c.charCodeAt(0),0);
   const positions=[[28,28,1.55,-14],[208,80,1.85,12],[112,224,1.35,8],[12,347,1.65,-9],[235,407,1.35,16],[128,496,1.05,-12]];
@@ -3717,7 +3737,7 @@ function countryCardArt(k){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="360" height="600" viewBox="0 0 360 600"><g fill="none" stroke="#b8cedf" stroke-opacity=".075" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${drawings}</g></svg>`;
   const url=`url("data:image/svg+xml,${encodeURIComponent(svg)}")`;cardArtCache.set(k,url);return url;
 }
-function setCountryArt(k){$("#pbody").style.setProperty("--card-art",countryCardArt(k))}
+function setCountryArt(k){const el=$("#pbody");el.style.setProperty("--card-art",countryCardArt(k));el.style.setProperty("--card-art-size",k==="FR"?"400px 600px":"360px 600px")}
 function renderCountry(k){
   if(S.found&&S.sel.type==="country"&&S.sel.k===k){renderFound(S.found);return}
   if(!S.adm) ensureAdm().then(()=>{if(S.adm&&S.sel.type==="country"&&S.sel.k===k)renderCountry(k)});
