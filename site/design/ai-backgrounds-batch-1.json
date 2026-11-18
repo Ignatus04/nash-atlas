@@ -1,0 +1,37 @@
+{
+  "BY": {
+    "file": "belarus-engraving-v1.webp",
+    "bytes": 43602,
+    "width": 800,
+    "height": 1200,
+    "source": "exec-40003f35-a8e6-475e-9e7b-3ec47165deab.png"
+  },
+  "DE": {
+    "file": "germany-engraving-v1.webp",
+    "bytes": 62878,
+    "width": 800,
+    "height": 1200,
+    "source": "exec-2e665358-7dfe-4d7f-8af6-bdef877555a4.png"
+  },
+  "IT": {
+    "file": "italy-engraving-v1.webp",
+    "bytes": 53102,
+    "width": 800,
+    "height": 1200,
+    "source": "exec-a4bf34e5-b47c-4cf4-b147-161153986e8f.png"
+  },
+  "ES": {
+    "file": "spain-engraving-v1.webp",
+    "bytes": 73134,
+    "width": 800,
+    "height": 1200,
+    "source": "exec-cf1b65f2-1a1a-4fda-94dc-8b74a907777b.png"
+  },
+  "GB": {
+    "file": "united-kingdom-engraving-v1.webp",
+    "bytes": 60170,
+    "width": 800,
+    "height": 1200,
+    "source": "exec-4bae4714-f82e-4aa2-a288-062f9e7fa58a.png"
+  }
+}
