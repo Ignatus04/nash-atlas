@@ -14,11 +14,17 @@
 .support-home:hover{transform:translateY(-2px)}
 @media(max-width:860px){.support-home{right:10px;top:calc(var(--toph,104px) + 8px);font-size:11px;padding:7px 11px}}
 
-.support-qr{display:block;width:min(200px,100%);height:auto;margin:12px auto;border-radius:12px;background:#fff}
-#supportBox .support-pay{display:flex;justify-content:center;text-decoration:none;background:#ef3124;color:#fff;margin:16px 0}
-#supportBox p{margin:8px 0;line-height:1.6}
+#supportBox .abox{width:min(580px,100%)}
 #supportBox h2{padding-right:24px}
-.support-note{color:var(--muted);font-size:13px;line-height:1.6}
+#supportBox p{margin:8px 0;line-height:1.6}
+.support-options{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:18px 0}
+.support-bank{display:flex;flex-direction:column;gap:10px;min-width:0;text-align:center;text-decoration:none;color:var(--ink);font-weight:600;font-size:13px}
+.support-bank img{display:block;width:100%;height:230px;object-fit:contain;background:#fff;border-radius:12px;padding:8px;box-sizing:border-box}
+.support-bank:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
+.support-or{color:var(--muted);font-size:12px}
+#supportBox .support-phone{text-align:center;color:var(--muted);font-size:13px}
+.support-phone a{color:var(--ink);white-space:nowrap}
+@media(max-width:560px){.support-options{gap:7px}.support-bank img{height:176px;padding:5px}.support-bank{font-size:12px}}
 
 [data-install][hidden],#installNow[hidden]{display:none!important}
 #installTitle{padding-right:24px}
@@ -1964,10 +1970,13 @@ const SUPPORT_URL="https://c2c.cbrpay.ru/AS1I000IC1OG5TLK8E0Q7PK0GP507KF3";
 function openSupport(){
   modal("supportBox",`<h2 id="supportTitle">Поддержать автора</h2>
     <p>Если «Наш атлас» помогает вам планировать путешествия, вы можете поддержать его развитие.</p>
-    <p>Буду благодарен за поддержку от 100 ₽. Сумму вы указываете в банке.</p>
-    <a class="btn support-pay" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer">Поддержать через СБП</a>
-    <img class="support-qr" src="support-sbp.png" alt="QR-код Альфа-Банка для поддержки автора через СБП" width="300" height="404">
-    <p class="support-note">На компьютере отсканируйте QR-код камерой телефона. Перед переводом проверьте получателя и сумму в банковском приложении. Поддержка добровольная.</p>`,{labelledby:"supportTitle"});
+    <p>Буду благодарен за любую материальную поддержку.</p>
+    <div class="support-options">
+      <a class="support-bank" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Альфа-Банк, откроется новая вкладка"><img src="support-sbp.png" alt="QR-код Альфа-Банка для добровольного перевода" width="300" height="404"><span>Альфа-Банк ↗</span></a>
+      <span class="support-or">или</span>
+      <a class="support-bank" href="https://www.sberbank.com/sms/pbpn?requisiteNumber=79037196333" target="_blank" rel="noopener noreferrer" aria-label="Перевести через Сбербанк, откроется новая вкладка"><img src="support-sber.png" alt="QR-код Сбербанка для добровольного перевода" width="636" height="636"><span>Сбербанк ↗</span></a>
+    </div>
+    <p class="support-phone">или по номеру телефона <a href="tel:+79037196333">+7 (903) 719 63 33</a></p>`,{labelledby:"supportTitle"});
 }
 function openAcct(){
   closeAcct();
@@ -2877,7 +2886,7 @@ const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
-  {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроются платёжная ссылка и QR-код. Поддержка добровольная; рекомендуемая сумма — от 100 ₽.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
+  {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроются платёжная ссылка и QR-код. Можно поддержать автора на любую сумму через Альфа-Банк или Сбербанк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
     m:"Добавьте «Наш атлас» на главный экран и открывайте карту по иконке.",
     install:true,art:installArt,run:playInstallScene},
