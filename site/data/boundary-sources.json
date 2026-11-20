@@ -1,0 +1,64 @@
+{
+  "source": "Terrae ADM0 2026.10, derived from OpenStreetMap",
+  "snapshot": "2026-09-28",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "attribution": "© OpenStreetMap contributors; Terrae",
+  "sources": {
+    "reference": {
+      "url": "https://huggingface.co/buckets/geodataset/terrae/resolve/adm0/2026.10/world/terrae-adm0-2026.10-medium-reference-polygons.gpkg",
+      "sha256": "563757e658a9df6e3ef7fa1dce45e23ef4305023ca488a3d6a4ea9630587d0d5"
+    },
+    "land": {
+      "url": "https://huggingface.co/buckets/geodataset/terrae/resolve/full/adm0/2026.10/world/terrae-adm0-2026.10-high-reference-lines.gpkg",
+      "sha256": "73d28af5ea883361181d9914bce8a3bbc64f1b1c137ea5c9ff2d76d1164d85d2"
+    },
+    "coast": {
+      "url": "https://huggingface.co/buckets/geodataset/terrae/resolve/adm0/2026.10/world/terrae-adm0-2026.10-medium-reference-lines.gpkg",
+      "sha256": "402706a947808711c4936345a2d63ea8fcd6c702e7f73ec4127e20273c19417c"
+    },
+    "de_facto": {
+      "url": "https://huggingface.co/buckets/geodataset/terrae/resolve/full/adm0/2026.10/world/terrae-adm0-2026.10-high-de_facto-polygons.gpkg",
+      "sha256": "53355ed117b1171b5d27dc5025301ca4c69b55471324a1f40a3222cccbbd2acb"
+    },
+    "disputes": {
+      "url": "https://huggingface.co/buckets/geodataset/terrae/resolve/full/adm0/2026.10/world/terrae-adm0-2026.10-high-disputes-polygons.gpkg",
+      "sha256": "d2e3d3a8577a158ebfb6d06406bdc2433b8b95a31f52c6e998b8729c94c682eb"
+    }
+  },
+  "adaptations": [
+    "Site territory codes and existing worldview assignment masks",
+    "Shared-arc overview simplification; high-detail land borders and medium coastline reassembled at common source junctions"
+  ],
+  "legacyMasks": [
+    "~Aksai Chin",
+    "~Azad Kashmir",
+    "~Bara Hotii Valleys",
+    "~Bhutan (northwest valleys)",
+    "~Demchok",
+    "~Gilgit-Baltistan",
+    "~Golan Heights",
+    "~Jammu and Kashmir",
+    "~Junagadh and Manavadar",
+    "~Kuril Is.",
+    "~Olivenza",
+    "~Samdu Valleys",
+    "~Shaksam Valley",
+    "~Siachen Glacier",
+    "~Tirpani Valleys",
+    "~UA-claim",
+    "~UA-kharkiv"
+  ],
+  "controlLine": "Previous site dataset, unchanged",
+  "upstreamSimplificationToleranceM": 15,
+  "coastlineSimplificationToleranceM": 150,
+  "features": 274,
+  "inputVertices": 6947971,
+  "isolatedRingAreaFilterDeg2": {
+    "overview": 0.01,
+    "detailed": 1e-05
+  },
+  "preservedRings": "Largest exterior of each territory and all shared land-border rings",
+  "geometryRepair": "mapshaper 0.8.6 topology cleaning; overview simplification with intersection repair; Shapely valid-output snap rounding on a common 1e-8 degree grid",
+  "coordinateGridDegrees": 1e-08
+}

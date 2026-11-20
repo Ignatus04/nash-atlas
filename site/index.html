@@ -169,7 +169,8 @@ body.hastiles .c-dot{fill:#fff;stroke:#14213a}
 .hastiles .adm-line{stroke:rgba(40,40,60,.45)}
 .tiles image{image-rendering:auto}
 .attrib{position:absolute;right:64px;bottom:6px;font-size:10.5px;color:#3a4256;background:rgba(255,255,255,.75);padding:2px 6px;border-radius:6px;z-index:4;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
-#mapwrap.tiled .attrib{display:block}
+#mapwrap .attrib{display:block;bottom:calc(var(--disclaimer-height,16px) + 10px);max-width:calc(100% - 90px);white-space:normal;text-align:right}
+.attrib a{color:inherit;text-decoration:underline}
 .bmsel{position:absolute;right:16px;bottom:172px;z-index:4;display:none;flex-direction:column;gap:4px}
 #mapwrap.tiled .bmsel,#mapwrap.tilesavail .bmsel{display:flex}
 .bmsel button{background:rgba(18,31,51,.92);border:1px solid var(--line);border-radius:10px;padding:6px 9px;font-size:12px;font-weight:600;color:var(--muted);text-align:right}
@@ -922,7 +923,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
   .seg{order:3;width:100%}
   .seg button{flex:1;padding:6px 4px;font-size:13px}
   .status{bottom:auto;top:calc(var(--toph,104px) + 6px)}
-  .attrib{bottom:auto;top:calc(var(--toph,104px) + 2px);right:10px}
+  #mapwrap .attrib{bottom:auto;top:calc(var(--toph,104px) + 2px);right:10px;font-size:10px;max-width:calc(100% - 20px)}
 }
 /* tablet in portrait: the sheet keeps a readable width instead of stretching edge to edge */
 @media (min-width:600px) and (max-width:860px){
@@ -1003,7 +1004,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     </div>
     <svg id="ov" aria-hidden="false"></svg>
     <div class="tip" id="tip"></div>
-    <div class="attrib" id="attrib"></div>
+    <div class="attrib" id="attrib"><a href="map-data.html" target="_blank" rel="noopener">Границы: © OpenStreetMap · Terrae · ODbL</a></div>
     <div class="bmsel" id="bmsel" role="group" aria-label="Подложка карты"></div>
     <div class="pickbar" id="pickbar"><span>Нажми на карту, где находится место</span><button id="pickCancel">Отмена</button></div>
     <div class="status" id="status"></div>
@@ -1460,6 +1461,7 @@ async function shareCard(){
   g.fillText(line,80,1390);
   // footer
   g.fillStyle="rgba(255,255,255,.08)"; g.fillRect(80,1480,W0-160,2); // the bottom ~300 px stay free: stories put their reply bar there
+  g.fillStyle="#9aa7bb"; g.font="500 20px Manrope, sans-serif";g.fillText("Границы: © OpenStreetMap contributors · Terrae · ODbL",80,1455);
   g.fillStyle="#eef1f6"; g.font="700 44px Manrope, sans-serif"; g.fillText("nash-atlas.ru",80,1570);
   g.fillStyle="#9aa7bb"; g.font="500 34px Manrope, sans-serif"; g.fillText("Карта виз, безопасности и мест, куда хочется",80,1626);
   const blob=await new Promise(res=>c.toBlob(res,"image/png")); if(!blob){status("Не получилось собрать картинку",4000);return}
@@ -2162,6 +2164,7 @@ function drawCanvas(){
 // prepare the simplified outlines for the zoom levels people reach first, while the browser is idle,
 // so the first pinch doesn't stall on building them
 function cvWarmLod(){const idle=window.requestIdleCallback||(f=>setTimeout(()=>f({timeRemaining:()=>8}),60));let l=0;const gen=++cvWarmLod.gen;
+  if(S.detailedBorders){idle(()=>{if(gen===cvWarmLod.gen)setLod(99)});return}
   const step=dl=>{if(gen!==cvWarmLod.gen||l>6)return;if(!lodCache.has(l)){const tol=LOD_TOL/2**l,pth=d3.geoPath({stream:o=>proj.stream(thin(o,tol))}),ds=new Map();for(const f of cvCountries()){const d=pth(f);ds.set(f,d);p2(d)}lodCache.set(l,ds)}l++;idle(step)};
   idle(step)}
 cvWarmLod.gen=0;
@@ -2200,7 +2203,7 @@ let W=0,H=0,proj,path,zoom,T=d3.zoomIdentity;
    The drawing extends OVS px past each edge so a drag doesn't uncover empty space. Gestures are
    caught by the container (zt), which never moves. */
 const zt=d3.select("#mapwrap"); let R=d3.zoomIdentity, OVS=0, lastDraw=0;
-function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);cvs.style.transform="";updateCopies();setLod(lodFor(T.k));drawCanvas()}
+function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);cvs.style.transform="";updateCopies();setLod(lodFor(T.k));drawCanvas();scheduleDetailedBorders()}
 /* the labels and pins keep their own anchor (ovR) for the whole gesture: they ride as one picture and are
    re-placed once, when the move ends — however many places there are */
 let ovR=d3.zoomIdentity;
@@ -2209,7 +2212,7 @@ function renderAll(){renderAt();ovR=T;ovSvg.style("transform",null);placeOverlay
 /* Detail levels for country outlines: zoomed out, points closer than ~0.35 screen px to the previous one are dropped,
    so the whole world draws from a fraction of its 145k points. Each level is computed once and kept. */
 const lodCache=new Map(), LOD_TOL=0.35; let lodLvl=-1;
-function lodFor(k){return k>=32?99:Math.max(0,Math.floor(Math.log2(k)))}
+function lodFor(k){return S.detailedBorders||k>=32?99:Math.max(0,Math.floor(Math.log2(k)))}
 function thin(out,tol){let lx=0,ly=0,px=0,py=0,n=0,pend=false;
   return {point(x,y){if(n++===0||Math.abs(x-lx)+Math.abs(y-ly)>tol){out.point(x,y);lx=x;ly=y;pend=false}else{px=x;py=y;pend=true}},
     lineStart(){n=0;pend=false;out.lineStart()},lineEnd(){if(pend)out.point(px,py);out.lineEnd()},
@@ -2234,7 +2237,7 @@ function setupProjection(){
   const mob=MOB(), [vt,vb]=mob?viewArea():[70,H];
   const ext=mob?[[8,vt],[W-8,vb]]:[[10,70],[W-10,H-10]];
   proj=TILES?d3.geoMercator().fitExtent(ext,{type:"MultiPoint",coordinates:[[-179.9,-56],[179.9,78]]}):d3.geoNaturalEarth1().fitExtent(ext,{type:"Sphere"});
-  path=d3.geoPath(proj); if(typeof selOl!=="undefined"){selOl.clear();seamP.clear()}
+  path=d3.geoPath(proj).digits(S.detailedBorders?7:3); if(typeof selOl!=="undefined"){selOl.clear();seamP.clear()}
 }
 /* ---------- endless map: the world repeats left and right, top and bottom never show ---------- */
 function worldYs(){return [proj([0,85.05])[1],proj([0,-85.05])[1]]}
@@ -2268,8 +2271,12 @@ function hitCountry(e){
 }
 function countryAt(lon,lat){
   const p=[lon,lat];
+  if(S.countryHits){
+    const candidates=S.countryHits.get(`${Math.min(35,Math.floor((lon+180)/10))}:${Math.min(17,Math.floor((lat+90)/10))}`)||[];
+    for(const {f,k,b} of candidates)if(lat>=b[0][1]&&lat<=b[1][1]&&(b[0][0]<=b[1][0]?lon>=b[0][0]&&lon<=b[1][0]:lon>=b[0][0]||lon<=b[1][0])&&d3.geoContains(f,p))return k;
+  }
   if(!S.gb){S.gb=new Map();S.countries.forEach(f=>S.gb.set(f,d3.geoBounds(f)))}
-  for(const f of S.countries){if(f.properties.k==="AQ")continue;const [[a,b],[c,d]]=S.gb.get(f);
+  for(const f of S.countries){if(f.properties.k==="AQ"||S.detailedKeys?.has(f.properties.k))continue;const [[a,b],[c,d]]=S.gb.get(f);
     if(p[1]<b||p[1]>d) continue; if(a<=c?(p[0]<a||p[0]>c):(p[0]<a&&p[0]>c)) continue;
     if(d3.geoContains(f,p)) return f.properties.k}
   return null;
@@ -2547,7 +2554,7 @@ function drawTiles(final){
   for(const [key,img] of tileEls){ if(!keys.has(key)){ if(final) placeTile(img,img._d); img.classList.remove("f"); img.classList.add("s"); img._stale=true } else img._stale=false }
   if(!final) paneTransform();
   scheduleStaleSweep(final?1600:0);
-  $("#attrib").textContent=bm.attr||"";
+  $("#attrib").innerHTML=`<a href="map-data.html" target="_blank" rel="noopener">Границы: © OpenStreetMap · Terrae · ODbL</a>${bm.attr?`<br>${esc(bm.attr)}`:""}`;
   applyOverlayOpacity();
 }
 function scheduleStaleSweep(force){
@@ -2883,12 +2890,13 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=20;
+const GUIDE_VER=22;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:22,t:"Подробные границы",m:"Контуры государств теперь основаны на открытых данных OpenStreetMap. При приближении автоматически загружается подробный уровень. Источники, дата данных и лицензия ODbL доступны по подписи на карте.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
   {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроется ссылка для добровольной материальной поддержки автора через Альфа-Банк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
@@ -3346,7 +3354,7 @@ function markAdm(){gAdm.selectAll("path.adm1").classed("sel",d=>S.sel.type==="re
 /* ---------- data lookups ---------- */
 function cityKey(c){return (c.k0||c[4])+"|"+c[1]}  // k0: the de facto country the city was filed under; keeps saved keys stable across border views
 function cityByKey(key){return S.cityIdx.get(key)}
-function countryOf(lat,lng){const f=S.countries.find(f=>d3.geoContains(f,[lng,lat]));return f?f.properties.k:null}
+function countryOf(lat,lng){return countryAt(normLon(lng),lat)}
 function capitalRu(k){const c=S.cities.find(c=>c[4]===k&&c[8]);return c?c[0]:(S.meta[k]?.cap||[])[0]||""}
 function admById(id){return S.adm?.find(f=>f.properties.id===id)}
 function regionOfCity(c){if(!S.adm)return null;return S.adm.find(f=>f.properties.k===c[4]&&d3.geoContains(f,[c[3],c[2]]))||null}
@@ -4511,37 +4519,37 @@ async function askHomeCountry(change){
 function tzCountry(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
   if(z==="Europe/Minsk")return "BY";
   if(/^(Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Ulyanovsk|Astrakhan|Kirov|Simferopol)|Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr))$/.test(z))return "RU"}catch(e){}return null}
-function applyWorldview(ct,wv,cc){
+function applyWorldview(ct,wv,cc,state=S){
   const o=ct.objects[Object.keys(ct.objects)[0]];
-  S.ccNames=new Map(o.geometries.filter(g=>g.properties.k&&g.properties.k[0]!=="~"&&g.properties.k!=="XU"&&g.properties.ru).map(g=>[g.properties.k,g.properties.ru]));
+  state.ccNames=new Map(o.geometries.filter(g=>g.properties.k&&g.properties.k[0]!=="~"&&g.properties.k!=="XU"&&g.properties.ru).map(g=>[g.properties.k,g.properties.ru]));
   // the UN view, plus where this country's official position differs from it
   const map=wv?{...wv.intl,...(wv.views[cc]||{})}:{};
-  S.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};S.wv=wv;
+  state.view={cc,map,id:wv&&wv.views[cc]?cc:"intl"};state.wv=wv;
   const own=g=>{const k=g.properties.k;return k in map?map[k]:(k[0]==="~"?g.properties.host:k)};
   // every area that changes hands in some view: a place there is filed under its owner in this view, whoever saved it
   const contested=new Set([...Object.keys(wv?.intl||{}),...Object.values(wv?.views||{}).flatMap(Object.keys)]);
-  S.flagExcludedKeys=new Set([...contested,...o.geometries.filter(g=>g.properties.k.startsWith("~")).map(g=>g.properties.k)]);
-  S.flagExcludedAreas=o.geometries.filter(g=>S.flagExcludedKeys.has(g.properties.k)).map(g=>{const f=topojson.feature(ct,g);return {k:g.properties.k,f,b:d3.geoBounds(f)}});
-  S.contested=o.geometries.filter(g=>contested.has(g.properties.k)&&!g.properties.small).map(g=>{const f=topojson.feature(ct,g);return {f,b:d3.geoBounds(f),ow:own(g)}});
+  state.flagExcludedKeys=new Set([...contested,...o.geometries.filter(g=>g.properties.k.startsWith("~")).map(g=>g.properties.k)]);
+  state.flagExcludedAreas=o.geometries.filter(g=>state.flagExcludedKeys.has(g.properties.k)).map(g=>{const f=topojson.feature(ct,g);return {k:g.properties.k,f,b:d3.geoBounds(f)}});
+  state.contested=o.geometries.filter(g=>contested.has(g.properties.k)&&!g.properties.small).map(g=>{const f=topojson.feature(ct,g);return {f,b:d3.geoBounds(f),ow:own(g)}});
   // countries whose shape differs from the de facto map: their written dispute note describes the de facto map, so it gives way to a note about the view
-  S.viewChanged=new Set();for(const g of o.geometries){const k=g.properties.k,d=k[0]==="~"?g.properties.host:k,ow=own(g);if(ow!==d){S.viewChanged.add(ow);S.viewChanged.add(d)}}
+  state.viewChanged=new Set();for(const g of o.geometries){const k=g.properties.k,d=k[0]==="~"?g.properties.host:k,ow=own(g);if(ow!==d){state.viewChanged.add(ow);state.viewChanged.add(d)}}
   // safety never follows the drawn border: every area that joins another country here keeps its own safety rating
   // (de facto holder: a piece's host, otherwise the territory itself); drawn over the owner and listed in its card
-  const pn={...(wv?.partNames?.all||{}),...(wv?.partNames?.[S.view.id]||{})};
+  const pn={...(wv?.partNames?.all||{}),...(wv?.partNames?.[state.view.id]||{})};
   // («small» marks tiny countries such as Northern Cyprus or Kosovo: still real areas; a key drawn twice is kept once)
   const seenP=new Set();
-  S.safeParts=o.geometries.filter(g=>own(g)!==(g.properties.k[0]==="~"?g.properties.host:g.properties.k)&&!seenP.has(g.properties.k)&&seenP.add(g.properties.k)).map(g=>{
+  state.safeParts=o.geometries.filter(g=>own(g)!==(g.properties.k[0]==="~"?g.properties.host:g.properties.k)&&!seenP.has(g.properties.k)&&seenP.add(g.properties.k)).map(g=>{
     const k=g.properties.k,dk=k[0]==="~"?g.properties.host:k,f=topojson.feature(ct,g);
     return {k,dk,ow:own(g),f,b:d3.geoBounds(f),name:pn[k]||g.properties.ru||k}});
   const groups=new Map();
   for(const g of o.geometries){const ow=own(g);if(!groups.has(ow))groups.set(ow,[]);groups.get(ow).push(g)}
-  const out=[];S.absorbed=new Map();
+  const out=[];state.absorbed=new Map();
   for(const [ow,gs] of groups){
     const main=gs.find(g=>g.properties.k===ow&&!g.properties.small)||gs.find(g=>g.properties.k===ow);
     if(!main){out.push(...gs);continue}           // owner not on the map: keep pieces with their holders
     const join=gs.filter(g=>g!==main&&!(g.properties.k===ow&&g.properties.small));
     gs.filter(g=>g!==main&&g.properties.k===ow&&g.properties.small).forEach(g=>out.push(g));
-    for(const g of join) S.absorbed.set(g.properties.k,ow);
+    for(const g of join) state.absorbed.set(g.properties.k,ow);
     if(!join.length){out.push(main);continue}
     const m=topojson.mergeArcs(ct,[main,...join]);m.properties=main.properties;if(main.id!=null)m.id=main.id;
     // the two sources draw a shared border slightly differently; the tiny gaps left between them would show as holes
@@ -4591,6 +4599,67 @@ function prepareCitySearch(){
   ensureAllCities().then(()=>{if(document.activeElement===$("#q")){resArr=searchAll($("#q").value);resSel=-1;renderResults()}if(document.activeElement===$("#cfq"))$("#cfq").dispatchEvent(new Event("input"))}).catch(e=>console.warn("cities",e));
 }
 let selectionRequest=0;
+// The first screen uses a compact, shared-arc OSM partition. Fetch the detailed
+// partition only after a real zoom; it replaces both drawing and hit testing.
+let detailedBordersP, detailedBordersTimer, detailedBordersRetry=0, borderIndex;
+const borderGroups=new Map();
+function scheduleDetailedBorders(){
+  if(!window.ATLAS_VER||detailedBordersP||T.k<12||Date.now()<detailedBordersRetry)return;
+  clearTimeout(detailedBordersTimer);
+  detailedBordersTimer=setTimeout(()=>{if(T.k>=12)ensureDetailedBorders()},250);
+}
+function visibleBorderGroups(){
+  const size=borderIndex.cellDegrees,nx=360/size,ny=180/size;
+  const center=normLon(proj.invert(T.invert([W/2,H/2]))[0]),span=Math.min(360,360*(W+128)/(mercW()*T.k));
+  const top=proj.invert(T.invert([W/2,-64]))[1],bottom=proj.invert(T.invert([W/2,H+64]))[1],out=new Set();
+  for(let x=0;x<nx;x++){const lon=-180+(x+.5)*size,delta=Math.abs(normLon(lon-center));if(span<360&&delta>span/2+size/2)continue;
+    for(let y=Math.max(0,Math.floor((bottom+90)/size));y<=Math.min(ny-1,Math.floor((top+90)/size));y++)for(const id of borderIndex.cells[`${x}:${y}`]||[])out.add(id)}
+  return out;
+}
+function rebuildDetailedCountries(){
+  const base=S.borderOverview,entries=[...borderGroups.values()],detailed=entries.flatMap(e=>e.features);
+  S.detailedKeys=new Set(detailed.map(f=>f.properties.k));S.detailedBorders=!!entries.length;
+  S.countries=[...base.countries.filter(f=>!S.detailedKeys.has(f.properties.k)),...detailed];S.cByK.clear();S.gb=null;
+  S.countries.forEach(f=>{const r=S.meta[f.properties.k]?.ru;if(r)f.properties.ru=r;const prev=S.cByK.get(f.properties.k);if(!prev||prev.properties.small&&!f.properties.small)S.cByK.set(f.properties.k,f)});
+  for(const [field,key] of [['safeParts','k'],['contested','k'],['flagExcludedAreas','k']]){
+    const replacements=entries.flatMap(e=>e.state[field]||[]);if(field==='contested'){
+      const keys=new Set(replacements.map(x=>x.f.properties.k));S[field]=[...base[field].filter(x=>!keys.has(x.f.properties.k)),...replacements];
+    }else{const keys=new Set(replacements.map(x=>x[key]));S[field]=[...base[field].filter(x=>!keys.has(x[key])),...replacements]}}
+  S.front=entries.find(e=>e.ids.has('XU'))?.front||base.front;S.ksBorder=entries.find(e=>e.ids.has('XK'))?.ks||base.ksBorder;
+  S.countryHits=new Map();
+  for(const country of detailed){const k=country.properties.k;if(k==='AQ')continue;
+    const polygons=country.geometry.type==='MultiPolygon'?country.geometry.coordinates:[country.geometry.coordinates];
+    for(const coordinates of polygons){const f={type:'Polygon',coordinates},b=d3.geoBounds(f),entry={f,k,b};
+      const ys=[Math.max(0,Math.floor((b[0][1]+90)/10)),Math.min(17,Math.floor((b[1][1]+90)/10))];
+      const ranges=b[0][0]<=b[1][0]?[[b[0][0],b[1][0]]]:[[b[0][0],180],[-180,b[1][0]]];
+      for(const [a,z] of ranges)for(let x=Math.max(0,Math.floor((a+180)/10));x<=Math.min(35,Math.floor((z+180)/10));x++)for(let y=ys[0];y<=ys[1];y++){
+        const cell=`${x}:${y}`;if(!S.countryHits.has(cell))S.countryHits.set(cell,[]);S.countryHits.get(cell).push(entry)}}
+  }
+  path.digits(7);selOl.clear();seamP.clear();seamC.clear();drawBase();renderAll();scheduleOverlay();
+}
+function ensureDetailedBorders(){
+  if(T.k<12)return Promise.resolve();
+  if(detailedBordersP)return detailedBordersP;
+  detailedBordersP=(async()=>{
+    borderIndex=borderIndex||await getData('border-index');if(T.k<12)return;
+    const needed=visibleBorderGroups(),missing=[...needed].filter(id=>!borderGroups.has(id));
+    for(const id of needed)if(borderGroups.has(id))borderGroups.get(id).used=Date.now();
+    if(!missing.length)return;
+    if(!S.borderOverview)S.borderOverview={countries:S.countries.slice(),safeParts:S.safeParts,contested:S.contested,flagExcludedAreas:S.flagExcludedAreas,front:S.front,ksBorder:S.ksBorder};
+    const loaded=await Promise.all(missing.map(async id=>{
+      const name='borders/'+id,ct=await getData(name),o=ct.objects[Object.keys(ct.objects)[0]],ids=new Set(o.geometries.map(g=>g.properties.k));
+      const state={};applyWorldview(ct,S.wv,S.view.cc,state);dataRequests.delete(name);
+      return {id,ids,state,used:Date.now(),vertices:borderIndex.groups[id].vertices,features:topojson.feature(ct,o).features,
+        front:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='UA,XU'),
+        ks:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK')};
+    }));
+    for(const e of loaded)borderGroups.set(e.id,e);
+    let vertices=[...borderGroups.values()].reduce((n,e)=>n+e.vertices,0);
+    for(const e of [...borderGroups.values()].sort((a,b)=>a.used-b.used))if(!needed.has(e.id)&&(borderGroups.size>12||vertices>1000000)){borderGroups.delete(e.id);vertices-=e.vertices}
+    rebuildDetailedCountries();
+  })().catch(e=>{detailedBordersRetry=Date.now()+30000;console.warn('detailed borders',e)}).finally(()=>{detailedBordersP=null;if(borderIndex&&T.k>=12&&[...visibleBorderGroups()].some(id=>!borderGroups.has(id)))scheduleDetailedBorders()});
+  return detailedBordersP;
+}
 async function boot(){
   size(); consentApply(); setTimeout(consentBar,1200);
   const ccP=viewerCountry(), wvP=getData("worldviews").catch(()=>null);

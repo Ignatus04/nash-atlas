@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Геоданные и лицензия — Наш атлас</title>
+<style>body{margin:0 auto;max-width:780px;padding:28px 20px 60px;background:#101c30;color:#eef1f6;font:16px/1.65 system-ui}a{color:#8cd4ff}h1{font-size:30px;line-height:1.2}h2{font-size:21px;margin-top:30px}li{margin:10px 0}.muted{color:#acb8cb}section{padding:18px 22px;border:1px solid #33445f;border-radius:16px;margin:22px 0}section p:first-child{margin-top:0}section p:last-child{margin-bottom:0}</style>
+<a href="/">← На карту</a><h1>Источники геоданных</h1>
+<section><p><strong>Границы: © OpenStreetMap contributors; Terrae.</strong></p>
+<p>Подготовленная база границ «Нашего атласа» доступна на условиях <a href="https://opendatacommons.org/licenses/odbl/1-0/">Open Database License 1.0 (ODbL)</a>. Её можно скачать, использовать и изменять с соблюдением лицензии, включая указание авторства и открытое распространение производных баз на тех же условиях.</p></section>
+<h2>Источник и дата</h2>
+<p>Основные контуры государств и территорий — <a href="https://github.com/terraecore/world-administrative-boundaries">Terrae ADM0, выпуск 2026.10</a>, основанный на <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, снимок от 28 сентября 2026 года. Данные предоставляются без гарантии геодезической точности и не заменяют официальные документы о границах.</p>
+<h2>Что изменено для сайта</h2>
+<p>Сопоставлены коды территорий с карточками сайта. Сохранены прежние правила отображения спорных участков и линия фактического контроля; их маски происходят из прежнего набора сайта на основе <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth (общественное достояние)</a>. Эти участки не следует считать обновлёнными до точности OpenStreetMap.</p>
+<p>Для первого экрана подготовлен обзорный уровень с общими границами соседей. При приближении загружается подробный уровень: общие сухопутные границы сохраняют исходную детализацию выбранного уровня Terrae (допуск упрощения 15 м); береговые линии взяты из согласованного уровня Terrae с допуском упрощения 150 м. Формат и округление координат адаптированы для браузера.</p>
+<p>Для скорости подробные данные загружаются отдельными группами соседних стран. Очень мелкие изолированные контуры фильтруются по площади; основной контур каждой территории и общие сухопутные границы сохраняются.</p><h2>Скачать подготовленную базу</h2>
+<ul><li><a href="data/countries.json" download>Обзорные границы, TopoJSON — ODbL 1.0</a></li>
+<li><a href="borders-odbl.zip" download>Подробные границы всех стран, ZIP с TopoJSON — ODbL 1.0</a></li>
+<li><a href="data/boundary-sources.json" download>Источники, контрольные суммы и сведения об обработке</a></li></ul>
+<p class="muted">Лицензия этой базы относится к геоданным. Личные отметки, фотографии и данные аккаунтов пользователей в неё не входят.</p>
+</html>

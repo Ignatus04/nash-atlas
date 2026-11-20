@@ -1,7 +1,7 @@
 """Build the website version of Наш атлас into /home/claude/web:
 index.html + app.js + app.css, self-hosted libraries and fonts, data/*.json loaded on demand,
 web app manifest and a service worker (works offline for what has been opened)."""
-import json, re, os, shutil, hashlib, base64, html as htmltools
+import json, re, os, shutil, hashlib, base64, gzip, zipfile, html as htmltools
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
 S=ROOT+'site/'; SRC=ROOT+'web-src/'; OUT=ROOT+'web/'
 B=next(p for p in [ROOT+'node_modules/',ROOT+'build/node_modules/'] if os.path.isdir(p+'d3'))
@@ -38,7 +38,7 @@ assert gf; html=html.replace(gf.group(0),'')
 
 # data, minified
 sizes={}
-PRIVATE={'lists.json'}
+PRIVATE={'lists.json','countries-detail.json'}
 for f in sorted(os.listdir(S+'data')):
     if f in PRIVATE: continue
     d=json.load(open(S+'data/'+f,encoding='utf-8'))
@@ -54,6 +54,19 @@ for f in sorted(os.listdir(S+'data')):
                 c['img']='passports/'+name
     out=json.dumps(d,ensure_ascii=False,separators=(',',':'))
     open(OUT+'data/'+f,'w',encoding='utf-8').write(out); sizes[f]=len(out.encode())
+
+# Detailed OSM geometry is fetched by nearby country, never on the first screen.
+# Store the generated sources compressed in Git; serve ordinary cacheable JSON.
+os.makedirs(OUT+'data/borders',exist_ok=True)
+for f in sorted(os.listdir(S+'geodata/borders')):
+    if not f.endswith('.json.gz'): continue
+    raw=gzip.decompress(open(S+'geodata/borders/'+f,'rb').read())
+    open(OUT+'data/borders/'+f[:-3],'wb').write(raw)
+    sizes['borders/'+f[:-3]]=len(raw)
+with zipfile.ZipFile(OUT+'borders-odbl.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
+    for f in sorted(os.listdir(OUT+'data/borders')): archive.write(OUT+'data/borders/'+f,'borders/'+f)
+    for f in ('border-index.json','boundary-sources.json'): archive.write(OUT+'data/'+f,f)
+    archive.writestr('LICENSE.txt','Boundary database: © OpenStreetMap contributors; Terrae. Adapted by Наш атлас.\nOpen Database License 1.0: https://opendatacommons.org/licenses/odbl/1-0/\nSources and adaptations: boundary-sources.json\n')
 
 
 # Only world-view labels are needed before the visitor explores the map.
@@ -79,7 +92,7 @@ assets["config.js"]=hashlib.sha256(open(OUT+"config.js","rb").read()).hexdigest(
 st=re.search(r'<style>(.*?)</style>',html,re.S); css='\n'.join(faces)+'\n'+st.group(1)
 m=re.search(r'<script>\n"use strict";(.*?)</script>',html,re.S); js='"use strict";'+m.group(1)
 pattern_hash=''.join(hashlib.sha1(open(os.path.join(dp,f),'rb').read()).hexdigest() for dp,ds,fs in os.walk(SRC+'patterns') for f in sorted(fs))
-ver=hashlib.sha1((css+js+pattern_hash+open(SRC+'config.js').read()+''.join(hashlib.sha1(open(S+'data/'+f,'rb').read()).hexdigest() for f in sorted(os.listdir(S+'data')))).encode()).hexdigest()[:10]
+ver=hashlib.sha1((css+js+pattern_hash+open(SRC+'config.js').read()+json.dumps(assets,sort_keys=True)).encode()).hexdigest()[:10]
 open(OUT+'app.css','w',encoding='utf-8').write(css)
 open(OUT+'app.js','w',encoding='utf-8').write(js)
 html=html.replace(st.group(0),f'<link rel="stylesheet" href="app.css?v={ver}">')
@@ -135,7 +148,7 @@ if BETA: open(OUT+'robots.txt','w').write('User-agent: *\nDisallow: /\n')
 else: shutil.copy(SRC+'CNAME',OUT+'CNAME')  # custom domain for GitHub Pages
 # the login email template: our own Supabase server fetches it from here (server/docker-compose.atlas.yml)
 os.makedirs(OUT+'email',exist_ok=True); shutil.copy(ROOT+'supabase/email/login.html',OUT+'email/login.html')
-for f in ('privacy.html','terms.html','consent.html'):
+for f in ('privacy.html','terms.html','consent.html','map-data.html'):
   t=open(SRC+f,encoding='utf-8').read()
   t=t.replace('<meta charset="utf-8">','<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; script-src \'none\'; object-src \'none\'; base-uri \'self\'; form-action \'none\'">',1)
   open(OUT+f,'w',encoding='utf-8').write(t)
