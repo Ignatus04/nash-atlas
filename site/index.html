@@ -2159,11 +2159,11 @@ function drawCanvas(){
     cx.globalAlpha=1}
   perfDraw(performance.now()-t0);
 }
-// Country contours retain every source vertex. Shared TopoJSON edges must not be
-// simplified independently: opposite traversal can otherwise select different points.
-// Path2D is cached once per projection; gestures still transform the cached canvas.
-function cvWarmLod(){const gen=++cvWarmLod.gen;const idle=window.requestIdleCallback||(f=>setTimeout(f,60));
-  idle(()=>{if(gen===cvWarmLod.gen)setLod(99)})}
+// prepare the simplified outlines for the zoom levels people reach first, while the browser is idle,
+// so the first pinch doesn't stall on building them
+function cvWarmLod(){const idle=window.requestIdleCallback||(f=>setTimeout(()=>f({timeRemaining:()=>8}),60));let l=0;const gen=++cvWarmLod.gen;
+  const step=dl=>{if(gen!==cvWarmLod.gen||l>6)return;if(!lodCache.has(l)){const tol=LOD_TOL/2**l,pth=d3.geoPath({stream:o=>proj.stream(thin(o,tol))}),ds=new Map();for(const f of cvCountries()){const d=pth(f);ds.set(f,d);p2(d)}lodCache.set(l,ds)}l++;idle(step)};
+  idle(step)}
 cvWarmLod.gen=0;
 // the country shapes for the current detail level, as Path2D
 let cvLodMap=null, cvLodLvl=-2;
@@ -2206,10 +2206,10 @@ function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.
 let ovR=d3.zoomIdentity;
 function ovMove(){if(ovR===T){ovSvg.style("transform",null);return}const s=T.k/ovR.k;ovSvg.style("transform",`translate(${T.x-ovR.x*s}px,${T.y-ovR.y*s}px) scale(${s})`)}
 function renderAll(){renderAt();ovR=T;ovSvg.style("transform",null);placeOverlay()}
-/* Full source contours, cached once per projection. The lightweight thin stream
-   remains only for small guide illustrations and exported share-card previews. */
-const lodCache=new Map(); let lodLvl=-1;
-function lodFor(k){return 99}
+/* Detail levels for country outlines: zoomed out, points closer than ~0.35 screen px to the previous one are dropped,
+   so the whole world draws from a fraction of its 145k points. Each level is computed once and kept. */
+const lodCache=new Map(), LOD_TOL=0.35; let lodLvl=-1;
+function lodFor(k){return k>=32?99:Math.max(0,Math.floor(Math.log2(k)))}
 function thin(out,tol){let lx=0,ly=0,px=0,py=0,n=0,pend=false;
   return {point(x,y){if(n++===0||Math.abs(x-lx)+Math.abs(y-ly)>tol){out.point(x,y);lx=x;ly=y;pend=false}else{px=x;py=y;pend=true}},
     lineStart(){n=0;pend=false;out.lineStart()},lineEnd(){if(pend)out.point(px,py);out.lineEnd()},
@@ -2217,8 +2217,8 @@ function thin(out,tol){let lx=0,ly=0,px=0,py=0,n=0,pend=false;
 function setLod(l){
   if(l===lodLvl||!path) return; lodLvl=l;
   let ds=lodCache.get(l);
-  if(!ds){ds=new Map();lodCache.set(l,ds);
-    for(const f of cvCountries())ds.set(f,path(f))}
+  if(!ds){const tol=LOD_TOL/2**l, pth=l===99?path:d3.geoPath({stream:o=>proj.stream(thin(o,tol))});ds=new Map();lodCache.set(l,ds);
+    for(const f of cvCountries()) ds.set(f,pth(f))}
 }
 function svgMove(){
   const s=T.k/R.k, dx=T.x-R.x*s, dy=T.y-R.y*s;
@@ -2234,8 +2234,7 @@ function setupProjection(){
   const mob=MOB(), [vt,vb]=mob?viewArea():[70,H];
   const ext=mob?[[8,vt],[W-8,vb]]:[[10,70],[W-10,H-10]];
   proj=TILES?d3.geoMercator().fitExtent(ext,{type:"MultiPoint",coordinates:[[-179.9,-56],[179.9,78]]}):d3.geoNaturalEarth1().fitExtent(ext,{type:"Sphere"});
-  proj.precision(0.1);
-  path=d3.geoPath(proj).digits(6); if(typeof selOl!=="undefined"){selOl.clear();seamP.clear()}
+  path=d3.geoPath(proj); if(typeof selOl!=="undefined"){selOl.clear();seamP.clear()}
 }
 /* ---------- endless map: the world repeats left and right, top and bottom never show ---------- */
 function worldYs(){return [proj([0,85.05])[1],proj([0,-85.05])[1]]}
