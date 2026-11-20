@@ -2116,10 +2116,7 @@ function drawCanvas(){
   if(!S.countries?.length||!proj) return;
   const t0=performance.now(), t=R, k=t.k, lw=1/k, tiles=svg.classed("hastiles"), moving=svg.classed("moving");
   cx.setTransform(1,0,0,1,0,0); cx.clearRect(0,0,cvs.width,cvs.height);
-  // Overview polygons are not survey-scale data. On detailed tiles use the
-  // basemap's boundaries, including river bends, instead of drawing a second border.
-  const detail=tiles&&tileZFor(k)>=8;
-  const op=detail?0:tiles?(()=>{const kk=T.k;return !S.area?0.06:kk<6?0.55:kk<30?0.45:kk<120?0.3:kk<500?0.12:0})():1;
+  const op=tiles?(()=>{const kk=T.k;return !S.area?0.06:kk<6?0.55:kk<30?0.45:kk<120?0.3:kk<500?0.12:0})():1;
   // which copies of the world reach into the drawn area
   const offs=[0]; if(TILES){const Wm=mercW(),c=(W/2-t.x)/k,half=(W/2+OVS)/k,t0x=proj.translate()[0];
     for(let n=Math.ceil((c-half-t0x-Wm/2)/Wm);n<=Math.floor((c+half-t0x+Wm/2)/Wm);n++) if(n) offs.push(n)}
@@ -2133,7 +2130,7 @@ function drawCanvas(){
     for(const [f,pth] of lod){const kk=f.properties.k;cx.fillStyle=cols.get(kk)||"#22324c";
       if(kk===hoverK){cx.globalAlpha=op*(tiles?.7:.82);cx.fill(pth);cx.globalAlpha=op}else cx.fill(pth)}
     cx.globalAlpha=1;
-    if(!detail){cx.strokeStyle=tiles?"rgba(30,35,55,.45)":rc("var(--ocean)");cx.lineWidth=(tiles?1:.6)*lw;cx.lineJoin="round";
+    {cx.strokeStyle=tiles?"rgba(30,35,55,.45)":rc("var(--ocean)");cx.lineWidth=(tiles?1:.6)*lw;cx.lineJoin="round";
       for(const pth of lod.values()) cx.stroke(pth);
       // countries the data cuts at the date line are filled once more, so the cut doesn't show as a border
       cx.globalAlpha=op; for(const [f,pth] of lod) if(seamCountry(f)){const c=cols.get(f.properties.k)||"#22324c";cx.fillStyle=c;cx.fill(pth);cx.strokeStyle=c;cx.lineWidth=3*lw;cx.stroke(seamPath(f))} cx.globalAlpha=1}
@@ -2147,7 +2144,7 @@ function drawCanvas(){
     if(cvShapes.front){cx.setLineDash([6*lw,3*lw]);cx.strokeStyle="#b3261e";cx.lineWidth=2*lw;cx.stroke(cvShapes.front);cx.setLineDash([])}
     if(cvShapes.ks){cx.setLineDash([7*lw,4*lw]);cx.strokeStyle="#f2a93b";cx.lineWidth=3*lw;cx.stroke(cvShapes.ks);cx.setLineDash([])}
     // the open country gets a light outline
-    if(sel&&!detail){const f=S.cByK.get(sel),pth=f&&selOutline(f);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
+    if(sel){const f=S.cByK.get(sel),pth=f&&selOutline(f);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
   }
   // everything outside the focused area is dimmed (drawn once, not per copy: the mask covers the whole canvas)
   // the hole is cut in every copy of the world, so a country across the date line (Chukotka, Fiji) stays lit on both sides
@@ -2567,9 +2564,7 @@ function applyOverlayOpacity(){
   const on=tilesOk&&!!BASEMAPS[basemap].url, k=T.k;
   const op=!S.area?0.06:k<6?0.55:k<30?0.45:k<120?0.3:k<500?0.12:0;
   // repaint only when the see-through level actually changes (this runs on every tile refresh)
-  const detail=on&&tileZFor(k)>=8;
-  gAdm.style("display",detail?"none":null);
-  const key=on?`${op}:${detail}`:-1; if(key!==applyOverlayOpacity.last){applyOverlayOpacity.last=key;requestDraw()}
+  const key=on?op:-1; if(key!==applyOverlayOpacity.last){applyOverlayOpacity.last=key;requestDraw()}
 }
 function moveOverlay(){
   if(movePending) return; movePending=true;
@@ -2889,13 +2884,12 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=21;
+const GUIDE_VER=20;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
-  {since:21,t:"Границы на подробной карте",m:"На подложке с рельефом при сильном приближении границы показывает сама подробная карта. Обзорные контуры стран и регионов скрываются, чтобы не перекрывать изгибы рек и местные детали. Обозначения зон риска остаются ориентировочными.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
   {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроется ссылка для добровольной материальной поддержки автора через Альфа-Банк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
   {since:17,t:"Атлас как приложение",
