@@ -1,0 +1,12 @@
+name: Подготовка беты
+on:
+  push:
+    branches: [beta]
+permissions:
+  contents: read
+jobs:
+  ready:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Запросить публикацию беты на GitHub Pages
+        run: echo 'Beta source is ready for the Pages publisher on main.'

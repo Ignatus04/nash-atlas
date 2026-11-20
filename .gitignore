@@ -10,6 +10,7 @@
 !/package.json
 !/README.md
 !/CLAUDE.md
+!/tests/
 !/.gitignore
 # private: our own saved places live in the account, not in the public repository
 site/data/lists.json

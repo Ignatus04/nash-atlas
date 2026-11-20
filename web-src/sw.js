@@ -1,10 +1,12 @@
 /* Наш атлас service worker: the app and data come from the cache, then refresh; map tiles are kept for offline use */
-const VER="__VER__", CORE=__CORE__, APP="atlas-app-"+VER, ASSETS="atlas-assets-v1", TILES="atlas-tiles", TILE_MAX=3000;
+const SCOPE=new URL(self.registration.scope).pathname, PAGE=new URL('index.html',self.registration.scope).href;
+const APP_PREFIX=SCOPE==='/'?'atlas-app-':'atlas-subapp-'+encodeURIComponent(SCOPE)+'-';
+const VER="__VER__", CORE=__CORE__, APP=APP_PREFIX+VER, ASSETS="atlas-assets-v1", TILES="atlas-tiles", TILE_MAX=3000;
 self.addEventListener("install",e=>{e.waitUntil(caches.open(APP).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 // Preserve unchanged resources across releases, including the previous worker's cache.
 self.addEventListener("activate",e=>{e.waitUntil((async()=>{
   const assets=await caches.open(ASSETS);
-  for(const k of await caches.keys())if(k.startsWith("atlas-app-")&&k!==APP){
+  for(const k of await caches.keys())if(k.startsWith(APP_PREFIX)&&k!==APP){
     const old=await caches.open(k);
     for(const request of await old.keys()){
       const u=new URL(request.url);
@@ -25,7 +27,7 @@ self.addEventListener("fetch",e=>{
   const r=e.request; if(r.method!=="GET") return;
   const u=new URL(r.url);
   // page: network first, so a new version shows up at once; offline falls back to the cached page
-  if(r.mode==="navigate"){const app=u.origin===location.origin&&/^\/(index\.html)?$/.test(u.pathname);e.respondWith(fetch(r).then(res=>{if(app&&res.ok){const cp=res.clone();caches.open(APP).then(c=>c.put("index.html",cp))}return res}).catch(()=>app?caches.match("index.html"):Response.error()));return}
+  if(r.mode==="navigate"){const app=u.origin===location.origin&&(u.pathname===SCOPE||u.pathname===SCOPE+'index.html');e.respondWith(fetch(r).then(res=>{if(app&&res.ok){const cp=res.clone();caches.open(APP).then(c=>c.put(PAGE,cp))}return res}).catch(()=>app?caches.open(APP).then(c=>c.match(PAGE)).then(hit=>hit||Response.error()):Response.error()));return}
   // map tiles: cache first, keep the most recent few thousand
   if(/tile\.opentopomap\.org$/.test(u.hostname)){
     e.respondWith(caches.open(TILES).then(async c=>{const hit=await c.match(r);if(hit)return hit;const res=await fetch(r);if(res.ok){c.put(r,res.clone());if(Math.random()<.02)trimTiles()}return res}));return}

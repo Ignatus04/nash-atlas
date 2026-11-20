@@ -3,6 +3,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_run:
+    workflows: [Подготовка беты]
+    branches: [beta]
+    types: [completed]
 permissions:
   contents: read
   pages: write
@@ -12,20 +16,52 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: stable
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: beta
+          path: preview
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - run: npm install --no-audit --no-fund
-      - run: python3 scripts/build_web.py
+          python-version: '3.12'
+      - name: Собрать основу
+        working-directory: stable
+        run: |
+          npm install --no-audit --no-fund
+          python3 scripts/build_web.py
+      - name: Собрать бету
+        working-directory: preview
+        env:
+          ATLAS_BETA: '1'
+        run: |
+          npm install --no-audit --no-fund
+          python3 scripts/build_web.py
+          node tests/startup-cache.mjs
+          node tests/startup-cities.mjs
+          node tests/osm-boundaries.mjs
+      - name: Разместить обе версии в одном сайте Pages
+        run: |
+          mkdir -p publish/beta
+          cp -a stable/web/. publish/
+          cp -a preview/web/. publish/beta/
+          touch publish/.nojekyll
+          test -f publish/index.html
+          test -f publish/beta/index.html
+          test ! -f publish/beta/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: publish
   deploy:
     needs: build
     runs-on: ubuntu-latest
