@@ -2084,7 +2084,7 @@ function sizeCanvas(){const w=W+2*OVS,h=H+2*OVS;
 // CSS colours ("var(--st-free)") resolved once for the canvas
 const cssC=new Map();
 function rc(v){if(!v||!v.startsWith("var("))return v;let c=cssC.get(v);if(c==null){c=getComputedStyle(document.documentElement).getPropertyValue(v.slice(4,-1)).trim()||"#3d4a60";cssC.set(v,c)}return c}
-// shapes: countries per detail level (from the LOD strings), everything else at full detail, built once per projection
+// Cache projected SVG paths for overlays.
 const P2=new Map(); // string -> Path2D
 const p2=d=>{if(!d)return null;let p=P2.get(d);if(!p){p=new Path2D(d);P2.set(d,p)}return p};
 let cvShapes={grat:null,sphere:null,df:[],front:null,ks:null,zones:[],focus:null};
@@ -2122,9 +2122,10 @@ function drawCanvas(){
   // which copies of the world reach into the drawn area
   const offs=[0]; if(TILES){const Wm=mercW(),c=(W/2-t.x)/k,half=(W/2+OVS)/k,t0x=proj.translate()[0];
     for(let n=Math.ceil((c-half-t0x-Wm/2)/Wm);n<=Math.floor((c+half-t0x+Wm/2)/Wm);n++) if(n) offs.push(n)}
-  const lod=cvLod(), cols=cvColors, sel=S.sel.k;
+  const cols=cvColors, sel=S.sel.k;
   for(const n of offs){
     const ox=TILES?n*mercW():0;
+    const lod=visibleCountryPaths(t,ox);
     cx.setTransform(CDPR*k,0,0,CDPR*k,CDPR*(OVS+t.x+ox*k),CDPR*(OVS+t.y));
     if(!tiles&&cvShapes.sphere){cx.fillStyle=rc("var(--ocean-2)");cx.fill(cvShapes.sphere)}
     if(!tiles&&cvShapes.grat){cx.strokeStyle="#1a2a42";cx.lineWidth=.6*lw;cx.stroke(cvShapes.grat)}
@@ -2146,7 +2147,7 @@ function drawCanvas(){
     if(cvShapes.front){cx.setLineDash([6*lw,3*lw]);cx.strokeStyle="#b3261e";cx.lineWidth=2*lw;cx.stroke(cvShapes.front);cx.setLineDash([])}
     if(cvShapes.ks){cx.setLineDash([7*lw,4*lw]);cx.strokeStyle="#f2a93b";cx.lineWidth=3*lw;cx.stroke(cvShapes.ks);cx.setLineDash([])}
     // the open country gets a light outline
-    if(sel){const f=S.cByK.get(sel),pth=f&&selOutline(f);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
+    if(sel){const f=S.cByK.get(sel),pth=f&&(seamCountry(f)?selOutline(f):countryShape(f).outline);if(pth){cx.strokeStyle=tiles?"#14213a":"#fff";cx.lineWidth=(tiles?2:1.6)*lw;cx.stroke(pth)}}
   }
   // everything outside the focused area is dimmed (drawn once, not per copy: the mask covers the whole canvas)
   // the hole is cut in every copy of the world, so a country across the date line (Chukotka, Fiji) stays lit on both sides
@@ -2156,22 +2157,43 @@ function drawCanvas(){
     fp.rect(x0,y0,(W+2*OVS)/k+2,(H+2*OVS)/k+2);
     for(const n of offs) fp.addPath(cvShapes.focus.h,new DOMMatrix([1,0,0,1,TILES?n*mercW():0,0]));
     cx.globalAlpha=cvShapes.focus.a; cx.fillStyle=tiles?"rgba(18,26,44,.38)":"rgba(6,12,24,.5)"; cx.fill(fp,"evenodd");
-    if(!moving){cx.strokeStyle=tiles?"rgba(18,26,44,.18)":"rgba(6,12,24,.25)";cx.lineWidth=10*lw;cx.lineJoin="round";
+    if(!moving&&!cvShapes.focus.isCountry){cx.strokeStyle=tiles?"rgba(18,26,44,.18)":"rgba(6,12,24,.25)";cx.lineWidth=10*lw;cx.lineJoin="round";
       for(const n of offs){if(n){cx.save();cx.translate(TILES?n*mercW():0,0);cx.stroke(cvShapes.focus.h);cx.restore()}else cx.stroke(cvShapes.focus.h)}}
     cx.globalAlpha=1}
   perfDraw(performance.now()-t0);
 }
-// prepare the simplified outlines for the zoom levels people reach first, while the browser is idle,
-// so the first pinch doesn't stall on building them
-function cvWarmLod(){const idle=window.requestIdleCallback||(f=>setTimeout(()=>f({timeRemaining:()=>8}),60));let l=0;const gen=++cvWarmLod.gen;
-  if(S.detailedBorders){idle(()=>{if(gen===cvWarmLod.gen)setLod(99)});return}
-  const step=dl=>{if(gen!==cvWarmLod.gen||l>6)return;if(!lodCache.has(l)){const tol=LOD_TOL/2**l,pth=d3.geoPath({stream:o=>proj.stream(thin(o,tol))}),ds=new Map();for(const f of cvCountries()){const d=pth(f);ds.set(f,d);p2(d)}lodCache.set(l,ds)}l++;idle(step)};
-  idle(step)}
-cvWarmLod.gen=0;
-// the country shapes for the current detail level, as Path2D
-let cvLodMap=null, cvLodLvl=-2;
-function cvLod(){if(cvLodLvl===lodLvl&&cvLodMap)return cvLodMap;const ds=lodCache.get(lodLvl);cvLodMap=new Map();
-  for(const f of cvCountries()){const d=ds?.get(f)??path(f);const p=p2(d);if(p)cvLodMap.set(f,p)}cvLodLvl=lodLvl;return cvLodMap}
+// The mask, fill and outline share a native canvas path. Bounds include every
+// projected vertex, including intersections added by the projection's clipping.
+let countryShapes=new WeakMap();
+function countryShape(feature){
+  let shape=countryShapes.get(feature);
+  if(shape)return shape;
+  const outline=new Path2D();
+  shape={outline,left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity};
+  function include(x,y){
+    shape.left=Math.min(shape.left,x);shape.right=Math.max(shape.right,x);
+    shape.top=Math.min(shape.top,y);shape.bottom=Math.max(shape.bottom,y);
+  }
+  const context={
+    moveTo(x,y){include(x,y);outline.moveTo(x,y)},
+    lineTo(x,y){include(x,y);outline.lineTo(x,y)},
+    closePath(){outline.closePath()}
+  };
+  d3.geoPath(proj,context)(feature);
+  countryShapes.set(feature,shape);
+  return shape;
+}
+function visibleCountryPaths(t,offset){
+  const pad=OVS+4,left=(-pad-t.x)/t.k-offset,right=(W+pad-t.x)/t.k-offset;
+  const top=(-pad-t.y)/t.k,bottom=(H+pad-t.y)/t.k;
+  const visible=new Map();
+  for(const feature of cvCountries()){
+    const shape=countryShape(feature);
+    if(shape.right>=left&&shape.left<=right&&shape.bottom>=top&&shape.top<=bottom)
+      visible.set(feature,shape.outline);
+  }
+  return visible;
+}
 function cvCountries(){return TILES?S.countries.filter(f=>f.properties.k!=="AQ"):S.countries}
 // colours: fade from the old to the new over half a second when the layer or the selection changes
 function cvSetColors(animate){
@@ -2203,26 +2225,12 @@ let W=0,H=0,proj,path,zoom,T=d3.zoomIdentity;
    The drawing extends OVS px past each edge so a drag doesn't uncover empty space. Gestures are
    caught by the container (zt), which never moves. */
 const zt=d3.select("#mapwrap"); let R=d3.zoomIdentity, OVS=0, lastDraw=0;
-function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);cvs.style.transform="";updateCopies();setLod(lodFor(T.k));drawCanvas();scheduleDetailedBorders()}
+function renderAt(){R=T;lastDraw=performance.now();root.attr("transform",T);svg.style("transform",null);cvs.style.transform="";updateCopies();drawCanvas();scheduleDetailedBorders()}
 /* the labels and pins keep their own anchor (ovR) for the whole gesture: they ride as one picture and are
    re-placed once, when the move ends — however many places there are */
 let ovR=d3.zoomIdentity;
 function ovMove(){if(ovR===T){ovSvg.style("transform",null);return}const s=T.k/ovR.k;ovSvg.style("transform",`translate(${T.x-ovR.x*s}px,${T.y-ovR.y*s}px) scale(${s})`)}
 function renderAll(){renderAt();ovR=T;ovSvg.style("transform",null);placeOverlay()}
-/* Detail levels for country outlines: zoomed out, points closer than ~0.35 screen px to the previous one are dropped,
-   so the whole world draws from a fraction of its 145k points. Each level is computed once and kept. */
-const lodCache=new Map(), LOD_TOL=0.35; let lodLvl=-1;
-function lodFor(k){return S.detailedBorders||k>=32?99:Math.max(0,Math.floor(Math.log2(k)))}
-function thin(out,tol){let lx=0,ly=0,px=0,py=0,n=0,pend=false;
-  return {point(x,y){if(n++===0||Math.abs(x-lx)+Math.abs(y-ly)>tol){out.point(x,y);lx=x;ly=y;pend=false}else{px=x;py=y;pend=true}},
-    lineStart(){n=0;pend=false;out.lineStart()},lineEnd(){if(pend)out.point(px,py);out.lineEnd()},
-    polygonStart(){out.polygonStart()},polygonEnd(){out.polygonEnd()},sphere(){out.sphere&&out.sphere()}}}
-function setLod(l){
-  if(l===lodLvl||!path) return; lodLvl=l;
-  let ds=lodCache.get(l);
-  if(!ds){const tol=LOD_TOL/2**l, pth=l===99?path:d3.geoPath({stream:o=>proj.stream(thin(o,tol))});ds=new Map();lodCache.set(l,ds);
-    for(const f of cvCountries()) ds.set(f,pth(f))}
-}
 function svgMove(){
   const s=T.k/R.k, dx=T.x-R.x*s, dy=T.y-R.y*s;
   const far=s>1.25||s<0.65||Math.abs(dx)>OVS*0.75||Math.abs(dy)>OVS*0.75;
@@ -2234,6 +2242,7 @@ function size(){const r=$("#mapwrap").getBoundingClientRect();W=r.width;H=r.heig
   svg.attr("viewBox",[-OVS,-OVS,W+2*OVS,H+2*OVS]).style("left",-OVS+"px").style("top",-OVS+"px").style("width",W+2*OVS+"px").style("height",H+2*OVS+"px").style("transform-origin",`${OVS}px ${OVS}px`);
   d3.select("#ov").attr("viewBox",[0,0,W,H]); if(typeof sizeCanvas==="function")sizeCanvas()}
 function setupProjection(){
+  countryShapes=new WeakMap();
   const mob=MOB(), [vt,vb]=mob?viewArea():[70,H];
   const ext=mob?[[8,vt],[W-8,vb]]:[[10,70],[W-10,H-10]];
   proj=TILES?d3.geoMercator().fitExtent(ext,{type:"MultiPoint",coordinates:[[-179.9,-56],[179.9,78]]}):d3.geoNaturalEarth1().fitExtent(ext,{type:"Sphere"});
@@ -2275,18 +2284,18 @@ function countryAt(lon,lat){
     const candidates=S.countryHits.get(`${Math.min(35,Math.floor((lon+180)/10))}:${Math.min(17,Math.floor((lat+90)/10))}`)||[];
     for(const {f,k,b} of candidates)if(lat>=b[0][1]&&lat<=b[1][1]&&(b[0][0]<=b[1][0]?lon>=b[0][0]&&lon<=b[1][0]:lon>=b[0][0]||lon<=b[1][0])&&d3.geoContains(f,p))return k;
   }
-  if(!S.gb){S.gb=new Map();S.countries.forEach(f=>S.gb.set(f,d3.geoBounds(f)))}
+  if(!S.gb){S.gb=new Map();S.countries.forEach(f=>{if(!S.detailedKeys?.has(f.properties.k))S.gb.set(f,d3.geoBounds(f))})}
   for(const f of S.countries){if(f.properties.k==="AQ"||S.detailedKeys?.has(f.properties.k))continue;const [[a,b],[c,d]]=S.gb.get(f);
     if(p[1]<b||p[1]>d) continue; if(a<=c?(p[0]<a||p[0]>c):(p[0]<a&&p[0]>c)) continue;
     if(d3.geoContains(f,p)) return f.properties.k}
   return null;
 }
 function drawBase(){
-  lodCache.clear(); lodLvl=-1; P2.clear(); cvLodMap=null; cvLodLvl=-2;
+  P2.clear();
   if(TILES){const a=proj([-180,85.05]),b=proj([180,-85.05]);const sp=new Path2D();sp.rect(a[0],a[1],b[0]-a[0],b[1]-a[1]);cvShapes.sphere=sp}
   else cvShapes.sphere=p2(path({type:"Sphere"}));
   cvShapes.grat=p2(path(d3.geoGraticule10()));
-  setLod(lodFor(T.k));
+  
   // territories whose real control differs from the claim: hatched, and the line of control drawn on top
   cvShapes.df=S.countries.filter(f=>DEFACTO.has(f.properties.k)).map(f=>p2(path(f))).filter(Boolean);
   // areas inside another country in this view keep their own entry rules and safety: their own colour wherever it differs
@@ -2294,7 +2303,7 @@ function drawBase(){
   cvShapes.front=S.front?p2(path(S.front)):null; cvShapes.ks=S.ksBorder?p2(path(S.ksBorder)):null;
   drawZones(); if(focusGeo) updateFocus();
   cvSetColors(false); if(!bindCanvasPointer.done){bindCanvasPointer.done=1;bindCanvasPointer()}
-  cvWarmLod();
+
   const ad=AREAS.filter(a=>S.areaGeo.has(a.id));
   gAreas.selectAll("path").data(ad,d=>d.id).join("path").attr("class","area").attr("d",d=>path(S.areaGeo.get(d.id)))
     .on("mouseenter",(e,d)=>hotArea(d.id)).on("mouseleave",()=>hotArea(null))
@@ -2438,8 +2447,9 @@ function ensureUrban(){if(!urbanP)urbanP=getData("urban").then(u=>{S.urban=u;if(
 function updateFocus(){
   if(!S.urban&&(S.sel.type==="city"||S.sel.type==="place"))ensureUrban();
   const g=focusFor(S.sel); focusGeo=g;
-  const d=g?simplePath(g,focusZoomFor(S.sel)):null;
-  const had=cvShapes.focus; cvShapes.focus=d?{h:new Path2D(d),a:had?1:0}:null;
+  const isCountry=S.sel.type==="country"||S.sel.type==="list";
+  const hole=g&&(isCountry?countryShape(g).outline:p2(simplePath(g,focusZoomFor(S.sel))));
+  const had=cvShapes.focus; cvShapes.focus=hole?{h:hole,a:had?1:0,isCountry}:null;
   if(cvShapes.focus&&!had&&!REDUCED){const f=cvShapes.focus,t0=performance.now();(function st(){if(cvShapes.focus!==f)return;f.a=Math.min(1,(performance.now()-t0)/400);drawCanvas();if(f.a<1)requestAnimationFrame(st)})()}
   else requestDraw();
   if(TILES&&document.body.classList.contains("tilesmode")&&!(zt.node().__transition&&Object.keys(zt.node().__transition).length)) drawPaneFocus();
@@ -2468,12 +2478,22 @@ function drawPaneFocus(){
   const cv=$("#paneFocus"); if(!cv) return;
   const on=focusGeo&&document.body.classList.contains("tilesmode");
   if(!on){cv.width=1;cv.height=1;cv.style.display="none";return}
-  const m=Math.round(Math.max(W,H)*0.5), dpr=0.5;
+  const m=Math.round(Math.max(W,H)*0.5), dpr=cvShapes.focus?.isCountry?1:0.5;
   const cw=W+2*m, ch=H+2*m;
   cv.style.display="block"; cv.style.left=-m+"px"; cv.style.top=-m+"px"; cv.style.width=cw+"px"; cv.style.height=ch+"px";
   cv.width=Math.round(cw*dpr); cv.height=Math.round(ch*dpr);
   const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,m*dpr,m*dpr);
   ctx.clearRect(-m,-m,cw,ch);
+  if(cvShapes.focus?.isCountry){
+    const mask=new Path2D();
+    mask.rect(-m,-m,cw,ch);
+    const width=mercW()*T0.k,center=T0.applyX(proj.translate()[0]);
+    const first=Math.ceil((-m-center)/width-.5),last=Math.floor((W+m-center)/width+.5);
+    for(let n=first;n<=last;n++)
+      mask.addPath(cvShapes.focus.h,new DOMMatrix([T0.k,0,0,T0.k,T0.x+n*width,T0.y]));
+    ctx.fillStyle="rgba(58,66,84,.55)";ctx.fill(mask,"evenodd");
+    return;
+  }
   const feather=Math.max(6,Math.min(26,Math.min(W,H)*0.02));
   ctx.filter=`blur(${feather*dpr}px)`;
   ctx.beginPath(); ctx.rect(-m,-m,cw,ch);
@@ -4623,6 +4643,18 @@ function visibleBorderGroups(){
     for(let y=Math.max(0,Math.floor((bottom+90)/size));y<=Math.min(ny-1,Math.floor((top+90)/size));y++)for(const id of borderIndex.cells[`${x}:${y}`]||[])out.add(id)}
   return out;
 }
+function indexBorderPolygons(features){
+  const hits=new Map();
+  for(const country of features){const k=country.properties.k;if(k==='AQ')continue;
+    const polygons=country.geometry.type==='MultiPolygon'?country.geometry.coordinates:[country.geometry.coordinates];
+    for(const coordinates of polygons){const f={type:'Polygon',coordinates},b=d3.geoBounds(f),entry={f,k,b};
+      const ys=[Math.max(0,Math.floor((b[0][1]+90)/10)),Math.min(17,Math.floor((b[1][1]+90)/10))];
+      const ranges=b[0][0]<=b[1][0]?[[b[0][0],b[1][0]]]:[[b[0][0],180],[-180,b[1][0]]];
+      for(const [a,z] of ranges)for(let x=Math.max(0,Math.floor((a+180)/10));x<=Math.min(35,Math.floor((z+180)/10));x++)for(let y=ys[0];y<=ys[1];y++){
+        const cell=`${x}:${y}`;if(!hits.has(cell))hits.set(cell,[]);hits.get(cell).push(entry)}}
+  }
+  return hits;
+}
 function rebuildDetailedCountries(){
   const base=S.borderOverview,entries=[...borderGroups.values()],detailed=entries.flatMap(e=>e.features);
   S.detailedKeys=new Set(detailed.map(f=>f.properties.k));S.detailedBorders=!!entries.length;
@@ -4634,13 +4666,9 @@ function rebuildDetailedCountries(){
     }else{const keys=new Set(replacements.map(x=>x[key]));S[field]=[...base[field].filter(x=>!keys.has(x[key])),...replacements]}}
   S.front=entries.find(e=>e.ids.has('XU'))?.front||base.front;S.ksBorder=entries.find(e=>e.ids.has('XK'))?.ks||base.ksBorder;
   S.countryHits=new Map();
-  for(const country of detailed){const k=country.properties.k;if(k==='AQ')continue;
-    const polygons=country.geometry.type==='MultiPolygon'?country.geometry.coordinates:[country.geometry.coordinates];
-    for(const coordinates of polygons){const f={type:'Polygon',coordinates},b=d3.geoBounds(f),entry={f,k,b};
-      const ys=[Math.max(0,Math.floor((b[0][1]+90)/10)),Math.min(17,Math.floor((b[1][1]+90)/10))];
-      const ranges=b[0][0]<=b[1][0]?[[b[0][0],b[1][0]]]:[[b[0][0],180],[-180,b[1][0]]];
-      for(const [a,z] of ranges)for(let x=Math.max(0,Math.floor((a+180)/10));x<=Math.min(35,Math.floor((z+180)/10));x++)for(let y=ys[0];y<=ys[1];y++){
-        const cell=`${x}:${y}`;if(!S.countryHits.has(cell))S.countryHits.set(cell,[]);S.countryHits.get(cell).push(entry)}}
+  for(const group of entries)for(const [cell,hits] of group.hits){
+    if(!S.countryHits.has(cell))S.countryHits.set(cell,[]);
+    for(const hit of hits)S.countryHits.get(cell).push(hit);
   }
   path.digits(7);selOl.clear();seamP.clear();seamC.clear();drawBase();renderAll();scheduleOverlay();
 }
@@ -4657,12 +4685,19 @@ function ensureDetailedBorders(){
     // Limit concurrent downloads when a regional view contains many countries.
     await Promise.all(Array.from({length:Math.min(4,missing.length)},async()=>{while(next<missing.length){
       const id=missing[next++];
+      if(T.k<EUROPE_BORDER_ZOOM||!visibleBorderGroups().has(id))continue;
       const name='borders/'+id,ct=await getData(name),o=ct.objects[Object.keys(ct.objects)[0]],ids=new Set(o.geometries.map(g=>g.properties.k));
       const state={};applyWorldview(ct,S.wv,S.view.cc,state);dataRequests.delete(name);
-      loaded.push({id,ids,state,used:Date.now(),vertices:borderIndex.groups[id].vertices,features:topojson.feature(ct,o).features,
-        front:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='UA,XU'),
-        ks:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK')});
+      const features=topojson.feature(ct,o).features;
+      const hits=indexBorderPolygons(features);
+      // Prepare each arriving group before swapping the visible partition.
+      for(const feature of features)countryShape(feature);
+      loaded.push({id,ids,state,features,hits,used:Date.now(),vertices:borderIndex.groups[id].vertices,
+        front:ids.has('XU')?topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='UA,XU'):null,
+        ks:ids.has('XK')?topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK'):null});
+      await new Promise(resolve=>setTimeout(resolve,0));
     }}));
+    if(!loaded.length)return;
     for(const e of loaded)borderGroups.set(e.id,e);
     let vertices=[...borderGroups.values()].reduce((n,e)=>n+e.vertices,0);
     for(const e of [...borderGroups.values()].sort((a,b)=>a.used-b.used))if(!needed.has(e.id)&&(borderGroups.size>12||vertices>1000000)){borderGroups.delete(e.id);vertices-=e.vertices}
