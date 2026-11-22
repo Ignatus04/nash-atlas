@@ -2890,12 +2890,13 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=22;
+const GUIDE_VER=23;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:23,t:"Границы Европы",m:"Подробные границы европейских стран теперь загружаются уже на масштабе региона: приблизьте Европу, чтобы увидеть точные контуры. У соседних государств используется одна общая линия.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:22,t:"Подробные границы",m:"Контуры государств теперь основаны на открытых данных OpenStreetMap. При приближении автоматически загружается подробный уровень. Источники, дата данных и лицензия ODbL доступны по подписи на карте.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
   {since:19,t:"Поддержать автора",m:"На главном экране карты появилась небольшая кнопка «Поддержать автора» для перевода через СБП. По кнопке откроется ссылка для добровольной материальной поддержки автора через Альфа-Банк.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("heart",64)}</div>`},
@@ -4600,13 +4601,19 @@ function prepareCitySearch(){
 }
 let selectionRequest=0;
 // The first screen uses a compact, shared-arc OSM partition. Fetch the detailed
-// partition only after a real zoom; it replaces both drawing and hit testing.
+// partition at regional zoom in Europe and at close zoom elsewhere. Drawing
+// and hit testing always switch together, using the same native shared edges.
 let detailedBordersP, detailedBordersTimer, detailedBordersRetry=0, borderIndex;
 const borderGroups=new Map();
+const EUROPE_BORDER_COUNTRIES=new Set('AD AL AM AT AZ BA BE BG BY CH CY CZ DE DK EE ES FI FR GB GE GR HR HU IE IS IT KZ LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SK SM TR UA VA XK'.split(' '));
+const EUROPE_BORDER_ZOOM=2, WORLD_BORDER_ZOOM=12;
+function requestedBorderGroups(visible,k,index){
+  return new Set([...visible].filter(id=>k>=WORLD_BORDER_ZOOM||k>=EUROPE_BORDER_ZOOM&&index.groups[id].countries.some(cc=>EUROPE_BORDER_COUNTRIES.has(cc))));
+}
 function scheduleDetailedBorders(){
-  if(!window.ATLAS_VER||detailedBordersP||T.k<12||Date.now()<detailedBordersRetry)return;
+  if(!window.ATLAS_VER||detailedBordersP||T.k<EUROPE_BORDER_ZOOM||Date.now()<detailedBordersRetry)return;
   clearTimeout(detailedBordersTimer);
-  detailedBordersTimer=setTimeout(()=>{if(T.k>=12)ensureDetailedBorders()},250);
+  detailedBordersTimer=setTimeout(()=>{if(T.k>=EUROPE_BORDER_ZOOM)ensureDetailedBorders()},250);
 }
 function visibleBorderGroups(){
   const size=borderIndex.cellDegrees,nx=360/size,ny=180/size;
@@ -4638,26 +4645,29 @@ function rebuildDetailedCountries(){
   path.digits(7);selOl.clear();seamP.clear();seamC.clear();drawBase();renderAll();scheduleOverlay();
 }
 function ensureDetailedBorders(){
-  if(T.k<12)return Promise.resolve();
+  if(T.k<EUROPE_BORDER_ZOOM)return Promise.resolve();
   if(detailedBordersP)return detailedBordersP;
   detailedBordersP=(async()=>{
-    borderIndex=borderIndex||await getData('border-index');if(T.k<12)return;
-    const needed=visibleBorderGroups(),missing=[...needed].filter(id=>!borderGroups.has(id));
+    borderIndex=borderIndex||await getData('border-index');if(T.k<EUROPE_BORDER_ZOOM)return;
+    const needed=requestedBorderGroups(visibleBorderGroups(),T.k,borderIndex),missing=[...needed].filter(id=>!borderGroups.has(id));
     for(const id of needed)if(borderGroups.has(id))borderGroups.get(id).used=Date.now();
     if(!missing.length)return;
     if(!S.borderOverview)S.borderOverview={countries:S.countries.slice(),safeParts:S.safeParts,contested:S.contested,flagExcludedAreas:S.flagExcludedAreas,front:S.front,ksBorder:S.ksBorder};
-    const loaded=await Promise.all(missing.map(async id=>{
+    const loaded=[];let next=0;
+    // Limit concurrent downloads when a regional view contains many countries.
+    await Promise.all(Array.from({length:Math.min(4,missing.length)},async()=>{while(next<missing.length){
+      const id=missing[next++];
       const name='borders/'+id,ct=await getData(name),o=ct.objects[Object.keys(ct.objects)[0]],ids=new Set(o.geometries.map(g=>g.properties.k));
       const state={};applyWorldview(ct,S.wv,S.view.cc,state);dataRequests.delete(name);
-      return {id,ids,state,used:Date.now(),vertices:borderIndex.groups[id].vertices,features:topojson.feature(ct,o).features,
+      loaded.push({id,ids,state,used:Date.now(),vertices:borderIndex.groups[id].vertices,features:topojson.feature(ct,o).features,
         front:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='UA,XU'),
-        ks:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK')};
-    }));
+        ks:topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK')});
+    }}));
     for(const e of loaded)borderGroups.set(e.id,e);
     let vertices=[...borderGroups.values()].reduce((n,e)=>n+e.vertices,0);
     for(const e of [...borderGroups.values()].sort((a,b)=>a.used-b.used))if(!needed.has(e.id)&&(borderGroups.size>12||vertices>1000000)){borderGroups.delete(e.id);vertices-=e.vertices}
     rebuildDetailedCountries();
-  })().catch(e=>{detailedBordersRetry=Date.now()+30000;console.warn('detailed borders',e)}).finally(()=>{detailedBordersP=null;if(borderIndex&&T.k>=12&&[...visibleBorderGroups()].some(id=>!borderGroups.has(id)))scheduleDetailedBorders()});
+  })().catch(e=>{detailedBordersRetry=Date.now()+30000;console.warn('detailed borders',e)}).finally(()=>{detailedBordersP=null;if(borderIndex&&T.k>=EUROPE_BORDER_ZOOM&&[...requestedBorderGroups(visibleBorderGroups(),T.k,borderIndex)].some(id=>!borderGroups.has(id)))scheduleDetailedBorders()});
   return detailedBordersP;
 }
 async function boot(){

@@ -25,3 +25,21 @@ const occupied=load('web/data/borders/'+Object.keys(index.groups).find(id=>index
 const kharkiv=tc.feature(occupied,occupied.objects.countries.geometries.find(g=>g.properties.k==='~UA-kharkiv'));
 const area=d3.geoArea(kharkiv)*6371**2;assert(area>100&&area<10000,'Preserve the existing Kharkiv control mask');
 console.log(JSON.stringify({pass:true,sharedSegments:common.length,nativeSamplePoints:points.length,maxErrorMetres:Math.round(current*10)/10,previousErrorMetres:Math.round(previous*10)/10,detailGroups:Object.keys(index.groups).length}));
+// Every European land-neighbour pair must use identical native edges, including
+// microstates and the three-country junctions around Andorra.
+const europePairs='ES-PT ES-FR ES-AD FR-AD FR-IT FR-MC FR-CH FR-DE FR-LU FR-BE IT-CH IT-AT IT-SI IT-SM IT-VA PT-ES BE-NL BE-DE BE-LU NL-DE DE-LU DE-CH DE-AT DE-CZ DE-PL DE-DK CH-AT CH-LI AT-LI AT-CZ AT-SK AT-HU AT-SI CZ-PL CZ-SK SK-PL SK-HU SK-UA PL-UA PL-BY PL-LT PL-RU LT-RU LT-BY LT-LV LV-BY LV-RU LV-EE EE-RU FI-RU FI-NO NO-RU NO-SE SE-FI BY-RU BY-UA UA-RU UA-MD UA-RO UA-HU MD-RO HU-RO HU-RS HU-HR HU-SI SI-HR HR-BA HR-RS HR-ME BA-RS BA-ME ME-RS ME-XK ME-AL RS-XK RS-MK RS-BG RS-RO XK-AL XK-MK AL-MK AL-GR MK-GR MK-BG GR-BG GR-TR BG-TR BG-RO TR-GE TR-AM TR-AZ GE-RU GE-AM GE-AZ AM-AZ AZ-RU'.split(' ').map(p=>p.split('-'));
+const edges=new Map(),features=new Map();
+for(const cc of new Set(europePairs.flat())){const f=feature(cc);features.set(cc,f);edges.set(cc,new Set(segments(f).map(key)))}
+for(const [a,b] of europePairs){const shared=[...edges.get(a)].filter(e=>edges.get(b).has(e));assert(shared.length>0,`Native shared border missing: ${a}-${b}`)}
+const vertices=f=>new Set(segments(f).flat().map(p=>p.map(x=>x.toFixed(7)).join(',')));
+const es=vertices(features.get('ES')),fr=vertices(features.get('FR')),ad=vertices(features.get('AD'));
+assert([...ad].filter(p=>es.has(p)&&fr.has(p)).length>=2,'Both Spain–France–Andorra junctions must coincide');
+const policy=source.slice(source.indexOf('const EUROPE_BORDER_COUNTRIES='),source.indexOf('\nfunction scheduleDetailedBorders()'));
+function requested(k,ids){return new vm.Script(policy+'; [...requestedBorderGroups(new Set(ids),k,index)]').runInNewContext({ids,k,index,Set})}
+const group=cc=>Object.keys(index.groups).find(id=>index.groups[id].countries.includes(cc));
+const selected=['ES','PT','FR','AD','IT','DE','CH','NO','PL','GR'].map(group),us=group('US');
+assert.equal(requested(1,[...selected,us]).length,0,'No detailed download on world overview');
+assert.equal(requested(2,[...new Set(selected),us]).length,new Set(selected).size,'All European groups load at regional zoom');
+assert.equal(requested(2,[us]).length,0,'Keep distant non-European data deferred');
+assert.equal(requested(12,[us]).length,1,'Close-up detail remains available worldwide');
+console.log(JSON.stringify({europePass:true,sharedBorders:europePairs.length,andorraJunctions:2,regionalZoom:2}));
