@@ -955,9 +955,21 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 .fchip{padding:5px 10px 5px 6px;gap:7px;min-height:37px;border-radius:12px}
 .fchip[aria-pressed="true"] .filter-symbol{color:inherit;background:#ffffff20}
 .fchip .n{margin-left:1px;font-variant-numeric:tabular-nums}
+#tripCompare{box-sizing:border-box;width:min(540px,94vw);max-height:86vh;overflow:auto;padding:20px;border:1px solid #344962;border-radius:16px;background:#142238;color:#edf2fa;font:inherit}
+#tripCompare::backdrop{background:#091321bb}
+#tripCompare header,.cmpPair{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#tripCompare h2{margin:0;font-size:22px}
+.cmpPair>*{flex:1;min-width:0;overflow-wrap:anywhere}
+.cmpPair select{width:100%;padding:8px 2px;border-radius:6px;font:inherit}
+#tripCompare h3,.cmpPair label,#tripCompare small{font-size:13px;color:#b4c3d5}
+#tripCompare h3{border-top:1px solid #35455a;padding-top:10px;margin:12px 0 5px}
+#tripCompare a{color:#92cdff}
 </style>
 </head>
 <body>
+<dialog id="tripCompare" aria-labelledby="cmpTitle"><header><h2 id="cmpTitle">Сравнение стран</h2><form method="dialog"><button class="btn small" aria-label="Закрыть сравнение">Закрыть</button></form></header>
+<div class="cmpPair"><label>Первая страна<select></select></label><label>Вторая страна<select></select></label></div><div id="cmpFacts"></div>
+<p><small>Цены для домохозяйств, 2024 год. США = 100. Чем выше индекс, тем дороже товары и услуги. Туристический бюджет зависит от города и сезона. Источник — Всемирный банк: <a href="https://data.worldbank.org/indicator/PA.NUS.PRVT.PP" target="_blank" rel="noopener">паритет покупательной способности</a> и <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noopener">курс валют</a>.</small></p></dialog>
 <div id="app">
   <div id="mapwrap">
 
@@ -3540,6 +3552,51 @@ function factsBlock(k){
   return `<section class="blk"><h2>Коротко</h2><div class="facts">${f.map(([a,b])=>`<div class="fact"><span>${a}</span><b>${esc(b)}</b></div>`).join("")}</div></section>`;
 }
 
+const householdPrices2024 = {"AE":70,"AG":82,"AL":49,"AM":40,"AO":36,"AT":78,"AU":94,"AZ":31,"BA":41,"BD":29,"BE":81,"BF":33,"BG":22,"BH":50,"BI":36,"BJ":33,"BN":41,"BO":34,"BR":47,"BS":111,"BT":25,"BW":39,"BY":25,"BZ":55,"CA":91,"CF":43,"CG":38,"CH":126,"CI":39,"CL":49,"CM":34,"CN":49,"CO":38,"CR":64,"CV":52,"CY":64,"CZ":62,"DE":76,"DJ":51,"DK":98,"DM":58,"DO":40,"DZ":32,"EC":45,"EE":70,"EG":15,"ES":64,"ET":30,"FI":85,"FJ":41,"FR":78,"GA":47,"GB":87,"GD":63,"GE":40,"GH":33,"GM":29,"GQ":45,"GR":60,"GT":45,"GW":38,"GY":47,"HK":75,"HN":50,"HR":53,"HT":81,"HU":52,"ID":32,"IE":95,"IL":98,"IN":24,"IQ":43,"IS":113,"IT":68,"JM":62,"JO":45,"JP":66,"KE":33,"KG":32,"KH":36,"KI":62,"KM":56,"KR":64,"KW":60,"KZ":38,"LA":28,"LB":59,"LC":59,"LK":29,"LR":0,"LS":33,"LT":57,"LU":91,"LV":58,"LY":37,"MA":41,"MD":47,"ME":45,"MG":28,"MK":38,"ML":32,"MN":33,"MO":63,"MT":63,"MU":43,"MV":61,"MX":59,"MY":32,"MZ":39,"NA":40,"NE":35,"NG":18,"NI":37,"NL":80,"NO":89,"NP":26,"NZ":91,"OM":48,"PA":51,"PE":52,"PG":71,"PH":36,"PK":23,"PL":50,"PT":60,"PW":99,"PY":38,"QA":76,"RO":45,"RS":47,"RU":31,"RW":27,"SA":50,"SB":90,"SC":60,"SE":81,"SG":78,"SI":62,"SK":59,"SM":80,"SN":38,"SR":44,"ST":60,"SV":48,"TD":39,"TG":37,"TH":31,"TJ":29,"TL":46,"TN":31,"TO":77,"TR":38,"TT":58,"TZ":25,"UA":27,"UG":35,"US":100,"UY":73,"UZ":27,"VC":63,"VN":30,"VU":105,"WS":69,"ZA":42,"ZM":29};
+const comparePair = ["ES","PT"];
+function compareButton(k=""){
+  return `<button class="btn small" data-compare="${esc(k)}">Сравнить страны</button>`;
+}
+function renderComparison(){
+  const dialog=document.getElementById("tripCompare");
+  if(!dialog.open)return;
+  const rows=[
+    ["Въезд · "+S.pass.map(pName).join(", "), k=>ST[codeFor(k)]?.label],
+    ["Безопасность", k=>SAFE[safeOf(k)?.l]?.label],
+    ["Стоимость жизни · индекс цен", k=>householdPrices2024[k]],
+    ["Валюта", k=>S.meta[k]?.cur?.join(", ")],
+    ["Столица", k=>capitalRu(k)]
+  ];
+  document.getElementById("cmpFacts").innerHTML=rows.map(([title,value])=>
+    `<h3>${esc(title)}</h3><div class="cmpPair">${comparePair.map(k=>`<span>${esc(String(value(k)||"Нет данных"))}</span>`).join("")}</div>`
+  ).join("");
+}
+function openComparison(k){
+  const dialog=document.getElementById("tripCompare");
+  const countries=Array.from(S.cByK,([code,f])=>[code,f.properties.ru||code]).sort((a,b)=>a[1].localeCompare(b[1],"ru"));
+  if(countries.length<2)return;
+  if(k)comparePair[0]=k;
+  if(!S.cByK.has(comparePair[0]))comparePair[0]=countries[0][0];
+  if(comparePair[0]===comparePair[1]||!S.cByK.has(comparePair[1]))comparePair[1]=countries.find(([code])=>code!==comparePair[0])[0];
+  const selects=Array.from(dialog.querySelectorAll("select"));
+  function sync(){
+    selects.forEach((sel,i)=>{
+      sel.value=comparePair[i];
+      for(const opt of sel.options)opt.disabled=opt.value===comparePair[1-i];
+    });
+    renderComparison();
+  }
+  selects.forEach((sel,i)=>{
+    sel.replaceChildren(...countries.map(([code,name])=>new Option(name,code)));
+    sel.onchange=()=>{comparePair[i]=sel.value;sync()};
+  });
+  dialog.showModal();
+  sync();
+}
+document.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-compare]");
+  if(button)openComparison(button.dataset.compare);
+});
 function renderHome(){
   const manual=placesIn(p=>!p.seed);
   $("#pbody").innerHTML=`
@@ -3578,6 +3635,7 @@ function areaHTML(id){
   return `
     ${world?"":crumbs([{t:"Весь мир",go:{type:"home"}},{t:a.name}])}
     <div class="p-head"><div class="grow"><h1>${world?"Куда поедем?":esc(a.name)}</h1>${world?`<button class="pp-change" id="ppChange">${S.pass.map(p=>flagImg(p)).join("")}<span>${S.pass.length>1?"Паспорта":"Паспорт"}: ${esc(S.pass.map(pName).join(", "))} · сменить</span></button>`:""}<p>${world&&safe?"Страны раскрашены по оценке МИДа, который лучше всех знает страну: США — для Америки, Франция — для франкоязычной Африки, Австралия — для Юго-Восточной Азии и Океании, Великобритания — для остальных, для России — официальные режимы в регионах. ":""}${world&&!safe?"Страны раскрашены по правилам въезда. Приблизь карту, чтобы увидеть ваши места, или открой страну из списка. ":""}${st.n} ${ruPlural(st.n,"страна","страны","стран")} и территорий · въезд ${who}</p></div></div>
+    ${compareButton()}
     ${world?finderHTML():lists.length?`<section class="blk"><h2>Наши списки из Google</h2><div class="chips">${lists.map(L=>{const n=placesIn(p=>p.list===L.name).length;return `<button class="chip link" data-list="${esc(L.name)}">${esc(S.meta[L.k]?.flag||"")} ${esc(L.name)} · ${n}</button>`}).join("")}</div></section>`:""}
     ${world?"":groups.filter(([g])=>byG[g]?.length).map(([g,t])=>{const col=g[0]==="S"?SAFE[g[1]].c:g==="EA"?ST.A.c:ST[g].c;const ks=byG[g].sort((x,y)=>S.cByK.get(x).properties.ru.localeCompare(S.cByK.get(y).properties.ru,"ru"));return `<section class="blk cgroup"><h3><span class="sw" style="background:${col}"></span>${t} <span class="saved">${ks.length}</span></h3><div class="chips">${ks.map(k=>`<button class="chip link" data-k="${k}">${esc(S.meta[k]?.flag||"")} ${esc(S.cByK.get(k).properties.ru)}</button>`).join("")}</div></section>`}).join("")}`;
 }
@@ -3838,6 +3896,7 @@ function renderCountry(k){
   $("#pbody").innerHTML=`
     ${crumbs([{t:"Весь мир",go:{type:"home"}},{t:f.properties.ru}])}
     <div class="p-head card-art"><div class="flag">${m.flag||(S.flags?.[k]?`<img src="${S.flags[k]}" alt="" style="width:40px;height:40px;border-radius:50%">`:"")}</div><div class="grow"><h1>${esc(f.properties.ru)}</h1><p>${esc(f.properties.en)}${m.sub?" · "+esc(subRu(m.sub)):""}</p></div></div>
+    ${compareButton(k)}
     ${cityPhotosHTML(k)}
     ${entryBlock(k)}
     ${safetyBlock(k)}
@@ -4766,7 +4825,7 @@ async function boot(){
   }
   // Region geometry is requested by country selection or search, not by a timer.
   if(!STANDALONE) fetch("data/media.json").then(r=>r.ok?r.json():null).then(m=>{if(m)S.media=m}).catch(()=>{});
-  Promise.all([getData("safety"),getData("safezones")]).then(([sf,zt])=>{S.safety=sf;S.zones=topojson.feature(zt,zt.objects[Object.keys(zt.objects)[0]]).features;
+  Promise.all([getData("safety"),getData("safezones")]).then(([sf,zt])=>{S.safety=sf;renderComparison();S.zones=topojson.feature(zt,zt.objects[Object.keys(zt.objects)[0]]).features;
     drawZones();paint();scheduleOverlay();if(S.sel.type==="country")renderCountry(S.sel.k);else if(S.sel.type==="home")renderHome()}).catch(e=>console.warn("safety",e));
   // Urban outlines are requested only when focusing a city or a place.
   flagsP.then(f=>{if(f){scheduleOverlay();brandFlags()}});
