@@ -2787,13 +2787,14 @@ function renderProfile(){
     <section class="blk"><h2>Поделиться</h2><button class="ap-item" id="pfCard">${ic("share")}<span>Картинка для сторис<small>Сколько стран и мест вы хотите посетить</small></span></button>${CLOUD?`<button class="ap-item" id="pfInv">${ic("user")}<span>Пригласить друзей<small>Отмечать места на одной карте вместе</small></span></button>`:""}</section>
     <section class="blk"><h2>Добавлять места</h2><button class="ap-item" id="pfFromMaps">${ic("pin")}<span>Из Google Карт и Яндекс Карт<small>Прямо из приложения на телефоне, через «Поделиться»</small></span></button></section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
-    ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}</section>`:""}
+    ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}<button class="ap-item" id="pfPrecise" role="switch" aria-checked="${preciseDisplay}">${ic("layers")}<span>Точные границы<small>Могут замедлить карту</small></span><span class="sw-t" aria-hidden="true"></span></button></section>`:""}
     <section class="blk"><h2>Приложение</h2>${installEntry()}<p class="hint">${appInstalled()?"Вы открыли установленное приложение. ":""}Для работы нужен интернет.</p></section>
     <section class="blk"><h2>Помощь</h2><button class="ap-item" id="pfGuide">${ic("help")}<span>Как пользоваться</span></button><a class="ap-item" href="/terms.html">${ic("doc")}<span>Пользовательское соглашение</span></a><a class="ap-item" href="/privacy.html">${ic("doc")}<span>Политика обработки данных</span></a>${consentUsed()?`<button class="ap-item" id="pfCk">${ic("check")}<span>Настройки cookie<small>Счётчик посещений и реклама</small></span></button>`:""}</section>`;
   if(u){const box=$("#pfAcct");box.innerHTML=acctMenuHTML();bindAcctMenu(box,()=>{},()=>renderProfile())}
   const on=(id,fn)=>{const x=$("#"+id);if(x)x.onclick=fn};
   on("pfLogin",openLogin); on("pfOut",exportBackup); on("pfIn",importBackup);
   on("pfPass",()=>openPassports(true)); on("pfGuide",()=>openGuide(0)); on("pfCk",openCookieSettings); on("pfCard",shareCard); on("pfInv",invitePeople); on("pfFromMaps",openFromMapsHelp);
+  on("pfPrecise",()=>{togglePreciseDisplay();renderProfile()});
   on("pfBm",()=>{setBasemap(basemap==="otm"?"none":"otm");renderProfile()});
   updateTabs();
 }
@@ -2910,12 +2911,13 @@ function gaPinScene(root){
     if(i>=pins.length){i=0;gaLater(()=>{pins.forEach(q=>q.classList.remove("on"));gaLater(drop,600)},2600)}else gaLater(drop,480)};
   gaLater(drop,350);
 }
-const GUIDE_VER=23;
+const GUIDE_VER=24;
 const gdBlobs=(n,cls)=>Array.from({length:n},(_,i)=>`<i class="${cls}" style="--i:${i}"></i>`).join("");
 // examples use only countries whose borders nobody disputes
 // every frame shows only borders nobody (or almost nobody) disputes: Western Europe, West Africa, the Americas
 const GUIDE_VB={col:[-10,56,20,39],card:[-8,55,18,40],safe:[-18,20,16,4]};
 const GUIDE=[
+  {since:24,t:"Точные границы",m:"Подробные контуры можно включить в профиле, в разделе «Карта». Они могут замедлить карту. Флаг новой отметки определяется по подробной границе при любом положении переключателя.",art:()=>ic("layers",64)},
   {since:23,t:"Границы Европы",m:"Подробные границы европейских стран теперь загружаются уже на масштабе региона: приблизьте Европу, чтобы увидеть точные контуры. У соседних государств используется одна общая линия.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:22,t:"Подробные границы",m:"Контуры государств теперь основаны на открытых данных OpenStreetMap. При приближении автоматически загружается подробный уровень. Источники, дата данных и лицензия ODbL доступны по подписи на карте.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("layers",64)}</div>`},
   {since:20,t:"Обратная связь",m:"На карте рядом с поддержкой автора есть кнопка «Пожелания и замечания». Она открывает Telegram автора: напишите об ошибке или предложите улучшение.",art:()=>`<div style="display:grid;place-items:center;height:160px">${ic("help",64)}</div>`},
@@ -3946,7 +3948,7 @@ function renderPlace(p){
   bindFans(p,save);
   let tt; $("#pTags").oninput=e=>{clearTimeout(tt);tt=setTimeout(()=>save({tags:splitTags(e.target.value)}),700)};
   let nt; $("#pNote").oninput=e=>{$("#pSaved").textContent="…";clearTimeout(nt);nt=setTimeout(()=>save({note:e.target.value}),700)};
-  $("#pMove").onclick=()=>startPick((lat,lng)=>{save({lat,lng,approx:false,k:countryOf(lat,lng)||p.k});select({type:"place",id:p.id},false)});
+  $("#pMove").onclick=()=>startPick(async(lat,lng)=>{try{const k=await markerCountry(lat,lng);save({lat,lng,approx:false,k:k||""});select({type:"place",id:p.id},false)}catch{status("Не удалось загрузить границу. Попробуйте ещё раз.",5000)}});
   $("#pDel").onclick=()=>{$("#pDelConfirm").innerHTML=`<div class="row2" style="margin-top:8px"><span>Удалить «${esc(p.name)}»?</span><button class="btn small" id="pDelYes">Да, удалить</button><button class="btn small ghost" id="pDelNo">Нет</button></div>`;
     $("#pDelNo").onclick=()=>$("#pDelConfirm").innerHTML="";
     $("#pDelYes").onclick=()=>(p.seed?ref.set({deleted:true,name:p.name}):ref.delete()).then(()=>{S.dbPlaces.set(p.id,{id:p.id,deleted:true});rebuildPlaces();select(cf?{type:"country",k:p.k}:{type:"home"},false)}).catch(()=>status("Не получилось удалить"));};
@@ -4048,9 +4050,9 @@ function sampleErr(e){
 }
 
 /* ---------- places: db ---------- */
-function placeDoc(p){return {name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:safeUrl(p.url),city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:p.k||countryOf(+p.lat,+p.lng)||"",by:S.me||null,at:Date.now()}}
+async function placeDoc(p){const k=await markerCountry(+p.lat,+p.lng);return {name:String(p.name).slice(0,140),lat:+p.lat,lng:+p.lng,status:p.status??"want",tags:p.tags||[],note:p.note||"",url:safeUrl(p.url),city:p.city||"",list:p.list||"",why:p.why||"",approx:!!p.approx,k:k||"",by:S.me||null,at:Date.now()}}
 async function addPlace(p){
-  const doc=placeDoc(p);
+  const doc=await placeDoc(p);
   if(!S.db){const id="local-"+Date.now()+Math.random().toString(36).slice(2,6);S.dbPlaces.set(id,{id,...doc});rebuildPlaces();scheduleOverlay();return id}
   const ref=S.db.collection("places").doc(); await ref.set(doc); S.dbPlaces.set(ref.id,{id:ref.id,...doc}); rebuildPlaces(); scheduleOverlay(); return ref.id;
 }
@@ -4630,8 +4632,35 @@ const EUROPE_BORDER_ZOOM=2, WORLD_BORDER_ZOOM=12;
 function requestedBorderGroups(visible,k,index){
   return new Set([...visible].filter(id=>k>=WORLD_BORDER_ZOOM||k>=EUROPE_BORDER_ZOOM&&index.groups[id].countries.some(cc=>EUROPE_BORDER_COUNTRIES.has(cc))));
 }
+let preciseDisplay=false;
+try{preciseDisplay=localStorage.getItem("atlas-precise-display")==="on"}catch{}
+function togglePreciseDisplay(){
+        if(!preciseDisplay&&!window.confirm("Подробные границы могут замедлить карту, особенно на телефоне. Включить их?"))return;
+        preciseDisplay=!preciseDisplay;
+        try{localStorage.setItem("atlas-precise-display",preciseDisplay?"on":"off")}catch{}
+        if(preciseDisplay)scheduleDetailedBorders();
+        else if(S.borderOverview){borderGroups.clear();rebuildDetailedCountries()}
+        renderBM();
+      }
+async function markerCountry(lat,lng){
+  if(!window.ATLAS_VER)return countryOf(lat,lng);
+  const index=borderIndex ||= await getData("border-index");
+  const lon=normLon(lng),size=index.cellDegrees;
+  const x=Math.floor((lon+180)/size),y=Math.min(180/size-1,Math.floor((lat+90)/size));
+  for(const id of index.cells[x+":"+y]||[]){
+    let features=borderGroups.get(id)?.features;
+    if(!features){
+      // Worldview application modifies the topology. Keep marker lookups independent of the renderer.
+      const topology=await loadData("borders/"+id);
+      applyWorldview(topology,S.wv,S.view.cc,{});
+      features=topojson.feature(topology,topology.objects.countries).features;
+    }
+    for(const feature of features)if(d3.geoContains(feature,[lon,lat]))return feature.properties.k;
+  }
+  return "";
+}
 function scheduleDetailedBorders(){
-  if(!window.ATLAS_VER||detailedBordersP||T.k<EUROPE_BORDER_ZOOM||Date.now()<detailedBordersRetry)return;
+  if(!preciseDisplay||!window.ATLAS_VER||detailedBordersP||T.k<EUROPE_BORDER_ZOOM||Date.now()<detailedBordersRetry)return;
   clearTimeout(detailedBordersTimer);
   detailedBordersTimer=setTimeout(()=>{if(T.k>=EUROPE_BORDER_ZOOM)ensureDetailedBorders()},250);
 }
@@ -4673,7 +4702,7 @@ function rebuildDetailedCountries(){
   path.digits(7);selOl.clear();seamP.clear();seamC.clear();drawBase();renderAll();scheduleOverlay();
 }
 function ensureDetailedBorders(){
-  if(T.k<EUROPE_BORDER_ZOOM)return Promise.resolve();
+  if(!preciseDisplay||T.k<EUROPE_BORDER_ZOOM)return Promise.resolve();
   if(detailedBordersP)return detailedBordersP;
   detailedBordersP=(async()=>{
     borderIndex=borderIndex||await getData('border-index');if(T.k<EUROPE_BORDER_ZOOM)return;
@@ -4685,7 +4714,7 @@ function ensureDetailedBorders(){
     // Limit concurrent downloads when a regional view contains many countries.
     await Promise.all(Array.from({length:Math.min(4,missing.length)},async()=>{while(next<missing.length){
       const id=missing[next++];
-      if(T.k<EUROPE_BORDER_ZOOM||!visibleBorderGroups().has(id))continue;
+      if(!preciseDisplay||T.k<EUROPE_BORDER_ZOOM||!visibleBorderGroups().has(id))continue;
       const name='borders/'+id,ct=await getData(name),o=ct.objects[Object.keys(ct.objects)[0]],ids=new Set(o.geometries.map(g=>g.properties.k));
       const state={};applyWorldview(ct,S.wv,S.view.cc,state);dataRequests.delete(name);
       const features=topojson.feature(ct,o).features;
@@ -4697,7 +4726,7 @@ function ensureDetailedBorders(){
         ks:ids.has('XK')?topojson.mesh(ct,o,(a,b)=>a!==b&&[a.properties.k,b.properties.k].sort().join()==='RS,XK'):null});
       await new Promise(resolve=>setTimeout(resolve,0));
     }}));
-    if(!loaded.length)return;
+    if(!preciseDisplay||!loaded.length)return;
     for(const e of loaded)borderGroups.set(e.id,e);
     let vertices=[...borderGroups.values()].reduce((n,e)=>n+e.vertices,0);
     for(const e of [...borderGroups.values()].sort((a,b)=>a.used-b.used))if(!needed.has(e.id)&&(borderGroups.size>12||vertices>1000000)){borderGroups.delete(e.id);vertices-=e.vertices}
@@ -4729,7 +4758,8 @@ async function boot(){
   setupProjection(); setupZoom(); drawBase(); scheduleOverlay(); renderHome();
   if(TILES){
     $("#mapwrap").classList.add("tilesavail");
-    renderBM=()=>{$("#bmsel").innerHTML=`<button data-bm="${basemap==="otm"?"none":"otm"}" aria-pressed="${basemap==="otm"}" title="Топографическая подложка OpenTopoMap">${basemap==="otm"?"Подложка: вкл":"Подложка: выкл"}</button>`;
+    renderBM=()=>{$("#bmsel").innerHTML=`<button id="preciseDisplay" aria-pressed="${preciseDisplay}">Точные границы: ${preciseDisplay?"вкл":"выкл"}</button> <button data-bm="${basemap==="otm"?"none":"otm"}" aria-pressed="${basemap==="otm"}" title="Топографическая подложка OpenTopoMap">${basemap==="otm"?"Подложка: вкл":"Подложка: выкл"}</button>`;
+      $("#preciseDisplay").onclick=togglePreciseDisplay;
       $("#mapwrap").classList.toggle("tiled",!!BASEMAPS[basemap].url);
       document.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>setBasemap(b.dataset.bm))};
     renderBM(); drawTiles();
@@ -4862,7 +4892,7 @@ $("#addForm").addEventListener("submit",async e=>{e.preventDefault();
   const p0={name,lat:addLL.lat,lng:addLL.lng,status:$("#addStatus").value,tags:splitTags($("#addTags").value),note:$("#addNote").value,url:$("#addUrl").value.trim()};
   const target=!$("#addMapL").hidden?$("#addMap").value:null;
   try{
-    if(target&&target!==S.acct?.map?.id){const {error}=await sb.from("docs").upsert({map_id:target,path:"places/"+newId("c"),data:placeDoc(p0),updated_at:new Date().toISOString()});if(error)throw error;
+    if(target&&target!==S.acct?.map?.id){const {error}=await sb.from("docs").upsert({map_id:target,path:"places/"+newId("c"),data:await placeDoc(p0),updated_at:new Date().toISOString()});if(error)throw error;
       closeAdd();const m=S.acct.maps.find(x=>x.id===target);status(`«${name}» добавлено в карту «${m?.name||""}»`,4000)}
     else{const id=await addPlace(p0);closeAdd();select({type:"place",id},true)}}
   catch(err){$("#addErr").textContent=err?.code==="quota_exceeded"?"В базе закончилось место":"Не получилось сохранить, попробуй ещё раз"}
