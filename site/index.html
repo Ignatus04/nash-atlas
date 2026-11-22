@@ -4605,7 +4605,7 @@ let selectionRequest=0;
 // and hit testing always switch together, using the same native shared edges.
 let detailedBordersP, detailedBordersTimer, detailedBordersRetry=0, borderIndex;
 const borderGroups=new Map();
-const EUROPE_BORDER_COUNTRIES=new Set('AD AL AM AT AZ BA BE BG BY CH CY CZ DE DK EE ES FI FR GB GE GR HR HU IE IS IT KZ LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SK SM TR UA VA XK'.split(' '));
+const EUROPE_BORDER_COUNTRIES=new Set('AX FO GG GI IM JE SJ AD AL AM AT AZ BA BE BG BY CH CY CZ DE DK EE ES FI FR GB GE GR HR HU IE IS IT KZ LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SK SM TR UA VA XK'.split(' '));
 const EUROPE_BORDER_ZOOM=2, WORLD_BORDER_ZOOM=12;
 function requestedBorderGroups(visible,k,index){
   return new Set([...visible].filter(id=>k>=WORLD_BORDER_ZOOM||k>=EUROPE_BORDER_ZOOM&&index.groups[id].countries.some(cc=>EUROPE_BORDER_COUNTRIES.has(cc))));
