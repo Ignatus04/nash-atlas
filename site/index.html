@@ -960,15 +960,16 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 #tripCompare header,.cmpPair{display:flex;align-items:center;justify-content:space-between;gap:10px}
 #tripCompare h2{margin:0;font-size:22px}
 .cmpPair>*{flex:1;min-width:0;overflow-wrap:anywhere}
-.cmpPair select{width:100%;padding:8px 2px;border-radius:6px;font:inherit}
+.cmpPair input{box-sizing:border-box;min-width:0;width:100%;padding:8px 2px;border-radius:6px;font:inherit}
 #tripCompare h3,.cmpPair label,#tripCompare small{font-size:13px;color:#b4c3d5}
 #tripCompare h3{border-top:1px solid #35455a;padding-top:10px;margin:12px 0 5px}
+.cmpInput{display:flex;align-items:center;gap:6px}.cmpFlag img{width:26px;height:20px;object-fit:contain}.cmpError{display:block;color:#ffb099;font-size:12px}
 #tripCompare a{color:#92cdff}
 </style>
 </head>
 <body>
 <dialog id="tripCompare" aria-labelledby="cmpTitle"><header><h2 id="cmpTitle">Сравнение стран</h2><form method="dialog"><button class="btn small" aria-label="Закрыть сравнение">Закрыть</button></form></header>
-<div class="cmpPair"><label>Первая страна<select></select></label><label>Вторая страна<select></select></label></div><div id="cmpFacts"></div>
+<div class="cmpPair"><label>Первая страна<span class="cmpInput"><span class="cmpFlag" aria-hidden="true"></span><input type="search" list="cmpCountries0" placeholder="Введите страну" autocomplete="off"><datalist id="cmpCountries0"></datalist></span><span class="cmpError" role="status"></span></label><label>Вторая страна<span class="cmpInput"><span class="cmpFlag" aria-hidden="true"></span><input type="search" list="cmpCountries1" placeholder="Введите страну" autocomplete="off"><datalist id="cmpCountries1"></datalist></span><span class="cmpError" role="status"></span></label></div><div id="cmpFacts"></div>
 <p><small>Цены для домохозяйств, 2024 год. США = 100. Чем выше индекс, тем дороже товары и услуги. Туристический бюджет зависит от города и сезона. Источник — Всемирный банк: <a href="https://data.worldbank.org/indicator/PA.NUS.PRVT.PP" target="_blank" rel="noopener">паритет покупательной способности</a> и <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noopener">курс валют</a>.</small></p></dialog>
 <div id="app">
   <div id="mapwrap">
@@ -3578,17 +3579,31 @@ function openComparison(k){
   if(k)comparePair[0]=k;
   if(!S.cByK.has(comparePair[0]))comparePair[0]=countries[0][0];
   if(comparePair[0]===comparePair[1]||!S.cByK.has(comparePair[1]))comparePair[1]=countries.find(([code])=>code!==comparePair[0])[0];
-  const selects=Array.from(dialog.querySelectorAll("select"));
+  const inputs=Array.from(dialog.querySelectorAll("input"));
   function sync(){
-    selects.forEach((sel,i)=>{
-      sel.value=comparePair[i];
-      for(const opt of sel.options)opt.disabled=opt.value===comparePair[1-i];
+    inputs.forEach((input,i)=>{
+      input.value=countries.find(([code])=>code===comparePair[i])[1];
+      input.parentElement.querySelector(".cmpFlag").innerHTML=flagImg(comparePair[i]);
+      input.closest("label").querySelector(".cmpError").textContent="";
+      input.setAttribute("aria-invalid","false");
+      const list=dialog.querySelector("#cmpCountries"+i);
+      list.replaceChildren(...countries.filter(([code])=>code!==comparePair[1-i]).map(([,name])=>new Option(name,name)));
     });
     renderComparison();
   }
-  selects.forEach((sel,i)=>{
-    sel.replaceChildren(...countries.map(([code,name])=>new Option(name,code)));
-    sel.onchange=()=>{comparePair[i]=sel.value;sync()};
+  inputs.forEach((input,i)=>{
+    input.oninput=()=>{
+      const match=countries.find(([,name])=>name.toLocaleLowerCase("ru")===input.value.trim().toLocaleLowerCase("ru"));
+      if(match&&match[0]!==comparePair[1-i]){
+        comparePair[i]=match[0];
+        sync();
+      }else{
+        input.parentElement.querySelector(".cmpFlag").replaceChildren();
+        input.setAttribute("aria-invalid","true");
+        input.closest("label").querySelector(".cmpError").textContent=match?"Выберите другую страну":"Выберите страну из подсказок";
+        document.getElementById("cmpFacts").replaceChildren();
+      }
+    };
   });
   dialog.showModal();
   sync();
@@ -4440,6 +4455,7 @@ function renderFound(w){
     <section class="blk"><div class="row2">
       ${ro?"":`<button class="btn primary" id="fAdd">+ Добавить в мои места</button>`}
       <a class="btn small ghost" href="${gmapsSearch(w.name+(w.where?", "+w.where:""))}" target="_blank" rel="noopener">Открыть в Google Картах</a></div></section>
+    ${cf?compareButton(w.k):""}
     ${near.length?placesBlock(near,"Наши места рядом"):""}
     <p class="src-n">Найдено в ${w.src==="wiki"?"Википедии":"OpenStreetMap"}. ${w.lat.toFixed(5)}, ${w.lng.toFixed(5)}</p>`;
   bindCrumbs();bindPlaceLinks();$("#panel").scrollTop=0;
