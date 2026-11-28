@@ -1041,6 +1041,7 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
     <label class="f" for="addUrl">Ссылка из Google Карт или координаты
       <input class="txt" id="addUrl" placeholder="https://www.google.com/maps/place/…">
     </label>
+    <button type="button" class="btn small" data-yandex-import>Импортировать список Яндекс Карт</button>
     <div id="addParse" class="hint">Подойдёт ссылка из адресной строки браузера: в ней есть координаты. В короткой ссылке maps.app.goo.gl координат нет, её сначала открой в браузере и скопируй адрес оттуда.</div>
     <div class="row2"><button type="button" class="btn small" id="addPick">Указать точку на карте</button><span id="addCoords" class="hint"></span></div>
     <label class="f" for="addName">Название<input class="txt" id="addName" required></label>
@@ -2799,7 +2800,7 @@ function renderProfile(){
   const tiles=TILES?`<button class="ap-item" id="pfBm" role="switch" aria-checked="${basemap==="otm"}">${ic("layers")}<span>Подложка с рельефом<small>Горы, дороги и города. Грузится дольше</small></span><span class="sw-t" aria-hidden="true"></span></button>`:"";
   $("#pbody").innerHTML=`<div class="p-head"><h1>Профиль</h1></div>${acct}
     <section class="blk"><h2>Поделиться</h2><button class="ap-item" id="pfCard">${ic("share")}<span>Картинка для сторис<small>Сколько стран и мест вы хотите посетить</small></span></button>${CLOUD?`<button class="ap-item" id="pfInv">${ic("user")}<span>Пригласить друзей<small>Отмечать места на одной карте вместе</small></span></button>`:""}</section>
-    <section class="blk"><h2>Добавлять места</h2><button class="ap-item" id="pfFromMaps">${ic("pin")}<span>Из Google Карт и Яндекс Карт<small>Прямо из приложения на телефоне, через «Поделиться»</small></span></button></section>
+    <section class="blk"><h2>Добавлять места</h2><button class="ap-item" data-yandex-import>Импорт списка Яндекс Карт</button><button class="ap-item" id="pfFromMaps">${ic("pin")}<span>Из Google Карт и Яндекс Карт<small>Прямо из приложения на телефоне, через «Поделиться»</small></span></button></section>
     <section class="blk"><h2>Паспорта</h2><button class="ap-item" id="pfPass">${ic("passport")}<span>${esc(S.pass.map(pName).join(", "))}<small>По ним раскрашена карта въезда</small></span><span class="pb-flags">${S.pass.map(p=>flagImg(p)).join("")}</span></button></section>
     ${tiles?`<section class="blk"><h2>Карта</h2>${tiles}<button class="ap-item" id="pfPrecise" role="switch" aria-checked="${preciseDisplay}">${ic("layers")}<span>Точные границы<small>Могут замедлить карту</small></span><span class="sw-t" aria-hidden="true"></span></button></section>`:""}
     <section class="blk"><h2>Приложение</h2>${installEntry()}<p class="hint">${appInstalled()?"Вы открыли установленное приложение. ":""}Для работы нужен интернет.</p></section>
@@ -4214,6 +4215,78 @@ async function geocodeAddr(a){const tries=[a];const parts=a.split(",").map(x=>x.
   for(const q of tries){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&q=${encodeURIComponent(q)}`);if(!r.ok)continue;const j=await r.json();
     if(j[0]){const lat=+j[0].lat,lng=+j[0].lon;if(isFinite(lat)&&isFinite(lng))return {lat,lng}}}catch(e){}}return null}
 let addLL=null;
+async function yandexImportRequest(params){
+  const response=await fetch(CFG.supabaseUrl+"/functions/v1/import-yandex?"+new URLSearchParams(params),{headers:{apikey:CFG.supabaseKey}});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||"Не удалось загрузить места");
+  return data;
+}
+function openYandexImport(){
+  closeAdd();
+  if(S.db&&!S.canWrite){status("Откройте свою карту с правом редактирования");return}
+  const {el}=modal("yandexImport",`<h2 id="yiTitle">Список из Яндекс Карт</h2>
+    <label class="f" for="yiUrl">Ссылка на публичный список</label>
+    <input class="txt" id="yiUrl" type="url" placeholder="https://yandex.ru/maps/-/…">
+    <button class="btn" id="yiLoad">Показать места</button>
+    <p class="hint" id="yiStatus" role="status"></p>
+    <div id="yiChoices" style="max-height:40vh;overflow:auto"></div>
+    <button class="btn primary" id="yiSave" disabled>Добавить выбранные</button>`,{labelledby:"yiTitle"});
+  const info=el.querySelector("#yiStatus"), choices=el.querySelector("#yiChoices");
+  const load=el.querySelector("#yiLoad"), save=el.querySelector("#yiSave"), input=el.querySelector("#yiUrl");
+  let items=[], title="", busy=false;
+  const exists=item=>[...S.places.values()].some(p=>p.url===item.url||
+    (Number.isFinite(item.lat)&&Number.isFinite(p.lat)&&nz(p.name)===nz(item.name)&&distKm(p.lat,p.lng,item.lat,item.lng)<.03));
+  function render(){
+    choices.innerHTML=items.map((item,i)=>`<label style="display:flex;gap:10px;padding:8px 0"><input type="checkbox" data-i="${i}" ${item.done||!item.uri?"disabled":'checked'}><span>${esc(item.name)}${item.done?" · уже на карте":""}<small style="display:block">${esc(item.note)}</small></span></label>`).join("");
+    save.disabled=!items.some(item=>!item.done&&item.uri);
+  }
+  choices.onchange=()=>{save.disabled=busy||!choices.querySelector("input:checked")};
+  load.onclick=async()=>{
+    if(busy)return;
+    busy=true;load.disabled=true;save.disabled=true;choices.replaceChildren();items=[];
+    info.textContent="Загружаю список…";
+    try{
+      const data=await yandexImportRequest({u:input.value.trim()});
+      if(!el.isConnected)return;
+      title=data.title;
+      const seen=new Set();
+      items=data.items.filter(item=>{if(seen.has(item.uri))return false;seen.add(item.uri);return true}).map(item=>{
+        item.url="https://yandex.ru/maps/?uri="+encodeURIComponent(item.uri);
+        item.done=exists(item);return item;
+      });
+      render();
+      info.textContent=title+" · "+items.length+" мест. Выберите нужные. Большой список может загружаться несколько минут.";
+    }catch(error){info.textContent=error.message}
+    finally{busy=false;load.disabled=false}
+  };
+  save.onclick=async()=>{
+    if(busy)return;
+    busy=true;save.disabled=true;load.disabled=true;input.disabled=true;
+    const selected=[...choices.querySelectorAll("input:checked")].map(box=>items[+box.dataset.i]);
+    choices.querySelectorAll("input").forEach(box=>box.disabled=true);
+    const targetDb=S.db;
+    let added=0,failed=0,skipped=0;
+    for(const [i,item] of selected.entries()){
+      if(!el.isConnected||!el.classList.contains("on"))break;
+      info.textContent="Обрабатываю "+(i+1)+" из "+selected.length+" · добавлено "+added;
+      try{
+        if(!Number.isFinite(item.lat))Object.assign(item,await yandexImportRequest({uri:item.uri}));
+        if(!el.isConnected||!el.classList.contains("on"))break;
+        if(S.db!==targetDb||S.db&&!S.canWrite)break;
+        if(exists(item)){item.done=true;skipped++;continue}
+        await addPlace({name:item.name,note:item.note,url:item.url,lat:item.lat,lng:item.lng,list:title,status:"want",tags:[]});
+        item.done=true;added++;
+      }catch(error){failed++}
+    }
+    busy=false;load.disabled=false;input.disabled=false;
+    if(el.isConnected){
+      render();
+      info.textContent="Добавлено "+added+". Уже на карте "+skipped+". Не удалось загрузить "+failed+". "+(failed?"Можно повторить для оставшихся мест.":"");
+    }
+  };
+}
+
+document.addEventListener("click",event=>{if(event.target.closest?.("[data-yandex-import]"))openYandexImport()});
 function openAdd(){
   const wm=writableMaps();
   if(S.db&&!S.canWrite&&!wm.length){status("У тебя доступ только на просмотр");return}
