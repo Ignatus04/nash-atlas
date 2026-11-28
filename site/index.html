@@ -964,12 +964,13 @@ section.blk .ap-item>span:first-of-type{flex:1;min-width:0;display:flex;flex-dir
 #tripCompare h3,.cmpPair label,#tripCompare small{font-size:13px;color:#b4c3d5}
 #tripCompare h3{border-top:1px solid #35455a;padding-top:10px;margin:12px 0 5px}
 .cmpInput{display:flex;align-items:center;gap:6px}.cmpFlag{display:grid;place-items:center;flex:0 0 24px;height:24px}.cmpFlag .fimg{display:block;width:24px;height:24px;margin:0;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px #ffffff26}.cmpError{display:block;color:#ffb099;font-size:12px}
+#tripCompare .cc-box .txt{padding-left:40px}#tripCompare .cc-list{font-size:14px}#tripCompare .cmpPair{align-items:flex-start}
 #tripCompare a{color:#92cdff}
 </style>
 </head>
 <body>
 <dialog id="tripCompare" aria-labelledby="cmpTitle"><header><h2 id="cmpTitle">Сравнение стран</h2><form method="dialog"><button class="btn small" aria-label="Закрыть сравнение">Закрыть</button></form></header>
-<div class="cmpPair"><label>Первая страна<span class="cmpInput"><span class="cmpFlag" aria-hidden="true"></span><input type="search" list="cmpCountries0" placeholder="Введите страну" autocomplete="off"><datalist id="cmpCountries0"></datalist></span><span class="cmpError" role="status"></span></label><label>Вторая страна<span class="cmpInput"><span class="cmpFlag" aria-hidden="true"></span><input type="search" list="cmpCountries1" placeholder="Введите страну" autocomplete="off"><datalist id="cmpCountries1"></datalist></span><span class="cmpError" role="status"></span></label></div><div id="cmpFacts"></div>
+<div class="cmpPair"><div><label for="cmpInput0">Первая страна</label><div class="cc-box"><span class="cc-flag" aria-hidden="true"></span><input class="txt" id="cmpInput0" role="combobox" aria-expanded="false" aria-controls="cmpCountries0" aria-autocomplete="list" autocomplete="off" placeholder="Начните печатать название"></div><ul class="cc-list" id="cmpCountries0" role="listbox" aria-label="Первая страна" hidden></ul></div><div><label for="cmpInput1">Вторая страна</label><div class="cc-box"><span class="cc-flag" aria-hidden="true"></span><input class="txt" id="cmpInput1" role="combobox" aria-expanded="false" aria-controls="cmpCountries1" aria-autocomplete="list" autocomplete="off" placeholder="Начните печатать название"></div><ul class="cc-list" id="cmpCountries1" role="listbox" aria-label="Вторая страна" hidden></ul></div></div><div id="cmpFacts"></div>
 <p><small>Цены для домохозяйств, 2024 год. США = 100. Чем выше индекс, тем дороже товары и услуги. Туристический бюджет зависит от города и сезона. Источник — Всемирный банк: <a href="https://data.worldbank.org/indicator/PA.NUS.PRVT.PP" target="_blank" rel="noopener">паритет покупательной способности</a> и <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noopener">курс валют</a>.</small></p></dialog>
 <div id="app">
   <div id="mapwrap">
@@ -3583,27 +3584,58 @@ function openComparison(k){
   function sync(){
     inputs.forEach((input,i)=>{
       input.value=countries.find(([code])=>code===comparePair[i])[1];
-      input.parentElement.querySelector(".cmpFlag").innerHTML=flagImg(comparePair[i]);
-      input.closest("label").querySelector(".cmpError").textContent="";
-      input.setAttribute("aria-invalid","false");
-      const list=dialog.querySelector("#cmpCountries"+i);
-      list.replaceChildren(...countries.filter(([code])=>code!==comparePair[1-i]).map(([,name])=>new Option(name,name)));
+      input.parentElement.querySelector(".cc-flag").innerHTML=flagImg(comparePair[i]);
+      dialog.querySelector("#cmpCountries"+i).hidden=true;
+      input.setAttribute("aria-expanded","false");
+      input.removeAttribute("aria-activedescendant");
     });
     renderComparison();
   }
   inputs.forEach((input,i)=>{
-    input.oninput=()=>{
-      const match=countries.find(([,name])=>name.toLocaleLowerCase("ru")===input.value.trim().toLocaleLowerCase("ru"));
-      if(match&&match[0]!==comparePair[1-i]){
-        comparePair[i]=match[0];
-        sync();
-      }else{
-        input.parentElement.querySelector(".cmpFlag").replaceChildren();
-        input.setAttribute("aria-invalid","true");
-        input.closest("label").querySelector(".cmpError").textContent=match?"Выберите другую страну":"Выберите страну из подсказок";
-        document.getElementById("cmpFacts").replaceChildren();
+    const list=dialog.querySelector("#cmpCountries"+i);
+    let shown=[], active=0;
+    function move(delta){
+      active=Math.max(0,Math.min(shown.length-1,active+delta));
+      list.querySelectorAll("[role=option]").forEach((el,j)=>el.setAttribute("aria-selected",j===active));
+      const option=list.children[active];
+      input.removeAttribute("aria-activedescendant");
+      if(shown.length&&option){
+        input.setAttribute("aria-activedescendant",option.id);
+        option.scrollIntoView({block:"nearest"});
       }
+    }
+    function render(query=""){
+      const term=nz(query.trim());
+      shown=countries.filter(([code,name])=>code!==comparePair[1-i]&&nz(name).includes(term));
+      shown.sort((a,b)=>Number(!nz(a[1]).startsWith(term))-Number(!nz(b[1]).startsWith(term)));
+      active=0;
+      list.innerHTML=shown.length?shown.map(([code,name],j)=>`<li role="option" id="cmp-${i}-${code}" data-k="${code}" aria-selected="${j===0}">${flagImg(code)}<span>${esc(name)}</span></li>`).join(""):'<li class="cc-none">Ничего не нашлось</li>';
+      list.hidden=false;
+      input.setAttribute("aria-expanded","true");
+      move(0);
+    }
+    function choose(code){comparePair[i]=code;sync()}
+    input.onfocus=()=>{sync();input.select();render()};
+    input.oninput=()=>{
+      input.parentElement.querySelector(".cc-flag").replaceChildren();
+      document.getElementById("cmpFacts").replaceChildren();
+      render(input.value);
     };
+    input.onkeydown=event=>{
+      if(event.key==="ArrowDown"||event.key==="ArrowUp"){
+        event.preventDefault();
+        if(list.hidden)render(input.value);else move(event.key==="ArrowDown"?1:-1);
+      }else if(event.key==="Enter"){
+        event.preventDefault();
+        if(!list.hidden&&shown[active])choose(shown[active][0]);
+      }else if(event.key==="Escape"&&!list.hidden){event.preventDefault();sync()}
+    };
+    list.onmousedown=event=>event.preventDefault();
+    list.onclick=event=>{
+      const option=event.target.closest("[data-k]");
+      if(option)choose(option.dataset.k);
+    };
+
   });
   dialog.showModal();
   sync();
